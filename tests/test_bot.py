@@ -1446,7 +1446,7 @@ def test_asi_vienen_los_ajustes(cfg):
     c = main.Corrida("prueba", 1, False)
     c.ahora = AHORA
     assert [p["id"] for p in c.promos_activas()] == [
-        "senales-exness", "exness-un-clic", "video-senales", "labitconf-2026", "binance-tarjeta-octubre", "binance-tarjeta"]
+        "senales-exness", "exness-un-clic", "video-senales", "binance-tarjeta-octubre", "binance-tarjeta"]
     hoy = AHORA.date()
     for promo in c.promos_activas():
         assert main.imagen_propia(promo["imagen"]) is not None, promo["id"]      # cada una con su imagen

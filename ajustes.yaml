@@ -109,7 +109,7 @@ socios:
     activo: true
     nombre: "Exness"
     alias: ["Exness"]
-    llamado: "Registrate en Exness con mi link"
+    llamado: "Registrate en Exness con mi link y usá las señales de mi bot"
     enlace: "https://one.exnessonelink.com/a/ptf6lzlrc8"
     aviso: "Operar con apalancamiento implica riesgo de perder tu capital."
   binance:
@@ -229,6 +229,8 @@ promos:
 
       💰 Además, podés acceder al 20% de devolución en comisiones durante la promoción correspondiente.
 
+      🤖 Y con tu cuenta en Exness accedés a las señales de mi bot para EUR/AUD y AUD/CAD. Mirá cómo funciona en el video completo: https://youtu.be/WGP222nUgvA
+
       ⚠️ Operar con apalancamiento implica riesgo de perder tu capital.
     texto_x: |
       ⚡️ EXNESS: ahora podés operar con un solo clic
@@ -277,7 +279,7 @@ promos:
       ¿Qué mirás primero: rentabilidad, drawdown o consistencia?
 
   - id: labitconf-2026
-    activa: true
+    activa: false                 # apagada: Eze pidió no promocionarla más (23/10/2026)
     nombre: "40% OFF en LABITCONF 2026"
     imagen: assets/promos/labitconf-2026.jpg
     vence: "2026-10-31"
