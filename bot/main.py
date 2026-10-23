@@ -23,7 +23,7 @@ from .estado import Estado
 from .filtro import Grupo, es_mala_noticia, nombra_prohibido, preparar, puntaje, ya_contada
 from .fuentes import leer_fuentes
 from .imagen import armar_placa, armar_promo, buscar_foto, generar_con_ia, logo_guardado, tal_cual
-from .publicar import ErrorPublicacion, claves_x, telegram_chats, telegram_mensaje, telegram_publicar, x_publicar, x_quien_soy
+from .publicar import ErrorPublicacion, claves_x, telegram_chats, telegram_mensaje, telegram_publicar, telegram_puede_publicar, x_publicar, x_quien_soy
 from .texto import (
     anio_actual, armar_llamado, enlaces_extra, faltantes, faltantes_promo, fuente_limpia, idea_de_imagen, normalizar_post, normalizar_promo,
     numeros_inventados, promesas, promo_telegram, promo_x, texto_revisable, texto_revisable_promo,
@@ -807,6 +807,12 @@ class Corrida:
             for tema, nombre in sorted(c.get("temas", {}).items()):
                 log.info("      tema %s %s  ->  destino: %s/%s", tema, nombre, c["id"], tema)
                 lineas.append(f"• {c['nombre']} › tema «{nombre or 'sin nombre'}»: {c['id']}/{tema}")
+        # Los lugares donde publica: se comprueba que el bot pueda escribir ahí (sin publicar nada).
+        for lugar in [self.destino, *self.tambien_en]:
+            if lugar:
+                linea = telegram_puede_publicar(self.token, lugar)
+                lineas.append("• Telegram " + linea)
+                (log.error if linea.startswith("❌") else log.info)("Telegram %s", linea)
         # Si están las llaves de X, se comprueban (sin publicar nada).
         if self.claves_x:
             try:

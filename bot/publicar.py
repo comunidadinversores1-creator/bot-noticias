@@ -132,6 +132,30 @@ def telegram_publicar(token: str, destino: str, jpg: bytes | None, texto_html: s
         raise
 
 
+def telegram_puede_publicar(token: str, destino: str) -> str:
+    """Comprueba, sin publicar nada, que el bot esté en ese canal o grupo y pueda escribir.
+    Devuelve una línea para mostrarle al dueño."""
+    datos = separar_destino(destino)
+    try:
+        yo = _telegram(token, "getMe", {})
+        chat = _telegram(token, "getChat", {"chat_id": datos["chat_id"]})
+        miembro = _telegram(token, "getChatMember", {"chat_id": datos["chat_id"], "user_id": yo["id"]})
+    except ErrorPublicacion as error:
+        return f"❌ {destino}: {error}"
+    nombre = chat.get("title") or destino
+    estado = miembro.get("status")
+    if chat.get("type") == "channel":
+        ok = estado == "creator" or (estado == "administrator" and miembro.get("can_post_messages"))
+        falta = "hacelo administrador con permiso para Publicar mensajes"
+    else:
+        ok = estado in ("creator", "administrator") or (estado == "member" and miembro.get("can_send_messages", True))
+        falta = "agregalo al grupo como administrador"
+    tema = f" (tema {datos['message_thread_id']})" if datos.get("message_thread_id") else ""
+    if ok:
+        return f"✅ {nombre}{tema}: puedo publicar"
+    return f"❌ {nombre}{tema}: no puedo publicar ({estado}). Solución: {falta}."
+
+
 def telegram_mensaje(token: str, destino: str, texto: str, html: bool = False) -> None:
     """Un mensaje para el dueño (avisos, muestras). Con html=True acepta negritas y bloques para copiar."""
     datos = {"chat_id": destino, "text": texto[:4000], "link_preview_options": _SIN_VISTA_PREVIA}
