@@ -1649,3 +1649,14 @@ def test_publica_en_el_canal_y_en_el_tema_del_grupo(corrida, red, tmp_path):
     assert len(canal) == 1 and len(grupo) == 1
     assert grupo[0]["message_thread_id"] == "45" and grupo[0]["text"] == canal[0]["text"]
     assert len(red.x_posts) == 1                              # en X sale una sola vez
+
+
+def test_cada_noticia_lleva_el_link_a_tus_redes(corrida, red, tmp_path):
+    _sin_la_fed(red)
+    c = corrida(imagen="ninguna")
+    c.cfg["x"]["premium"] = True
+    assert c.correr() == 0
+    tg = _al_canal(red)[0]["text"]
+    assert tg.rstrip().endswith('📲 <a href="https://linktr.ee/comunidadinversores">Seguime en todas mis redes</a>')
+    x = red.x_posts[0]["text"]
+    assert "Seguime en todas mis redes (el link está en mi perfil)" in x and "http" not in x

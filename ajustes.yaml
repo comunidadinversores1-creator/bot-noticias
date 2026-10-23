@@ -10,6 +10,8 @@ marca:
   nombre: "EZEQUIEL BAGNATO | COMUNIDAD INVERSORES"   # lo de antes de la barra va arriba, lo de después abajo
   firma: "@C_INVERSORES"                              # aparece chiquito al pie de la imagen
   # El logo es assets/logo.png (la cara de Eze en círculo).
+  # Al pie de cada noticia (en X, con Premium, sale "el link está en mi perfil")
+  redes: {texto: "Seguime en todas mis redes", enlace: "https://linktr.ee/comunidadinversores"}
 
 telegram:
   publicar: true

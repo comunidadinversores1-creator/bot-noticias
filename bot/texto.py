@@ -498,7 +498,7 @@ def _simbolo(post: dict) -> str:
     return post["bandera"] or EMOJI_CATEGORIA.get(post["categoria"], "📰")
 
 
-def texto_telegram(post: dict, urgente: bool, llamado: dict | None = None) -> str:
+def texto_telegram(post: dict, urgente: bool, llamado: dict | None = None, redes: dict | None = None) -> str:
     """Pie de foto para Telegram (con negritas)."""
     e = lambda s: html.escape(s, quote=False)
 
@@ -520,6 +520,10 @@ def texto_telegram(post: dict, urgente: bool, llamado: dict | None = None) -> st
             visibles += ["", post["pregunta"]]
         lineas += ["", f"📰 Fuente: {e(post['fuente'])}"]
         visibles += ["", f"📰 Fuente: {post['fuente']}"]
+        if redes:
+            # Al pie: el link a todas tus redes (tu Linktree).
+            lineas.append(f'📲 <a href="{html.escape(redes["enlace"], quote=True)}">{e(redes["texto"])}</a>')
+            visibles.append(f"📲 {redes['texto']}")
         return "\n".join(lineas), len("\n".join(visibles))
 
     texto, largo = armar(True, post["resumen"])
@@ -573,16 +577,16 @@ def idea_de_imagen(post: dict, urgente: bool, marca: str = "", protagonista: str
     'protagonista' es la marca de la noticia (Binance, Exness...), para pedir que se vea su logo."""
     cartel = '"ÚLTIMA HORA", en rojo y con una sirena' if urgente else f'"{post["categoria"]}"'
     partes = [
-        "Haceme una imagen cuadrada (1:1) estilo miniatura de noticia para redes: muy llamativa, colores intensos, "
-        "luz dramática y look 3D brillante.",
+        "Haceme una imagen cuadrada (1:1) estilo miniatura de noticia para redes: fotorrealista (nada de dibujito), "
+        "muy llamativa, colores intensos, luz dramática y look 3D brillante.",
         f"Escena: {(post['escena'] or 'símbolos del mundo financiero y cripto relacionados con la noticia').rstrip('.')}.",
         f"Que se vea bien el logo oficial de {protagonista}." if protagonista else "",
         f'Texto grande en la mitad de abajo, en mayúsculas, con letras gruesas y bien legibles: "{post["titular_imagen"].upper()}". '
-        "Resaltá en amarillo la cifra o la palabra más importante.",
+        "Repartilo en 2 o 3 renglones: letras blancas con relieve y la cifra o la palabra más importante en amarillo dorado.",
         f"Arriba a la izquierda, un cartel que diga {cartel}.",
     ]
     if marca:
-        partes.append(f'Abajo, bien chiquito: "{marca}".')
+        partes.append(f'Abajo de todo, centrado, chiquito y con letras separadas: "{marca}".')
     partes.append("Escribí los textos exactamente como te los paso, sin cambiar ni una letra ni un número. Sin marcas de agua.")
     return "\n".join(p for p in partes if p)
 

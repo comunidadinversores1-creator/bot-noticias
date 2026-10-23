@@ -266,7 +266,7 @@ class Corrida:
             foto = self.imagen_para(g, post)
             log.info("  imagen: %s%s", foto.titulo if foto else "ninguna (placa de texto)", " · con llamado a registrarse" if llamado else "")
             jpg = armar_placa(post, foto, self.cfg, self.ahora, self.estado.proxima_variante(), g.urgente)
-        para_telegram = texto_telegram(post, g.urgente, llamado)
+        para_telegram = texto_telegram(post, g.urgente, llamado, self.redes())
         para_x = texto_x(post, g.urgente, llamado, self.cfg["x"])
         llamado_en_x = bool(llamado) and llamado["texto"] in para_x      # en X puede no entrar con su aviso
         registro = {
@@ -283,6 +283,13 @@ class Corrida:
         if resultado == "ok" and self.sin_imagen:
             self.mandar_idea(post, g, registro)
         return resultado
+
+    def redes(self) -> dict | None:
+        """El link a todas tus redes que va al pie de cada noticia ('redes' en 'marca')."""
+        r = self.cfg["marca"].get("redes") or {}
+        if isinstance(r, dict) and str(r.get("enlace") or "").startswith("http") and str(r.get("texto") or "").strip():
+            return {"texto": str(r["texto"]).strip(), "enlace": str(r["enlace"]).strip()}
+        return None
 
     def mandar_idea(self, post: dict, g: Grupo, registro: dict) -> None:
         """Cuando el bot publica solo texto, le manda al dueño por privado un pedido listo para pegar
