@@ -4,7 +4,7 @@
 # ============================================================
 
 # Interruptor general.  false = el bot no publica nada.
-encendido: false
+encendido: true
 
 marca:
   nombre: "EZEQUIEL BAGNATO | COMUNIDAD INVERSORES"   # lo de antes de la barra va arriba, lo de después abajo

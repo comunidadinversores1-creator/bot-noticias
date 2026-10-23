@@ -1440,7 +1440,7 @@ def test_asi_vienen_los_ajustes(cfg):
     assert list(socios_activos(cfg)) == ["exness", "binance"]                  # Pionex está apagado por ahora
     assert cfg["socios"]["exness"]["enlace"] == "https://one.exnessonelink.com/a/ptf6lzlrc8"
     assert cfg["socios"]["binance"]["enlace"] == "https://www.binance.com/join?ref=202718448"
-    assert cfg["x"]["poner_links"] is False and cfg["encendido"] is False and cfg["x"]["premium"] is True
+    assert cfg["x"]["poner_links"] is False and cfg["encendido"] is True and cfg["x"]["premium"] is True
     assert cfg["telegram"]["destino"] == "@comunidad_inversores_anuncios"
     assert cfg["telegram"]["tambien_en"] == ["@Tu_Comunidad_Inversores/150910"]
     c = main.Corrida("prueba", 1, False)
