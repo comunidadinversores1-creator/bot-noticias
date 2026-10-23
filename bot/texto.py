@@ -778,10 +778,30 @@ def revisar_charla(crudo: dict, anteriores: list[str], limite: int = 280) -> tup
         problemas.append(f"es más larga que {limite} caracteres")
     if _CUENTO_REAL.search(texto):
         problemas.append("cuenta un caso como si fuera real (tiene que ser una hipótesis: 'imaginá...')")
-    malas = promesas(texto, "")
+    malas = promesas_charla(texto)
     if malas:
         problemas.append(f"suena a promesa de ganancia ({', '.join(malas)})")
     clave = normalizar(texto)[:60]
     if any(normalizar(a)[:60] == clave for a in anteriores):
         problemas.append("repite una publicación anterior")
     return texto, problemas
+
+
+# En una charla se habla de plata con naturalidad ("ganar $3.000.000", "un sueldo"): eso está bien.
+# Lo que no puede pasar nunca es prometer: resultado seguro, sin riesgo, vivir de rendimientos.
+_PROMESA_CHARLA = re.compile(
+    r"\basegurad[oa]s?\b|\bgarantizad[oa]s?\b|\bsin riesgos?\b|\bno (?:podes|se puede|vas a) perder\b"
+    r"|\bingresos? pasivos?\b|\bviv\w* de (?:rendimientos|renta|rentas|intereses|trading|los bots|un bot|bots)\b"
+    r"|\b(?:plata|dinero) facil\b|\bseguro que (?:ganas|gana|rinde)\b"
+)
+
+
+def promesas_charla(texto: str) -> list[str]:
+    plano = _plano(texto)
+    malas = {m.group(0) for m in _ACCION_PROMESA.finditer(plano)}
+    for m in _PROMESA_CHARLA.finditer(plano):
+        antes = " ".join(plano[: m.start()].split()[-5:])
+        if _advertencia_honesta(plano, m.start(), m.end()) or re.search(r"\b(?:no|nunca|nadie|ningun\w*|jamas)\b", antes):
+            continue          # "no existe el trading sin riesgo" es justo lo contrario de una promesa
+        malas.add(m.group(0))
+    return sorted(malas)

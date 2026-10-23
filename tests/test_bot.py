@@ -1719,3 +1719,11 @@ def test_muestra_de_charla_en_modo_prueba(corrida, red, tmp_path):
     privados = [m["text"] for m in _al_privado(red)]
     assert len(privados) == 2 and privados[0].startswith("💬 Pregunta para X") and "seguime" in privados[0]
     assert red.x_posts == []
+
+
+def test_en_la_charla_se_puede_hablar_de_plata_pero_no_prometer():
+    assert texto.promesas_charla("te pagan $3.000.000 de sueldo por mes\n\n¿aceptás?") == []
+    assert texto.promesas_charla("cuánto tendrías que ganar para dejar tu laburo?") == []
+    assert texto.promesas_charla("no existe el trading sin riesgo") == []
+    assert texto.promesas_charla("imaginá vivir de rendimientos con un bot") != []
+    assert texto.promesas_charla("con este bot tenés ganancias aseguradas") != []
