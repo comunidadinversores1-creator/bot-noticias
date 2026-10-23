@@ -726,3 +726,32 @@ def texto_propio_x(texto_x: str, texto_largo: str, cfg_x: dict) -> str:
         corto = f"{primera}\n\n👉 {donde[:1].upper()}{donde[1:]}"
     corto = sin_links(_LINK_MD.sub(r"\1", corto))
     return recortar_x(corto)
+
+
+# ------------------------------------------------ X Premium: posts largos
+
+LIMITE_X_PREMIUM = 25000
+
+
+def x_premium(cfg_x: dict) -> bool:
+    from .util import verdadero
+    return verdadero(cfg_x.get("premium"))
+
+
+def x_largo(texto_html: str, cfg_x: dict, con_links: bool) -> str:
+    """El mismo texto de Telegram, para una cuenta de X con Premium (acepta posts largos).
+    Los links van escritos solo si 'poner_links' lo permite (X cobra más por cada post con link);
+    si no, se cambian por 'link en mi perfil'."""
+    donde = sin_links(str(cfg_x.get("texto_sin_link") or "el link está en mi perfil"))
+
+    def enlace(m: re.Match) -> str:
+        url, visible = html.unescape(m.group(1)), html.unescape(re.sub(r"<[^>]+>", "", m.group(2)))
+        return f"{visible}: {url}" if con_links else f"{visible} ({donde})"
+
+    t = re.sub(r'<a href="([^"]+)">(.*?)</a>', enlace, texto_html, flags=re.S)
+    t = html.unescape(re.sub(r"<[^>]+>", "", t))
+    if not con_links:
+        t = _URL.sub(f"({donde})", t)
+        t = t.replace(f"({donde}) ({donde})", f"({donde})")
+    t = re.sub(r"\n{3,}", "\n\n", t).strip()
+    return t[:LIMITE_X_PREMIUM]

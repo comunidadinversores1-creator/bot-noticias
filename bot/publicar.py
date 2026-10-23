@@ -180,13 +180,15 @@ def _error_x(r: requests.Response, paso: str, claves: dict) -> ErrorPublicacion:
     return ErrorPublicacion(f"X no aceptó {paso} (código {r.status_code}): {cuerpo[:200]}", "x_otro")
 
 
-def x_publicar(claves: dict, jpg: bytes | None, texto: str, publicidad: bool = False, hecha_con_ia: bool = False) -> str:
+def x_publicar(claves: dict, jpg: bytes | None, texto: str, publicidad: bool = False, hecha_con_ia: bool = False,
+               texto_corto: str = "") -> str:
     """Crea la publicación (con la imagen, si hay una). Devuelve el id del post.
 
     jpg=None          -> publica solo el texto.
     publicidad=True   -> X le pone la etiqueta de contenido promocional (lo exige su regla
                          cuando hay un link de afiliado o una promo).
-    hecha_con_ia=True -> avisa que la imagen fue generada con IA."""
+    hecha_con_ia=True -> avisa que la imagen fue generada con IA.
+    texto_corto       -> si el texto es largo (cuentas con X Premium) y X no lo acepta, se publica este."""
     firma = OAuth1(claves["X_API_KEY"], claves["X_API_SECRET"], claves["X_ACCESS_TOKEN"], claves["X_ACCESS_SECRET"])
     imagen: dict = {}
     if jpg is not None:
@@ -205,6 +207,18 @@ def x_publicar(claves: dict, jpg: bytes | None, texto: str, publicidad: bool = F
         except (ValueError, KeyError, TypeError):
             raise ErrorPublicacion("X recibió la imagen pero no devolvió su número.", "x_otro", True)
 
+    if texto_corto and peso_x(texto) > 280:
+        try:
+            return _x_crear(firma, texto, imagen, publicidad, hecha_con_ia, claves)
+        except ErrorPublicacion as error:
+            if error.incierto or error.clave == "x_red":
+                raise
+            log.warning("X no aceptó el texto largo (%s); publico la versión corta.", str(error)[:120])
+        texto = texto_corto
+    return _x_crear(firma, texto, imagen, publicidad, hecha_con_ia, claves)
+
+
+def _x_crear(firma, texto: str, imagen: dict, publicidad: bool, hecha_con_ia: bool, claves: dict) -> str:
     cuerpo: dict = {"text": texto, **imagen}
     if publicidad:
         cuerpo["paid_partnership"] = True

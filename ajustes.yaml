@@ -23,6 +23,10 @@ x:
   #   promos  = pone tu link solo en las promos                        (unos USD 21 por mes)
   #   siempre = también en las noticias que llevan llamado             (hasta unos USD 32 por mes)
   poner_links: false
+  # Tu cuenta tiene X Premium: los posts pueden ser largos (hasta 25.000 letras).
+  # true  = en X sale el texto completo, igual que en Telegram (si X no lo acepta, sale la versión corta)
+  # false = en X sale una versión corta, de hasta 280 letras
+  premium: true
   texto_sin_link: "el link está en mi perfil"
   marcar_publicidad: true         # X exige avisar cuando un post tiene link de afiliado o es una promo
 

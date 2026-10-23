@@ -27,7 +27,7 @@ from .publicar import ErrorPublicacion, claves_x, telegram_chats, telegram_mensa
 from .texto import (
     anio_actual, armar_llamado, enlaces_extra, faltantes, faltantes_promo, fuente_limpia, idea_de_imagen, normalizar_post, normalizar_promo,
     numeros_inventados, promesas, promo_telegram, promo_x, texto_revisable, texto_revisable_promo,
-    texto_propio_telegram, texto_propio_x, texto_telegram, texto_x,
+    link_en_x, texto_propio_telegram, texto_propio_x, texto_telegram, texto_x, x_largo, x_premium,
 )
 from .util import (
     RAIZ, a_hora, ahora_utc, cargar_ajustes, configurar_log, cupo_a_esta_hora, en_silencio, log, normalizar, socios_activos,
@@ -109,6 +109,12 @@ class Corrida:
             log.error("No pude mandar el aviso: %s", error)
 
     # ------------------------------------------------- entregar (común a todo)
+    def x_largo(self, para_telegram: str, publicidad: bool) -> str:
+        """Con X Premium ('premium: true'), en X sale el texto completo, igual que en Telegram."""
+        if not x_premium(self.cfg["x"]):
+            return ""
+        return x_largo(para_telegram, self.cfg["x"], link_en_x(self.cfg["x"], publicidad))
+
     def entregar(self, numero: int, jpg: bytes | None, para_telegram: str, para_x: str, registro: dict,
                  publicidad: bool = False, con_ia: bool = False, original: str = "") -> str:
         """Publica (o manda la muestra), con imagen o solo texto (jpg=None). Devuelve 'ok', 'reintentar'
@@ -127,7 +133,8 @@ class Corrida:
             if self.token and self.chat_prueba:
                 try:
                     telegram_publicar(self.token, self.chat_prueba, jpg, para_telegram)
-                    telegram_mensaje(self.token, self.chat_prueba, f"👆 Así saldría en Telegram.\n\nY así saldría en X:\n\n{para_x}")
+                    telegram_mensaje(self.token, self.chat_prueba,
+                                     f"👆 Así saldría en Telegram.\n\nY así saldría en X:\n\n{self.x_largo(para_telegram, publicidad) or para_x}")
                 except ErrorPublicacion as error:
                     log.error("  no pude mandar la muestra: %s", error)
                     self.fallas += 1
@@ -143,7 +150,9 @@ class Corrida:
         if "x" in self.canales:
             try:
                 avisar_publicidad = publicidad and verdadero(self.cfg["x"].get("marcar_publicidad", True))
-                registro["x"] = x_publicar(self.claves_x, jpg, para_x, publicidad=avisar_publicidad, hecha_con_ia=con_ia)
+                largo = self.x_largo(para_telegram, publicidad)
+                registro["x"] = x_publicar(self.claves_x, jpg, largo or para_x, publicidad=avisar_publicidad, hecha_con_ia=con_ia,
+                                           texto_corto=para_x if largo else "")
                 log.info("  publicado en X")
             except ErrorPublicacion as error:
                 errores.append(error)

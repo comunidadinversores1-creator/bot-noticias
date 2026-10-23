@@ -61,6 +61,7 @@ def corrida(monkeypatch, tmp_path, red):
             promo["activa"] = False
         for socio in c.cfg["socios"].values():
             socio["activo"] = True
+        c.cfg["x"]["premium"] = False                # X corto por defecto en las pruebas (las de Premium lo prenden)
         c.destino = "@canal_real"
         c.chat_prueba = "555"
         return c
@@ -1437,7 +1438,7 @@ def test_asi_vienen_los_ajustes(cfg):
     assert list(socios_activos(cfg)) == ["exness", "binance"]                  # Pionex está apagado por ahora
     assert cfg["socios"]["exness"]["enlace"] == "https://one.exnessonelink.com/a/ptf6lzlrc8"
     assert cfg["socios"]["binance"]["enlace"] == "https://www.binance.com/join?ref=202718448"
-    assert cfg["x"]["poner_links"] is False and cfg["encendido"] is False
+    assert cfg["x"]["poner_links"] is False and cfg["encendido"] is False and cfg["x"]["premium"] is True
     assert cfg["telegram"]["destino"] == "@comunidad_inversores_anuncios"
     c = main.Corrida("prueba", 1, False)
     c.ahora = AHORA
@@ -1586,3 +1587,42 @@ def test_muestra_de_una_promo_con_texto_propio(corrida, red, tmp_path):
     assert corrida(modo="prueba", promo="labitconf-2026").correr() == 0
     assert [f["chat_id"] for f in red.telegram_fotos] == ["555"] and red.x_posts == []
     assert "COMUNIDADINVERSORES40" in red.telegram_fotos[0]["caption"]
+
+
+# ============================== X Premium: posts largos
+
+def test_x_premium_publica_el_texto_completo(corrida, red, tmp_path):
+    _sin_la_fed(red)
+    c = _solo_promo(corrida(), "exness-un-clic")
+    c.cfg["x"]["premium"] = True
+    assert c.correr() == 0
+    x = red.x_posts[0]["text"]
+    assert "La idea no es operar más rápido por operar más rápido." in x and "Calendario económico integrado" in x
+    assert "http" not in x and "Exness — registro (el link está en mi perfil)" in x
+    assert texto.peso_x(x) > 280
+
+
+def test_x_premium_con_links_los_escribe(cfg):
+    html_tg = texto.texto_propio_telegram("Mirá [el video](https://youtu.be/abc) y https://linktr.ee/yo")
+    con = texto.x_largo(html_tg, cfg["x"], True)
+    assert con == "Mirá el video: https://youtu.be/abc y https://linktr.ee/yo"
+    sin = texto.x_largo(html_tg, cfg["x"], False)
+    assert "http" not in sin and sin.count("(el link está en mi perfil)") == 2
+
+
+def test_si_x_no_acepta_el_texto_largo_sale_el_corto(corrida, red, tmp_path):
+    _sin_la_fed(red)
+    c = _solo_promo(corrida(), "exness-un-clic")
+    c.cfg["x"]["premium"] = True
+    red.x_rechaza_largos = True
+    assert c.correr() == 0
+    assert len(red.x_posts) == 1 and texto.peso_x(red.x_posts[0]["text"]) <= 280
+    assert "Registrate con mi link (está en mi perfil)" in red.x_posts[0]["text"]
+
+
+def test_sin_premium_sale_el_corto(corrida, red, tmp_path):
+    _sin_la_fed(red)
+    c = _solo_promo(corrida(), "exness-un-clic")
+    c.cfg["x"]["premium"] = False
+    assert c.correr() == 0
+    assert texto.peso_x(red.x_posts[0]["text"]) <= 280

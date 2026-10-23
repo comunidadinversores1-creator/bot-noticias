@@ -186,6 +186,8 @@ class InternetFalso:
             datos = json.loads(self._cuerpo(pedido))
             if self.x_estado not in (200, 201):
                 return self._r(pedido, self.x_estado, self.x_cuerpo or {"title": "error", "detail": "algo falló"})
+            if getattr(self, "x_rechaza_largos", False) and len(datos["text"]) > 280:
+                return self._r(pedido, 403, {"title": "Forbidden", "detail": "Your Tweet text is too long."})
             self.x_posts.append(datos)
             return self._r(pedido, 201, {"data": {"id": f"19{len(self.x_posts):018d}", "text": datos["text"]}})
         return self._r(pedido, 404, {"title": "Not Found"})
