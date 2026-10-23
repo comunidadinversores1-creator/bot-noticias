@@ -23,7 +23,7 @@ from .estado import Estado
 from .filtro import Grupo, es_mala_noticia, nombra_prohibido, preparar, puntaje, ya_contada
 from .fuentes import leer_fuentes
 from .imagen import armar_placa, armar_promo, buscar_foto, generar_con_ia, logo_guardado, tal_cual
-from .publicar import ErrorPublicacion, claves_x, telegram_chats, telegram_mensaje, telegram_publicar, x_publicar
+from .publicar import ErrorPublicacion, claves_x, telegram_chats, telegram_mensaje, telegram_publicar, x_publicar, x_quien_soy
 from .texto import (
     anio_actual, armar_llamado, enlaces_extra, faltantes, faltantes_promo, fuente_limpia, idea_de_imagen, normalizar_post, normalizar_promo,
     numeros_inventados, promesas, promo_telegram, promo_x, texto_revisable, texto_revisable_promo,
@@ -807,6 +807,13 @@ class Corrida:
             for tema, nombre in sorted(c.get("temas", {}).items()):
                 log.info("      tema %s %s  ->  destino: %s/%s", tema, nombre, c["id"], tema)
                 lineas.append(f"• {c['nombre']} › tema «{nombre or 'sin nombre'}»: {c['id']}/{tema}")
+        # Si están las llaves de X, se comprueban (sin publicar nada).
+        if self.claves_x:
+            try:
+                lineas.append(f"• X: conectado a la cuenta {x_quien_soy(self.claves_x)} ✅")
+            except ErrorPublicacion as error:
+                lineas.append(f"• X: ❌ {error}")
+                log.error("X: %s", error)
         # Para no tener que leer el registro de GitHub: se lo manda por Telegram a quien le escribió al bot.
         if lineas:
             aviso = ("¡Hola! Ya estoy funcionando. Estos son los lugares donde estoy y su código "

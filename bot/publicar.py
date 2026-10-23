@@ -179,6 +179,21 @@ def claves_x(entorno: dict | None = None) -> dict | None:
     return claves if all(claves.values()) else None
 
 
+def x_quien_soy(claves: dict) -> str:
+    """Comprueba las llaves de X sin publicar nada: devuelve el @usuario de la cuenta."""
+    firma = OAuth1(claves["X_API_KEY"], claves["X_API_SECRET"], claves["X_ACCESS_TOKEN"], claves["X_ACCESS_SECRET"])
+    try:
+        r = requests.get("https://api.x.com/2/users/me", auth=firma, timeout=30)
+    except requests.RequestException as error:
+        raise ErrorPublicacion(f"No pude conectarme con X ({type(error).__name__}).", "x_red", True)
+    if r.status_code != 200:
+        raise _error_x(r, "la verificación", claves)
+    try:
+        return "@" + str(r.json()["data"]["username"])
+    except (ValueError, KeyError, TypeError):
+        return "(sin nombre)"
+
+
 def _error_x(r: requests.Response, paso: str, claves: dict) -> ErrorPublicacion:
     cuerpo = ocultar(r.text[:400], *claves.values())
     bajo = cuerpo.lower()
