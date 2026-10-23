@@ -61,6 +61,20 @@ hashtags:
   - {hashtag: "Trading",     si_dice: ["trading", "traders", "trader"]}
 
 # ------------------------------------------------------------
+#  GROK (la IA de X, lee X en tiempo real). Necesita la llave XAI_API_KEY en GitHub.
+#  - Temas del día: a la mañana y a la tarde busca de qué se habla en X, y las preguntas salen sobre eso.
+#  - Posts virales: una vez por día te manda al privado los posts que están explotando, para que les
+#    respondas vos (responder automático a otras personas está prohibido en X).
+# ------------------------------------------------------------
+grok:
+  activa: true
+  modelo: "grok-4.7"
+  temas_horas: ["08:00", "15:00"]
+  virales_hora: "10:00"
+  virales_cantidad: 5
+  areas: "trading, criptomonedas, exchanges, inteligencia artificial, empresas tecnológicas, bolsa, economía, guerras y conflictos que mueven los mercados, dólar, dinero y ahorro"
+
+# ------------------------------------------------------------
 #  CALENDARIO ECONÓMICO (Telegram y X):
 #  - a la mañana, la agenda del día con los datos importantes (inflación, empleo, tasas...)
 #  - un rato antes de cada dato, un aviso: a qué hora sale, qué se espera y que puede haber volatilidad
@@ -159,7 +173,7 @@ ritmo:
 # ------------------------------------------------------------
 imagen:
   modo: ninguna
-  idea_para_chatgpt: true
+  idea_para_chatgpt: false        # apagado: Eze prefiere que el privado quede para los posts virales
 
 # Colores de la imagen (para el modo "placa") según cómo cae la noticia en el mercado.
 colores:

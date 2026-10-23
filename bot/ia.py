@@ -431,7 +431,9 @@ def elegir_foto(cerebro: Cerebro, titular: str, opciones: list[str]) -> int | No
 
 # ------------------------------------------------- 4) charla en X (preguntas y dilemas)
 
-SISTEMA_CHARLA = """Escribís publicaciones cortas para la cuenta de X de Ezequiel Bagnato (Comunidad Inversores). El objetivo es que la gente responda, opine y comparta. Temas: bots de trading, inteligencia artificial aplicada a invertir, trading, gestión del riesgo, psicología del trader, y dinero del día a día (ahorro, sueldo, inversiones, bitcoin, dólar, jubilación).
+SISTEMA_CHARLA = """Escribís publicaciones cortas para la cuenta de X de Ezequiel Bagnato (Comunidad Inversores). El objetivo es que la gente responda, opine y comparta. Temas: bots de trading, inteligencia artificial, trading, gestión del riesgo, psicología del trader, criptomonedas y exchanges, empresas tecnológicas, guerras y conflictos que mueven los mercados, y dinero del día a día (ahorro, sueldo, inversiones, bitcoin, dólar, jubilación).
+
+Si te paso un TEMA DE HOY EN X con su CONTEXTO, la publicación es sobre eso (es de lo que la gente está hablando ahora): usá solo los hechos del contexto, sin inventar cifras ni detalles.
 
 ESTILO (copialo bien):
 - Español rioplatense con voseo, como habla un pibe argentino en X. Arrancá en minúscula. Frases cortas.
@@ -467,14 +469,18 @@ TEMAS_CHARLA = [
     "bots de trading", "inteligencia artificial para invertir", "gestión del riesgo", "stop loss", "apalancamiento",
     "psicología del trader", "rachas de pérdidas", "backtesting", "disciplina", "operar noticias",
     "ahorro", "sueldo", "inversiones a largo plazo", "bitcoin", "dólar", "jubilación", "deudas", "gastos hormiga",
-    "interés compuesto", "fondo de emergencia",
+    "interés compuesto", "fondo de emergencia", "inteligencia artificial y empleo", "empresas tecnológicas",
+    "exchanges de cripto", "guerras y mercados", "petróleo", "aranceles y comercio",
 ]
 
 
 def redactar_charla(cerebro: Cerebro, formato: str, tema: str, anteriores: list[str], correccion: str = "", datos: str = "") -> dict:
-    usuario = f"FORMATO: {formato}\n{'PRODUCTO' if formato == 'venta' else 'TEMA'}: {tema}\n"
-    if datos:
-        usuario += f"DATOS:\n{datos.strip()}\n"
+    if datos.startswith("CONTEXTO:"):
+        usuario = f"FORMATO: {formato}\nTEMA DE HOY EN X: {tema}\n{datos.strip()}\n"
+    else:
+        usuario = f"FORMATO: {formato}\n{'PRODUCTO' if formato == 'venta' else 'TEMA'}: {tema}\n"
+        if datos:
+            usuario += f"DATOS:\n{datos.strip()}\n"
     usuario += "\nPUBLICACIONES ANTERIORES (no repetir):\n" + (
         "\n---\n".join(a[:200] for a in anteriores[-25:]) or "(ninguna)")
     if correccion:

@@ -19,6 +19,7 @@ from datetime import date, datetime, timedelta
 from PIL import Image
 
 from . import calendario as cal
+from . import grok
 from . import ia
 from .estado import Estado
 from .filtro import Grupo, es_mala_noticia, nombra_prohibido, preparar, puntaje, ya_contada
@@ -502,6 +503,7 @@ class Corrida:
                 return self.recuperar_memoria()
             # De a una por vez: si en esta corrida sale algo del calendario, una enseñanza o una pregunta,
             # la promo y las noticias comunes esperan a la próxima hora (lo urgente sale igual).
+            self.tal_vez_grok()              # no publica nada: busca temas del día y te manda los virales
             self.ocupado = self.tal_vez_calendario()
             if not self.ocupado:
                 self.ocupado = self.tal_vez_charla()
@@ -521,6 +523,8 @@ class Corrida:
             return 1
 
         # --- muestra de charla para X (solo en modo prueba: promo = charla)
+        if not self.real and self.promo_pedida.lower() == "grok":
+            return self.muestra_grok()
         if not self.real and self.promo_pedida.lower() == "calendario":
             return self.muestra_calendario()
         if not self.real and self.promo_pedida.lower() in ("charla", "ensenanza"):
@@ -797,6 +801,92 @@ class Corrida:
                 self.avisar(error.clave, str(error))
         return id_tg, id_x
 
+    # ------------------------------------------------- Grok (X en tiempo real)
+    def tema_caliente(self) -> dict | None:
+        """Un tema de los que más se hablan hoy en X que todavía no se usó."""
+        g = self.estado.datos["grok"]
+        hoy = self.ahora.astimezone(zona(self.cfg)).date().isoformat()
+        if g.get("temas_dia") != hoy:
+            return None
+        usados = set(g.get("usados") or [])
+        for t in g.get("temas") or []:
+            if isinstance(t, dict) and t.get("tema") and t["tema"] not in usados:
+                if self.real:
+                    g["usados"] = [*usados, t["tema"]]
+                return t
+        return None
+
+    def tal_vez_grok(self) -> None:
+        c = self.cfg.get("grok") or {}
+        if not verdadero(c.get("activa")) or not grok.disponible() or en_silencio(self.cfg, self.ahora):
+            return
+        g = self.estado.datos["grok"]
+        local = self.ahora.astimezone(zona(self.cfg))
+        hoy = local.date().isoformat()
+        # Temas del día: se buscan a la mañana y se refrescan a la tarde.
+        horarios = [h for h in (a_hora(x) for x in (c.get("temas_horas") or ["08:00", "15:00"])) if h is not None]
+        tandas = sum(1 for h in horarios if h <= local.time())
+        hechas = int(g.get("temas_tandas", 0)) if g.get("temas_dia") == hoy else 0
+        if tandas > hechas:
+            try:
+                temas = grok.temas_del_dia(self.cfg, self.ahora)
+                usados = g.get("usados", []) if g.get("temas_dia") == hoy else []
+                g.update({"temas": temas, "temas_dia": hoy, "temas_tandas": tandas, "usados": usados})
+                log.info("Grok: temas de hoy en X: %s", " | ".join(t["tema"] for t in temas))
+            except grok.SinGrok as error:
+                g.update({"temas_dia": hoy, "temas_tandas": tandas})      # no se insiste hasta la próxima tanda
+                self.avisar("grok", f"Grok {error}. Las preguntas de X siguen saliendo con temas generales.", cada_horas=24)
+        # Posts virales para responder: una vez por día, a tu privado.
+        hora_virales = a_hora(c.get("virales_hora") or "10:00")
+        if g.get("virales_dia") != hoy and hora_virales is not None and local.time() >= hora_virales:
+            g["virales_dia"] = hoy
+            self.mandar_virales()
+        self.estado.guardar()
+
+    def mandar_virales(self) -> int:
+        c = self.cfg.get("grok") or {}
+        try:
+            posts = grok.virales(self.cfg, self.ahora, int(c.get("virales_cantidad", 5)))
+        except grok.SinGrok as error:
+            self.avisar("grok", f"Grok {error}. Hoy no pude buscarte los posts virales.", cada_horas=24)
+            return 0
+        if not posts or not (self.token and self.chat_prueba):
+            return 0
+        e = lambda s: html.escape(s, quote=False)
+        partes = ["🔥 <b>Posts virales para responder hoy</b>",
+                  "Respondé desde tu celu con algo que aporte: un dato, tu experiencia o una pregunta. Lo ideal, en la primera hora.", ""]
+        for i, p in enumerate(posts, start=1):
+            partes.append(f'<b>{i}. <a href="{html.escape(p["url"], quote=True)}">{e(p["cuenta"] or "ver post")}</a></b>')
+            if p["de_que_habla"]:
+                partes.append(e(p["de_que_habla"]))
+            if p["por_que"]:
+                partes.append(f"<i>{e(p['por_que'])}</i>")
+            if p["idea"]:
+                partes.append(f"💡 Idea: {e(p['idea'])}")
+            partes.append("")
+        try:
+            telegram_mensaje(self.token, self.chat_prueba, "\n".join(partes).strip(), html=True)
+        except ErrorPublicacion as error:
+            log.warning("no pude mandar los virales: %s", error)
+            return 0
+        return len(posts)
+
+    def muestra_grok(self) -> int:
+        """Modo prueba: los temas de hoy y los virales, a tu privado."""
+        if not grok.disponible():
+            self.avisar("grok", "Falta la llave de Grok (XAI_API_KEY) en GitHub.")
+            return self.cerrar(0)
+        try:
+            temas = grok.temas_del_dia(self.cfg, self.ahora)
+        except grok.SinGrok as error:
+            self.avisar("grok", f"Grok {error}.")
+            return self.cerrar(0)
+        if self.token and self.chat_prueba:
+            lineas = ["🧠 <b>De esto se habla hoy en X</b> (las preguntas del día van a salir sobre estos temas):", ""]
+            lineas += [f"• <b>{html.escape(t['tema'], quote=False)}</b>: {html.escape(t['contexto'], quote=False)}" for t in temas]
+            telegram_mensaje(self.token, self.chat_prueba, "\n".join(lineas), html=True)
+        return self.cerrar(1 + (1 if self.mandar_virales() else 0))
+
     def tal_vez_calendario(self) -> bool:
         """La agenda del día (a la mañana) y el aviso un rato antes de cada dato importante."""
         c = self.cfg.get("calendario") or {}
@@ -874,6 +964,12 @@ class Corrida:
         temas = [str(t) for t in (ch.get("temas") or ia.TEMAS_CHARLA)]
         formato, tema = forzado or formatos[numero % len(formatos)], temas[(numero * 7 + 3) % len(temas)]
         datos, publicidad = "", False
+        if formato not in ("venta", "ensenanza"):
+            # Si Grok encontró de qué se habla hoy en X, la pregunta va sobre eso.
+            caliente = self.tema_caliente()
+            if caliente:
+                tema = caliente["tema"]
+                datos = f"CONTEXTO: {caliente.get('contexto', '')}"
         hechas = sum(1 for c in self.estado.datos["charlas"] if isinstance(c, dict) and c.get("formato") == formato)
         hechas += 0 if self.real else self._muestras_charla
         if formato == "ensenanza":

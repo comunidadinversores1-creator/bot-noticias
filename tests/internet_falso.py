@@ -109,6 +109,12 @@ class InternetFalso:
             return self._ia(pedido, host)
         if host.endswith("wikipedia.org") or host == "commons.wikimedia.org":
             return self._wiki(pedido, u, host)
+        if host == "api.x.ai":
+            cuerpo = json.loads(self._cuerpo(pedido))
+            consigna = cuerpo["input"][0]["content"]
+            datos = getattr(self, "grok", {})
+            contenido = {"temas": datos.get("temas", [])} if "temas con más conversación" in consigna else {"posts": datos.get("posts", [])}
+            return self._r(pedido, 200, {"output": [{"type": "message", "content": [{"type": "output_text", "text": json.dumps(contenido, ensure_ascii=False)}]}]})
         if host == "nfs.faireconomy.media":
             return self._r(pedido, 200, list(getattr(self, "calendario", [])))
         if host == "upload.wikimedia.org":

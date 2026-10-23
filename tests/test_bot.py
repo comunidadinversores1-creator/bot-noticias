@@ -69,6 +69,7 @@ def corrida(monkeypatch, tmp_path, red):
         c.cfg["ensenanza"]["activa"] = False          # las enseñanzas, solo en sus pruebas
         c.cfg["calendario"]["activa"] = False         # el calendario económico, solo en sus pruebas
         c.cfg["ritmo"]["horarios_noticias"] = []      # reparto parejo (los horarios fijos tienen su prueba)
+        c.cfg["imagen"]["idea_para_chatgpt"] = True    # la función sigue existiendo (Eze la tiene apagada)
         c.cfg["x_charla"]["horarios"] = ["09:30", "14:00", "21:30"]
         c.chat_prueba = "555"
         return c
@@ -1449,6 +1450,7 @@ def test_asi_vienen_los_ajustes(cfg):
     assert cfg["x"]["poner_links"] is False and cfg["encendido"] is True and cfg["x"]["premium"] is True
     assert cfg["telegram"]["destino"] == "@comunidad_inversores_anuncios"
     assert cfg["telegram"]["tambien_en"] == ["@Tu_Comunidad_Inversores/150910"]
+    assert cfg["imagen"]["idea_para_chatgpt"] is False and cfg["grok"]["activa"] is True
     c = main.Corrida("prueba", 1, False)
     c.ahora = AHORA
     assert [p["id"] for p in c.promos_activas()] == [
@@ -1847,3 +1849,42 @@ def test_noticias_en_sus_horarios(corrida, red, tmp_path):
     assert correr(9, 40) == 1
     red.feeds["ambito.com"] = _rss("Ámbito", [{"title": "El BCRA vuelve a comprar reservas en el mercado", "fecha": AHORA - timedelta(minutes=5), "desc": "compró dólares"}])
     assert correr(10, 40) == 1         # la de las 11:30 todavía no
+
+
+
+# ============================== Grok: temas del día en X y posts virales
+
+def _grok_responde(red, temas=None, posts=None):
+    red.grok = {
+        "temas": temas if temas is not None else [{"tema": "bitcoin cae 8% tras datos de empleo", "contexto": "Bitcoin bajó 8% en el día después del dato de empleo de EE.UU.", "hashtag": "Bitcoin"}],
+        "posts": posts if posts is not None else [{"url": "https://x.com/cuenta/status/1", "cuenta": "@cuentagrande", "de_que_habla": "¿Conviene comprar en la caída?",
+                                                   "por_que": "300 respuestas en 2 horas", "idea": "yo miro primero el stop loss antes que la entrada"}],
+    }
+
+
+def test_grok_temas_del_dia_y_virales(corrida, red, tmp_path, monkeypatch):
+    _sin_la_fed(red)
+    monkeypatch.setenv("XAI_API_KEY", "clave-xai")
+    _grok_responde(red)
+    red.charlas = ["bitcoin cayó 8% en un día\n\n¿vendés, comprás o no tocás nada?"]
+    c = corrida(imagen="ninguna", charla=True, ahora=_hora(13, 10))
+    assert c.correr() == 0
+    memoria = _memoria(tmp_path)
+    assert memoria["grok"]["temas"][0]["tema"] == "bitcoin cae 8% tras datos de empleo"
+    pedido_charla = [l for l in red.llamadas_ia if "cuenta de X de Ezequiel" in json.dumps(l, ensure_ascii=False)][-1]
+    assert "TEMA DE HOY EN X: bitcoin cae 8%" in json.dumps(pedido_charla, ensure_ascii=False)
+    virales = [m["text"] for m in _al_privado(red) if "Posts virales" in m["text"]]
+    assert len(virales) == 1 and "https://x.com/cuenta/status/1" in virales[0] and "💡 Idea" in virales[0]
+    assert memoria["grok"]["usados"] == ["bitcoin cae 8% tras datos de empleo"]
+    # Otra corrida el mismo día: no vuelve a mandar los virales ni a pedir los temas.
+    pedidos_antes = len([p for p in red.pedidos if "api.x.ai" in (p.url or "")])
+    assert corrida(imagen="ninguna", ahora=_hora(13, 40)).correr() == 0
+    assert len([p for p in red.pedidos if "api.x.ai" in (p.url or "")]) == pedidos_antes
+
+
+def test_sin_llave_de_grok_sigue_como_siempre(corrida, red, tmp_path, monkeypatch):
+    _sin_la_fed(red)
+    monkeypatch.delenv("XAI_API_KEY", raising=False)
+    assert corrida(imagen="ninguna", charla=True, ahora=_hora(13, 10)).correr() == 0
+    assert not any("api.x.ai" in (p.url or "") for p in red.pedidos)
+    assert len(_memoria(tmp_path)["charlas"]) == 1
