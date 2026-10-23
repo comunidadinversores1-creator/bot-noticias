@@ -1626,3 +1626,24 @@ def test_sin_premium_sale_el_corto(corrida, red, tmp_path):
     c.cfg["x"]["premium"] = False
     assert c.correr() == 0
     assert texto.peso_x(red.x_posts[0]["text"]) <= 280
+
+
+# ============================== también en el tema "Noticias" del grupo
+
+def test_separar_destino():
+    from bot.publicar import separar_destino
+    assert separar_destino("@canal") == {"chat_id": "@canal"}
+    assert separar_destino("-1001234567890/45") == {"chat_id": "-1001234567890", "message_thread_id": "45"}
+    assert separar_destino("-1001234567890") == {"chat_id": "-1001234567890"}
+
+
+def test_publica_en_el_canal_y_en_el_tema_del_grupo(corrida, red, tmp_path):
+    _sin_la_fed(red)
+    c = corrida(imagen="ninguna")
+    c.tambien_en = ["-1009999/45"]
+    assert c.correr() == 0
+    canal = _al_canal(red)
+    grupo = [m for m in red.telegram_mensajes if m["chat_id"] == "-1009999"]
+    assert len(canal) == 1 and len(grupo) == 1
+    assert grupo[0]["message_thread_id"] == "45" and grupo[0]["text"] == canal[0]["text"]
+    assert len(red.x_posts) == 1                              # en X sale una sola vez

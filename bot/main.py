@@ -82,6 +82,10 @@ class Corrida:
         self.token = (os.environ.get("TELEGRAM_BOT_TOKEN") or "").strip()
         tg = self.cfg["telegram"]
         self.destino = (os.environ.get("TELEGRAM_DESTINO") or str(tg.get("destino") or "")).strip()
+        # Otros lugares donde sale lo mismo (por ejemplo, el tema "Noticias" del grupo).
+        extras = tg.get("tambien_en") or []
+        extras = [extras] if isinstance(extras, (str, int)) else extras
+        self.tambien_en = [str(d).strip() for d in extras if str(d).strip() and str(d).strip() != self.destino]
         self.chat_prueba = (os.environ.get("TELEGRAM_CHAT_PRUEBA") or str(tg.get("chat_prueba") or "")).strip()
         self.claves_x = claves_x()
         # imagen.modo: 'ninguna' = publica solo el texto (la imagen la pone el dueño a mano) · 'placa' = la arma el bot
@@ -144,6 +148,13 @@ class Corrida:
         if "telegram" in self.canales:
             try:
                 registro["telegram"] = telegram_publicar(self.token, self.destino, jpg, para_telegram)
+                for otro in self.tambien_en:
+                    # Si el canal ya salió, una falla acá solo se avisa: reintentar duplicaría el canal.
+                    try:
+                        telegram_publicar(self.token, otro, jpg, para_telegram)
+                    except ErrorPublicacion as error:
+                        self.fallas += 1
+                        self.avisar(f"tg_otro_{otro}", f"Salió en el canal pero no en {otro}: {error}")
                 log.info("  publicado en Telegram")
             except ErrorPublicacion as error:
                 errores.append(error)
@@ -699,8 +710,23 @@ class Corrida:
             return 1
         if not chats:
             log.info("No veo chats todavía. Escribile /start al bot (o agregalo al canal y publicá algo) y probá de nuevo.")
+        lineas = []
         for c in chats:
             log.info("CHAT  id=%s  tipo=%s  nombre=%s  usuario=%s", c["id"], c["tipo"], c["nombre"], ("@" + c["usuario"]) if c["usuario"] else "-")
+            if c["tipo"] in ("group", "supergroup", "channel"):
+                lineas.append(f"• {c['nombre']}: {c['id']}")
+            for tema, nombre in sorted(c.get("temas", {}).items()):
+                log.info("      tema %s %s  ->  destino: %s/%s", tema, nombre, c["id"], tema)
+                lineas.append(f"• {c['nombre']} › tema «{nombre or 'sin nombre'}»: {c['id']}/{tema}")
+        # Para no tener que leer el registro de GitHub: se lo manda por Telegram a quien le escribió al bot.
+        if lineas:
+            aviso = "Estos son los lugares donde estoy y su código (para copiar en ajustes.yaml):\n\n" + "\n".join(lineas)
+            for c in chats:
+                if c["tipo"] == "private":
+                    try:
+                        telegram_mensaje(self.token, str(c["id"]), aviso)
+                    except ErrorPublicacion as error:
+                        log.warning("no pude mandarle la lista a %s: %s", c["nombre"], error)
         return 0
 
 

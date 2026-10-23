@@ -76,10 +76,21 @@ def _telegram(token: str, metodo: str, datos: dict, archivos: dict | None = None
     raise ErrorPublicacion("Telegram no respondió.", "tg_red", True)
 
 
+def separar_destino(destino: str) -> dict:
+    """'@canal' o '-1001234567890' -> solo el chat.  '-1001234567890/45' -> el chat y el tema 45 de un grupo
+    con temas (el número del tema es el que aparece en su link: t.me/c/1234567890/45)."""
+    destino = str(destino or "").strip()
+    chat, _, tema = destino.rpartition("/") if re.fullmatch(r".+/\d+", destino) else (destino, "", "")
+    datos = {"chat_id": chat}
+    if tema:
+        datos["message_thread_id"] = tema
+    return datos
+
+
 def telegram_foto(token: str, destino: str, jpg: bytes, texto_html: str) -> int:
     resultado = _telegram(
         token, "sendPhoto",
-        {"chat_id": destino, "caption": texto_html, "parse_mode": "HTML"},
+        {**separar_destino(destino), "caption": texto_html, "parse_mode": "HTML"},
         {"photo": ("noticia.jpg", jpg, "image/jpeg")},
     )
     return int(resultado.get("message_id", 0))
@@ -92,7 +103,7 @@ def telegram_texto(token: str, destino: str, texto_html: str) -> int:
     """Publica solo texto (con negritas y links, sin imagen). Devuelve el número del mensaje."""
     resultado = _telegram(
         token, "sendMessage",
-        {"chat_id": destino, "text": texto_html[:4096], "parse_mode": "HTML", "link_preview_options": _SIN_VISTA_PREVIA},
+        {**separar_destino(destino), "text": texto_html[:4096], "parse_mode": "HTML", "link_preview_options": _SIN_VISTA_PREVIA},
     )
     return int(resultado.get("message_id", 0))
 
@@ -141,14 +152,22 @@ def telegram_chats(token: str) -> list[dict]:
     vistos: dict[int, dict] = {}
     for novedad in respuesta.get("result", []):
         for campo in ("message", "channel_post", "my_chat_member", "edited_message"):
-            chat = (novedad.get(campo) or {}).get("chat")
-            if chat:
-                vistos[chat["id"]] = {
-                    "id": chat["id"],
-                    "tipo": chat.get("type"),
-                    "nombre": chat.get("title") or " ".join(filter(None, [chat.get("first_name"), chat.get("last_name")])),
-                    "usuario": chat.get("username", ""),
-                }
+            mensaje = novedad.get(campo) or {}
+            chat = mensaje.get("chat")
+            if not chat:
+                continue
+            visto = vistos.setdefault(chat["id"], {
+                "id": chat["id"],
+                "tipo": chat.get("type"),
+                "nombre": chat.get("title") or " ".join(filter(None, [chat.get("first_name"), chat.get("last_name")])),
+                "usuario": chat.get("username", ""),
+                "temas": {},
+            })
+            # Grupos con temas: el número del tema y, si se ve, su nombre.
+            if mensaje.get("is_topic_message") and mensaje.get("message_thread_id"):
+                creado = mensaje.get("forum_topic_created") or (mensaje.get("reply_to_message") or {}).get("forum_topic_created") or {}
+                tema = int(mensaje["message_thread_id"])
+                visto["temas"][tema] = creado.get("name") or visto["temas"].get(tema) or ""
     return list(vistos.values())
 
 
