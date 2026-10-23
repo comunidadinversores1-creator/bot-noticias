@@ -82,7 +82,7 @@ calendario:
 # ------------------------------------------------------------
 x_charla:
   activa: true
-  horarios: ["09:30", "14:00", "21:30"]      # una después de cada horario
+  horarios: ["13:00", "19:30", "22:00"]      # una después de cada horario (en los huecos de X, sin pisar noticias ni promos)
   # Debajo de cada pregunta, una de estas (van rotando):
   respuestas:
     - "si te hacen pensar estas preguntas, seguime.\n\ntodos los días subo una sobre trading, bots, IA y dinero. y las noticias que mueven el mercado, apenas salen."
@@ -136,6 +136,10 @@ ritmo:
   max_por_dia: 7                  # noticias + promos por día (4 noticias + 3 promos). Las enseñanzas y las preguntas de X van aparte
   promos_por_dia: 3               # cuántas de esas 10 son ventas de tus herramientas y campañas
   horarios_promos: ["10:30", "15:30", "20:30"]   # desde esa hora sale la promo que toca
+  # Las noticias comunes salen después de cada uno de estos horarios (lo urgente sale siempre).
+  # Así queda el día en Telegram: 7:30 agenda · 8:30 enseñanza · 9:30 noticia · 10:30 promo · 11:30 noticia
+  # · 12:30 enseñanza · 14:00 noticia · 15:30 promo · 17:00 noticia · 18:30 enseñanza · 20:30 promo
+  horarios_noticias: ["09:30", "11:30", "14:00", "17:00"]
   horas_entre_promos: 3           # nunca dos promos pegadas
   max_llamados_por_dia: 2         # tope de noticias con "registrate con mi link" (aparte de las promos)
   minutos_entre_publicaciones: 40 # separación mínima entre una y otra (el bot mira una vez por hora)

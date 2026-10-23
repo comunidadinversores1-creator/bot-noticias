@@ -652,9 +652,20 @@ class Corrida:
             hoy -= nocturnas
             noticias_hoy = hoy - promos_hoy
             cupo = cupo_a_esta_hora(cfg, self.ahora)
+            horarios_noticias = sorted(h for h in (a_hora(x) for x in (r.get("horarios_noticias") or [])) if h is not None)
             motivo = ""
             if en_silencio(cfg, self.ahora):
                 motivo = "es horario de silencio"
+            elif horarios_noticias:
+                # Las noticias comunes tienen sus horarios, entre las enseñanzas y las promos: así en
+                # Telegram sale algo más o menos cada hora y media, sin huecos largos ni amontonamientos.
+                local = self.ahora.astimezone(zona(cfg)).time()
+                pasados = sum(1 for h in horarios_noticias if h <= local)
+                if noticias_hoy >= pasados:
+                    motivo = f"van {noticias_hoy} noticias y todavía no es el horario de la siguiente"
+                    cupo = hoy + 1           # para que no se active el 'día atrasado'
+                else:
+                    cupo = hoy + 1
             elif hoy >= cupo:
                 motivo = f"ya van {hoy} publicaciones y a esta hora corresponden {cupo}"
             elif noticias_hoy >= tope - lugar_para_promos:

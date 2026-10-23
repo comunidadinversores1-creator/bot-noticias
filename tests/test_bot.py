@@ -68,6 +68,8 @@ def corrida(monkeypatch, tmp_path, red):
         c.cfg["hashtags"] = []                        # sin hashtags, salvo en su prueba
         c.cfg["ensenanza"]["activa"] = False          # las enseñanzas, solo en sus pruebas
         c.cfg["calendario"]["activa"] = False         # el calendario económico, solo en sus pruebas
+        c.cfg["ritmo"]["horarios_noticias"] = []      # reparto parejo (los horarios fijos tienen su prueba)
+        c.cfg["x_charla"]["horarios"] = ["09:30", "14:00", "21:30"]
         c.chat_prueba = "555"
         return c
 
@@ -1831,3 +1833,17 @@ def test_no_salen_dos_publicaciones_juntas(corrida, red, tmp_path):
     c = _con_promos(corrida(imagen="ninguna", charla=True, ahora=_hora(11, 40)))
     assert c.correr() == 0
     assert [p["tipo"] for p in _memoria(tmp_path)["publicadas"]] == ["promo"]
+
+
+
+def test_noticias_en_sus_horarios(corrida, red, tmp_path):
+    _sin_la_fed(red)
+    def correr(h, m):
+        c = corrida(imagen="ninguna", ahora=_hora(h, m))
+        c.cfg["ritmo"]["horarios_noticias"] = ["09:30", "11:30", "14:00", "17:00"]
+        assert c.correr() == 0
+        return len([p for p in _memoria(tmp_path)["publicadas"] if p.get("tipo") == "noticia"])
+    assert correr(9, 10) == 0          # antes del primer horario, la noticia común espera
+    assert correr(9, 40) == 1
+    red.feeds["ambito.com"] = _rss("Ámbito", [{"title": "El BCRA vuelve a comprar reservas en el mercado", "fecha": AHORA - timedelta(minutes=5), "desc": "compró dólares"}])
+    assert correr(10, 40) == 1         # la de las 11:30 todavía no
