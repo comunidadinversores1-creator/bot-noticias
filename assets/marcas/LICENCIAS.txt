@@ -1,0 +1,25 @@
+Logos de esta carpeta
+=====================
+
+Los archivos PNG de esta carpeta se generaron a partir de dos colecciones abiertas de íconos:
+
+1) web3icons (@web3icons/core)  -  licencia MIT
+   https://github.com/0xa3k5/web3icons
+   Copyright (c) web3icons contributors
+   Se concede permiso, sin cargo, a cualquier persona que obtenga una copia de este software y de
+   los archivos de documentación asociados, para usarlo sin restricción, incluyendo sin limitación
+   los derechos de usar, copiar, modificar, fusionar, publicar, distribuir, sublicenciar y/o vender
+   copias, siempre que este aviso de copyright y este aviso de permiso se incluyan en todas las
+   copias o partes sustanciales del software. EL SOFTWARE SE ENTREGA "TAL CUAL", SIN GARANTÍA DE
+   NINGÚN TIPO.
+   (Exchanges y criptomonedas: binance, bitget, bybit, coinbase, kraken, kucoin, okx, upbit,
+   bithumb, bitstamp, coinex, crypto-com, gate-io, gemini-exchange, uniswap, pancakeswap, bitcoin,
+   ethereum, tether, usdc, solana, xrp, bnb, dogecoin, cardano.)
+
+2) Simple Icons (simple-icons)  -  licencia CC0 1.0 (dominio público)
+   https://github.com/simple-icons/simple-icons
+   (El resto de los logos.)
+
+Importante: los logos son marcas registradas de sus dueños. Acá se usan solo para ilustrar
+noticias sobre esas empresas. Si una marca pide que no se use su logo, se borra el archivo
+y la línea correspondiente de indice.json.

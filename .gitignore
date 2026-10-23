@@ -1,0 +1,7 @@
+estado.json
+salida/
+salida_muestra/
+__pycache__/
+*.pyc
+.pytest_cache/
+.env

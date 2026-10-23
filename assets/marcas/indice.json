@@ -1,0 +1,262 @@
+{
+ "ada": {
+  "archivo": "cardano.png",
+  "descripcion": "Cardano (criptomoneda)"
+ },
+ "alphabet": {
+  "archivo": "google.png",
+  "descripcion": "Google"
+ },
+ "amd": {
+  "archivo": "amd.png",
+  "descripcion": "AMD"
+ },
+ "apple": {
+  "archivo": "apple.png",
+  "descripcion": "Apple"
+ },
+ "bank of america": {
+  "archivo": "bankofamerica.png",
+  "descripcion": "Bank of America"
+ },
+ "binance": {
+  "archivo": "binance.png",
+  "descripcion": "Binance (exchange cripto)"
+ },
+ "binance exchange": {
+  "archivo": "binance.png",
+  "descripcion": "Binance (exchange cripto)"
+ },
+ "bitcoin": {
+  "archivo": "bitcoin.png",
+  "descripcion": "Bitcoin (criptomoneda)"
+ },
+ "bitget": {
+  "archivo": "bitget.png",
+  "descripcion": "Bitget (exchange cripto)"
+ },
+ "bithumb": {
+  "archivo": "bithumb.png",
+  "descripcion": "Bithumb (exchange cripto)"
+ },
+ "bitstamp": {
+  "archivo": "bitstamp.png",
+  "descripcion": "Bitstamp (exchange cripto)"
+ },
+ "bnb": {
+  "archivo": "bnb.png",
+  "descripcion": "BNB (criptomoneda de Binance)"
+ },
+ "bnb chain": {
+  "archivo": "bnb.png",
+  "descripcion": "BNB (criptomoneda de Binance)"
+ },
+ "btc": {
+  "archivo": "bitcoin.png",
+  "descripcion": "Bitcoin (criptomoneda)"
+ },
+ "bybit": {
+  "archivo": "bybit.png",
+  "descripcion": "Bybit (exchange cripto)"
+ },
+ "cardano": {
+  "archivo": "cardano.png",
+  "descripcion": "Cardano (criptomoneda)"
+ },
+ "coinbase": {
+  "archivo": "coinbase.png",
+  "descripcion": "Coinbase (exchange cripto)"
+ },
+ "coinex": {
+  "archivo": "coinex.png",
+  "descripcion": "CoinEx (exchange cripto)"
+ },
+ "crypto com": {
+  "archivo": "crypto-com.png",
+  "descripcion": "Crypto.com (exchange cripto)"
+ },
+ "cryptocom": {
+  "archivo": "crypto-com.png",
+  "descripcion": "Crypto.com (exchange cripto)"
+ },
+ "doge": {
+  "archivo": "dogecoin.png",
+  "descripcion": "Dogecoin (criptomoneda)"
+ },
+ "dogecoin": {
+  "archivo": "dogecoin.png",
+  "descripcion": "Dogecoin (criptomoneda)"
+ },
+ "eth": {
+  "archivo": "ethereum.png",
+  "descripcion": "Ethereum (criptomoneda)"
+ },
+ "ether": {
+  "archivo": "ethereum.png",
+  "descripcion": "Ethereum (criptomoneda)"
+ },
+ "ethereum": {
+  "archivo": "ethereum.png",
+  "descripcion": "Ethereum (criptomoneda)"
+ },
+ "gate io": {
+  "archivo": "gate-io.png",
+  "descripcion": "Gate.io (exchange cripto)"
+ },
+ "gateio": {
+  "archivo": "gate-io.png",
+  "descripcion": "Gate.io (exchange cripto)"
+ },
+ "gemini exchange": {
+  "archivo": "gemini-exchange.png",
+  "descripcion": "Gemini (exchange cripto de los Winklevoss)"
+ },
+ "goldman sachs": {
+  "archivo": "goldmansachs.png",
+  "descripcion": "Goldman Sachs"
+ },
+ "google": {
+  "archivo": "google.png",
+  "descripcion": "Google"
+ },
+ "hsbc": {
+  "archivo": "hsbc.png",
+  "descripcion": "HSBC"
+ },
+ "intel": {
+  "archivo": "intel.png",
+  "descripcion": "Intel"
+ },
+ "kraken": {
+  "archivo": "kraken.png",
+  "descripcion": "Kraken (exchange cripto)"
+ },
+ "kucoin": {
+  "archivo": "kucoin.png",
+  "descripcion": "KuCoin (exchange cripto)"
+ },
+ "mastercard": {
+  "archivo": "mastercard.png",
+  "descripcion": "Mastercard"
+ },
+ "mercado pago": {
+  "archivo": "mercadopago.png",
+  "descripcion": "Mercado Pago"
+ },
+ "mercadopago": {
+  "archivo": "mercadopago.png",
+  "descripcion": "Mercado Pago"
+ },
+ "meta": {
+  "archivo": "meta.png",
+  "descripcion": "Meta (Facebook)"
+ },
+ "meta platforms": {
+  "archivo": "meta.png",
+  "descripcion": "Meta (Facebook)"
+ },
+ "netflix": {
+  "archivo": "netflix.png",
+  "descripcion": "Netflix"
+ },
+ "nvidia": {
+  "archivo": "nvidia.png",
+  "descripcion": "Nvidia"
+ },
+ "okx": {
+  "archivo": "okx.png",
+  "descripcion": "OKX (exchange cripto)"
+ },
+ "opensea": {
+  "archivo": "opensea.png",
+  "descripcion": "OpenSea"
+ },
+ "pancake swap": {
+  "archivo": "pancakeswap.png",
+  "descripcion": "PancakeSwap (exchange descentralizado)"
+ },
+ "pancakeswap": {
+  "archivo": "pancakeswap.png",
+  "descripcion": "PancakeSwap (exchange descentralizado)"
+ },
+ "paypal": {
+  "archivo": "paypal.png",
+  "descripcion": "PayPal"
+ },
+ "revolut": {
+  "archivo": "revolut.png",
+  "descripcion": "Revolut (fintech)"
+ },
+ "ripple": {
+  "archivo": "xrp.png",
+  "descripcion": "XRP (criptomoneda de Ripple)"
+ },
+ "robinhood": {
+  "archivo": "robinhood.png",
+  "descripcion": "Robinhood (broker)"
+ },
+ "samsung": {
+  "archivo": "samsung.png",
+  "descripcion": "Samsung"
+ },
+ "sol": {
+  "archivo": "solana.png",
+  "descripcion": "Solana (criptomoneda)"
+ },
+ "solana": {
+  "archivo": "solana.png",
+  "descripcion": "Solana (criptomoneda)"
+ },
+ "stripe": {
+  "archivo": "stripe.png",
+  "descripcion": "Stripe"
+ },
+ "telegram": {
+  "archivo": "telegram.png",
+  "descripcion": "Telegram"
+ },
+ "tesla": {
+  "archivo": "tesla.png",
+  "descripcion": "Tesla"
+ },
+ "tether": {
+  "archivo": "tether.png",
+  "descripcion": "Tether USDT (stablecoin)"
+ },
+ "tradingview": {
+  "archivo": "tradingview.png",
+  "descripcion": "TradingView"
+ },
+ "uniswap": {
+  "archivo": "uniswap.png",
+  "descripcion": "Uniswap (exchange descentralizado)"
+ },
+ "upbit": {
+  "archivo": "upbit.png",
+  "descripcion": "Upbit (exchange cripto)"
+ },
+ "usd coin": {
+  "archivo": "usdc.png",
+  "descripcion": "USDC (stablecoin de Circle)"
+ },
+ "usdc": {
+  "archivo": "usdc.png",
+  "descripcion": "USDC (stablecoin de Circle)"
+ },
+ "usdt": {
+  "archivo": "tether.png",
+  "descripcion": "Tether USDT (stablecoin)"
+ },
+ "visa": {
+  "archivo": "visa.png",
+  "descripcion": "Visa"
+ },
+ "wells fargo": {
+  "archivo": "wellsfargo.png",
+  "descripcion": "Wells Fargo"
+ },
+ "xrp": {
+  "archivo": "xrp.png",
+  "descripcion": "XRP (criptomoneda de Ripple)"
+ }
+}

@@ -1,0 +1,495 @@
+# ============================================================
+#  AJUSTES DEL BOT DE NOTICIAS  ·  Ezequiel Bagnato | Comunidad Inversores
+#  Todo lo que se puede cambiar sin tocar el programa está acá.
+# ============================================================
+
+# Interruptor general.  false = el bot no publica nada.
+encendido: false
+
+marca:
+  nombre: "EZEQUIEL BAGNATO | COMUNIDAD INVERSORES"   # lo de antes de la barra va arriba, lo de después abajo
+  firma: "@C_INVERSORES"                              # aparece chiquito al pie de la imagen
+  # El logo es assets/logo.png (la cara de Eze en círculo).
+
+telegram:
+  publicar: true
+  destino: "@comunidad_inversores_anuncios"   # canal donde publica (tu canal "Noticias Financieras Diarias"). Se puede cambiar por otro
+  chat_prueba: ""                 # chat privado donde llegan las pruebas y los avisos de error
+
+x:
+  publicar: true
+  # X cobra USD 0,015 por post sin link y USD 0,20 por post con link. Opciones:
+  #   false   = nunca pone el link; dice "el link está en mi perfil"   (unos USD 4,50 por mes)
+  #   promos  = pone tu link solo en las promos                        (unos USD 21 por mes)
+  #   siempre = también en las noticias que llevan llamado             (hasta unos USD 32 por mes)
+  poner_links: false
+  texto_sin_link: "el link está en mi perfil"
+  marcar_publicidad: true         # X exige avisar cuando un post tiene link de afiliado o es una promo
+
+ritmo:
+  zona_horaria: "America/Argentina/Buenos_Aires"
+  max_por_dia: 10                 # tope de publicaciones por día (noticias + promos)
+  promos_por_dia: 3               # cuántas de esas 10 son ventas de tus herramientas y campañas
+  horarios_promos: ["10:30", "15:30", "20:30"]   # desde esa hora sale la promo que toca
+  horas_entre_promos: 3           # nunca dos promos pegadas
+  max_llamados_por_dia: 2         # tope de noticias con "registrate con mi link" (aparte de las promos)
+  minutos_entre_publicaciones: 40 # separación mínima entre una y otra (el bot mira una vez por hora)
+  impacto_minimo: 7               # del 1 al 10. Más alto = publica menos, solo lo fuerte
+  impacto_de_relleno: 6           # si el día viene flojo (van 2 o más de atraso) también sale lo de este impacto. Con 7 nunca rellena
+  silencio_desde: "00:00"         # de madrugada no publica...
+  silencio_hasta: "07:00"
+  impacto_urgente: 9              # ...salvo que la noticia sea de este impacto o más
+  antiguedad_maxima_horas: 6      # no publica noticias más viejas que esto
+
+# ------------------------------------------------------------
+#  IMAGEN
+#    modo: ninguna = el bot publica solo el texto. La imagen la hacés vos a mano (por ejemplo en ChatGPT).
+#    modo: placa   = el bot arma la imagen solo, con el logo oficial o una foto real y el titular.
+#  idea_para_chatgpt: después de cada noticia te manda por privado un texto listo para
+#  pegar en ChatGPT y que te haga la imagen de esa noticia.
+# ------------------------------------------------------------
+imagen:
+  modo: ninguna
+  idea_para_chatgpt: true
+
+# Colores de la imagen (para el modo "placa") según cómo cae la noticia en el mercado.
+colores:
+  alcista: "#22C55E"              # verde
+  bajista: "#EF4444"              # rojo
+  neutral: "#3B82F6"              # azul
+  promo: "#F5B50A"                # dorado (el del aro de tu logo)
+  fondo: "#0B0F14"
+
+# Temas que el bot puede publicar (el nombre es el que sale en la imagen).
+categorias:
+  - ECONOMÍA
+  - MERCADOS
+  - INDICADORES
+  - CRIPTO
+  - EXCHANGES
+  - BROKERS
+  - EMPRESAS
+  - GEOPOLÍTICA
+  - REGULACIÓN
+  - ARGENTINA
+
+# ------------------------------------------------------------
+#  SOCIOS: las marcas con las que trabajás. Sus noticias tienen prioridad
+#  y, cuando la noticia es buena para ellos, el bot suma el llamado a
+#  registrarse con tu link. (En las malas —un hackeo, una multa— NO lo pone.)
+#  activo: false = esa marca queda guardada pero no se promociona: sin
+#  prioridad, sin llamado y sin ventas. Para volver a prenderla: activo: true
+# ------------------------------------------------------------
+socios:
+  exness:
+    activo: true
+    nombre: "Exness"
+    alias: ["Exness"]
+    llamado: "Registrate en Exness con mi link"
+    enlace: "https://one.exnessonelink.com/a/ptf6lzlrc8"
+    aviso: "Operar con apalancamiento implica riesgo de perder tu capital."
+  binance:
+    activo: true
+    nombre: "Binance"
+    alias: ["Binance"]
+    llamado: "Abrí tu cuenta en Binance con mi link"
+    enlace: "https://www.binance.com/join?ref=202718448"
+    aviso: ""
+  pionex:
+    activo: false                 # APAGADO por ahora (oct-2026): Eze avisa cuando lo vuelve a promocionar
+    nombre: "Pionex"
+    alias: ["Pionex"]
+    llamado: "Registrate en Pionex con mi link"
+    enlace: "https://accounts.pionex.com/es/signUp?r=0uCbaWYsxRp"
+    aviso: "Los bots de trading no garantizan ganancias: podés perder capital."
+
+# Si a un socio le falta el link, se usa este.
+enlace_general: "https://linktr.ee/comunidadinversores"
+
+# ------------------------------------------------------------
+#  PROMOS: las ventas de tus herramientas y las campañas.
+#  El bot las va rotando y escribe un texto distinto cada vez, pero SOLO con
+#  los datos que figuren acá: no inventa nada, no promete ganancias y no da
+#  cifras de resultados (para eso invita a ver el dossier o el video).
+#  Una promo sale únicamente si dice "activa: true".
+#
+#  Campos opcionales:
+#    socio           la marca (usa su link, su llamado y su aviso)
+#    enlace          un link propio para esta promo (le gana al del socio)
+#    aviso           una aclaración propia que va debajo del llamado
+#    texto_sin_link  qué decir en X en lugar de "el link está en mi perfil"
+#    dato_fijo       algo que no puede faltar nunca en la publicación (un código de descuento)
+#    extras          hasta 3 links más, solo en Telegram (un dossier, un tutorial)
+#    vence           último día en que sale. Ej: "2026-12-31". Después deja de salir sola y te avisa
+#    imagen          una imagen propia, ej. assets/promos/senales.jpg
+#                    (en modo "ninguna" se publica tal cual · en modo "placa" va arriba y el bot le suma el texto)
+#  Los porcentajes solo se aceptan si son un dato del producto que figure acá
+#  (un reintegro, un descuento). Nunca como rendimiento o ganancia.
+# ------------------------------------------------------------
+promos:
+  - id: senales-exness
+    activa: true
+    socio: exness
+    etiqueta: "MIS HERRAMIENTAS"
+    nombre: "Señales de trading en Exness"
+    llamado: "Registrate en Exness con mi link"
+    extras:
+      - {texto: "Dossier completo: resultados, metodología y riesgos", enlace: "https://drive.google.com/file/d/1mzqNl57Hj3rjzvWKR_6IoVOQ7xSbbf_C/view"}
+      - {texto: "Tutorial paso a paso", enlace: "https://youtu.be/WGP222nUgvA"}
+    datos: |
+      Sistema de señales de trading para operar en Exness. Analiza dos pares de divisas: AUD/CAD y EUR/AUD.
+      Indica cuándo entrar, dónde colocar el Stop Loss y el Take Profit, y cuándo pasar a Break Even.
+      El canal de señales es gratuito.
+      Cómo acceder: 1) registrarse en Exness con el enlace de Ezequiel, 2) verificar la identidad y depositar al menos US$100, 3) escribirle a Ezequiel para pedir el acceso.
+      Además hay un 20% de devolución de comisiones, según las condiciones de la propuesta.
+      Hay un dossier con el backtest de 2022 a 2026 (1.485 operaciones analizadas): muestra la curva de capital, la metodología y los riesgos. También hay un tutorial en video, paso a paso.
+
+  - id: video-senales
+    activa: true
+    etiqueta: "VIDEO"
+    nombre: "Video: probé más de 9.300 combinaciones de trading"
+    llamado: "Mirá el video completo"
+    enlace: "https://youtu.be/WGP222nUgvA"
+    datos: |
+      Video de Ezequiel. Probó más de 9.300 combinaciones de trading y solo 2 pares pasaron: AUD/CAD y EUR/AUD.
+      La pregunta del video: ¿puede una estrategia funcionar durante años y seguir funcionando en el futuro?
+      Muestra el backtest de más de 4 años sobre esos dos pares, cómo funciona el sistema y cómo seguir las señales.
+      No muestra solo una curva linda: también muestra el drawdown, los períodos negativos y los datos usados para el backtest.
+
+  - id: labitconf-2026
+    activa: true
+    etiqueta: "BENEFICIO"
+    nombre: "40% OFF en LABITCONF 2026"
+    llamado: "Sacá tu entrada con 40% OFF"
+    enlace: "https://www.hallos.io/event/labitconf/checkout"
+    texto_sin_link: "en la web de LABITCONF"
+    dato_fijo: "Código: COMUNIDADINVERSORES40"
+    vence: "2026-10-31"
+    datos: |
+      Comunidad Inversores es Media Partner de LABITCONF 2026.
+      Beneficio para la comunidad: 40% OFF en la entrada GENERAL con el código COMUNIDADINVERSORES40.
+      El código tiene hasta 100 usos, es válido para los dos días y se puede usar hasta el evento.
+      LABITCONF 2026 es el 30 y 31 de octubre en Costa Salguero, Buenos Aires.
+      Además hay 6 entradas para sortear entre la comunidad.
+
+  - id: binance-tarjeta-octubre
+    activa: true                  # datos de la página oficial de la campaña (leída el 9/10/2026)
+    socio: binance
+    etiqueta: "PROMO"
+    nombre: "Cashback de octubre con la Binance Card"
+    llamado: "Abrí tu cuenta en Binance con mi link"
+    aviso: "Promoción de Binance: tiene cupos limitados y condiciones propias."
+    vence: "2026-10-28"           # la campaña termina el 29/10 a las 20:59 de Argentina: el último día entero es el 28
+    datos: |
+      Campaña de Binance en Argentina para la Binance Card: "Tus compras del día a día ahora con cashback". Va del 29 de septiembre al 29 de octubre de 2026.
+      Para quienes piden la tarjeta ahora o todavía no la usaron: 50% de cashback instantáneo en las primeras 2 compras cotidianas, hasta 2,5 USDC en cada compra. Es para los primeros 110.000 usuarios.
+      Para quienes ya usaban la tarjeta: 5 USDC al gastar 50 USD en total durante la campaña; hay que confirmar la participación en la página de la campaña. Es para los primeros 20.000 usuarios.
+      Según los términos de Binance, participan los usuarios con la identidad verificada que recibieron el aviso de la campaña (en la app o por mail). Los cupos son limitados.
+
+  - id: binance-tarjeta
+    activa: true                  # datos de la página oficial del lanzamiento (leída el 9/10/2026)
+    socio: binance
+    etiqueta: "PROMO"
+    nombre: "Tarjeta física de Binance"
+    llamado: "Abrí tu cuenta en Binance con mi link"
+    aviso: "Promoción de Binance: tiene cupos limitados y condiciones propias."
+    vence: "2026-10-30"           # el envío es gratis si se pide antes del 31/10; en noviembre hay que actualizar los datos
+    datos: |
+      Llegó a la Argentina la Binance Card física.
+      Se pide desde el panel de Tarjeta, en la app o en la web de Binance. Llega por correo en hasta 12 días y se activa con el código que viene en el sobre.
+      El envío es gratis si se pide antes del 31 de octubre de 2026.
+      Tiene 3% de cashback instantáneo en las compras elegibles, con tope de 100 USDC por mes, hasta el 31 de diciembre de 2026. Para tenerlo hay que hacer la primera compra con la tarjeta física antes del 30 de noviembre; el 3% corre desde el mes siguiente.
+      Según los términos de Binance, participan los usuarios con la identidad verificada que recibieron el aviso de la promoción (en la app o por mail).
+
+  # --- Pionex: guardadas para cuando se vuelva a promocionar (hoy el socio está con activo: false) ---
+  - id: bots-pionex
+    activa: false
+    socio: pionex
+    etiqueta: "MIS HERRAMIENTAS"
+    nombre: "Mis bots de Pionex"
+    llamado: "Copiá mis bots en Pionex con mi link"
+    datos: |
+      Ezequiel Bagnato arma sus propios bots de trading en Pionex.
+      Se copian con el copy trading del propio exchange (CopyBot): no hay que configurar nada.
+      La plata siempre queda en la cuenta de cada usuario; Ezequiel nunca la toca.
+      Operan criptomonedas de forma automática, las 24 horas.
+      Ezequiel muestra los resultados a la comunidad, tanto los buenos como los malos.
+
+  - id: pionex-bienvenida
+    activa: false
+    socio: pionex
+    etiqueta: "PROMO"
+    nombre: "Campaña de bienvenida de Pionex"
+    llamado: "Registrate en Pionex con mi link"
+    vence: ""
+    datos: |
+      Pionex tiene una campaña de bienvenida para usuarios nuevos que se registran con el link de Ezequiel.
+      El bono se desbloquea en 3 pasos: verificar la cuenta, hacer el primer depósito y abrir un bot propio.
+
+# ------------------------------------------------------------
+#  IMÁGENES HECHAS CON IA (plan C, apagado).
+#  Orden normal: 1) logo oficial (empresas, exchanges, monedas) o foto real
+#  (personas, lugares, instituciones)  2) placa solo de texto.
+#  Con esto en true, antes de la placa de texto prueba generar una imagen con IA.
+#  Es pago: unos 3 centavos de dólar por imagen (Google no lo da gratis).
+#  Nunca genera personas reales ni hechos reales, y la imagen sale avisada como hecha con IA.
+# ------------------------------------------------------------
+imagen_ia:
+  activa: false
+  modelo: "gemini-3.1-flash-lite-image"
+
+# ------------------------------------------------------------
+#  NO NOMBRAR: si una noticia nombra a alguna de estas empresas, el bot la
+#  saltea. Hoy está vacía (se publican noticias de cualquier exchange o broker).
+#  Ejemplo:  no_nombrar: ["Empresa A", "Empresa B"]
+# ------------------------------------------------------------
+no_nombrar: []
+
+# ------------------------------------------------------------
+#  TÍTULOS QUE SE DESCARTAN SIEMPRE (notas de servicio, guías,
+#  consultorios, publicidad). Se comparan sin acentos ni mayúsculas.
+# ------------------------------------------------------------
+titulos_descartados:
+  - '\bcuando cobro\b'
+  - '\bquienes cobran\b'
+  - '\bfecha de cobro\b'
+  - '\bcalendario de pagos?\b'
+  - '\bminuto a minuto\b'
+  - '\ba cuanto (cotiza|opera|cerro|abre|esta)\b'
+  - '^que es\b'
+  - '\bque es (el|la|un|una|los|las)\b'
+  - '\bmanual de\b'
+  - '\bpaso a paso\b'
+  - '\bcomo (hacer|invertir|comprar|sacar|tramitar|saber|ahorrar|cobrar|pedir|acceder)\b'
+  - '\bhoroscopo\b'
+  - '\bquiniela\b'
+  - '\bloteria\b'
+  - '\bferiados?\b'
+  - '\bprediccion(es)? de precio\b'
+  - '\bprice prediction\b'
+  - '\bsponsored\b'
+  - '\bpatrocinad[oa]\b'
+  - '\bpress release\b'
+  - '\bcomunicado de prensa\b'
+  - '^(my|i am|i m|we are|should i|is it|how to|how i|what to)\b'
+  - '\b(stocks?|coins?|cryptos?|altcoins?) to (buy|watch)\b'
+  - '\bmejores (acciones|criptomonedas|cedears) para\b'
+  - '\bpodcast\b'
+  - '\bnewsletter\b'
+  - '\bwebinar\b'
+  - '\bquiz\b'
+  - '\bcuanto (cobra|gana) un\b'
+  - '\bcuanto hay que invertir\b'
+  - '\bcuanto gano si\b'
+  - '\b(broker|exchange|app|platform|plataforma) reviews?\b'
+  - '\breviews? 20\d\d\b'
+  - '\bresenas?\b'
+  - '\bopiniones\b'
+  - '\bes confiable\b'
+  - '\bdolar binance\b'
+  - '\bprecio del dolar\b'
+  - '\b(precio|cotizacion) (de|del) .* hoy\b'
+  - '\bcodigo de (referido|descuento|bono)\b'
+
+# ------------------------------------------------------------
+#  PALABRAS QUE SUMAN PUNTOS (ayudan a detectar lo importante).
+# ------------------------------------------------------------
+palabras_clave:
+  - fed
+  - reserva federal
+  - fomc
+  - powell
+  - tasa de interes
+  - tasas de interes
+  - interest rate
+  - rate cut
+  - rate hike
+  - inflacion
+  - inflation
+  - cpi
+  - ipc
+  - pbi
+  - gdp
+  - desempleo
+  - payrolls
+  - jobs report
+  - recesion
+  - recession
+  - bce
+  - ecb
+  - banco central
+  - central bank
+  - bcra
+  - indec
+  - fmi
+  - imf
+  - riesgo pais
+  - dolar
+  - reservas
+  - cepo
+  - devaluacion
+  - default
+  - deuda
+  - bonos
+  - treasury
+  - tesoro
+  - aranceles
+  - tariffs
+  - sanciones
+  - sanctions
+  - guerra
+  - war
+  - ataque
+  - attack
+  - misil
+  - missile
+  - alto el fuego
+  - ceasefire
+  - ormuz
+  - hormuz
+  - petroleo
+  - oil
+  - opep
+  - opec
+  - oro
+  - gold
+  - wall street
+  - s&p 500
+  - nasdaq
+  - dow jones
+  - merval
+  - bitcoin
+  - btc
+  - ethereum
+  - stablecoin
+  - etf
+  - sec
+  - cftc
+  - regulacion
+  - regulation
+  - ley
+  - law
+  - bill
+  - congreso
+  - congress
+  - senado
+  - senate
+  - decreto
+  - executive order
+  - quiebra
+  - bankruptcy
+  - hack
+  - hacked
+  - hackeo
+  - hackeado
+  - hackers
+  - robo
+  - robaron
+  - stolen
+  - exploit
+  - retiros
+  - withdrawals
+  - exchange
+  - broker
+  - cierra
+  - cierre
+  - shuts down
+  - shutdown
+  - multa
+  - fine
+  - fined
+  - licencia
+  - license
+  - liquidaciones
+  - liquidations
+  - earnings
+  - resultados
+  - balance
+  - fusion
+  - adquisicion
+  - acquisition
+  - merger
+  - ipo
+  - despidos
+  - layoffs
+  - record
+  - maximo historico
+  - all-time high
+  - desplome
+  - plunge
+  - crash
+  - se dispara
+  - surges
+  - milei
+  - caputo
+  - trump
+
+# ------------------------------------------------------------
+#  FUENTES.  peso: 2 = oficial o muy confiable, 1 = normal.
+#  idioma: es / en.   tema: una pista para el bot (puede ir vacío).
+#  horas: hasta cuántas horas de antigüedad se acepta (si no se pone, vale la regla general).
+#  socio: la búsqueda es de esa marca; si la marca está apagada en 'socios', no se lee.
+# ------------------------------------------------------------
+fuentes:
+  # --- Tus socios (se aceptan noticias de hasta un día, porque salen pocas) ---
+  - {nombre: "Google Noticias",  url: "https://news.google.com/rss/search?q=Exness%20when%3A1d&hl=es-419&gl=AR&ceid=AR:es-419", idioma: es, peso: 1.2, tema: BROKERS, horas: 24, socio: exness}
+  - {nombre: "Google Noticias",  url: "https://news.google.com/rss/search?q=Exness%20when%3A1d&hl=en-US&gl=US&ceid=US:en", idioma: en, peso: 1.2, tema: BROKERS, horas: 24, socio: exness}
+  - {nombre: "Google Noticias",  url: "https://news.google.com/rss/search?q=Binance%20when%3A12h&hl=es-419&gl=AR&ceid=AR:es-419", idioma: es, peso: 1.2, tema: EXCHANGES, horas: 12, socio: binance}
+  - {nombre: "Google Noticias",  url: "https://news.google.com/rss/search?q=Binance%20when%3A12h&hl=en-US&gl=US&ceid=US:en", idioma: en, peso: 1.2, tema: EXCHANGES, horas: 12, socio: binance}
+  - {nombre: "Google Noticias",  url: "https://news.google.com/rss/search?q=Pionex%20when%3A1d&hl=es-419&gl=AR&ceid=AR:es-419", idioma: es, peso: 1.1, tema: EXCHANGES, horas: 24, socio: pionex}
+  # --- Exchanges y brokers: hackeos, cierres, multas, hitos ---
+  - {nombre: "Google Noticias",  url: "https://news.google.com/rss/search?q=(exchange%20OR%20broker)%20(hackeo%20OR%20hackeado%20OR%20quiebra%20OR%20%22suspende%20retiros%22%20OR%20multa%20OR%20cierra)%20when%3A6h&hl=es-419&gl=AR&ceid=AR:es-419", idioma: es, peso: 1.1, tema: EXCHANGES}
+  - {nombre: "Google Noticias",  url: "https://news.google.com/rss/search?q=(exchange%20OR%20broker)%20(hacked%20OR%20hack%20OR%20bankruptcy%20OR%20%22halts%20withdrawals%22%20OR%20%22shuts%20down%22%20OR%20fined)%20when%3A6h&hl=en-US&gl=US&ceid=US:en", idioma: en, peso: 1.1, tema: EXCHANGES}
+  - {nombre: "Finance Magnates", url: "https://www.financemagnates.com/feed/", idioma: en, peso: 1.2, tema: BROKERS}
+  # --- Argentina y español ---
+  - {nombre: "Ámbito",           url: "https://www.ambito.com/rss/pages/economia.xml", idioma: es, peso: 1.3, tema: ARGENTINA}
+  - {nombre: "Ámbito",           url: "https://www.ambito.com/rss/pages/finanzas.xml", idioma: es, peso: 1.3, tema: ARGENTINA}
+  - {nombre: "Infobae",          url: "https://www.infobae.com/arc/outboundfeeds/rss/category/economia/?outputType=xml", idioma: es, peso: 1.2, tema: ARGENTINA}
+  - {nombre: "La Nación",        url: "https://www.lanacion.com.ar/arc/outboundfeeds/rss/category/economia/?outputType=xml", idioma: es, peso: 1.2, tema: ARGENTINA}
+  - {nombre: "El Cronista",      url: "https://www.cronista.com/files/rss/finanzas-mercados.xml", idioma: es, peso: 1.2, tema: ARGENTINA}
+  - {nombre: "iProfesional",     url: "https://www.iprofesional.com/rss/finanzas", idioma: es, peso: 1.1, tema: ARGENTINA}
+  - {nombre: "Clarín",           url: "https://www.clarin.com/rss/economia/", idioma: es, peso: 1.1, tema: ARGENTINA}
+  - {nombre: "Bloomberg Línea",  url: "https://www.bloomberglinea.com/arc/outboundfeeds/rss/?outputType=xml", idioma: es, peso: 1.5, tema: ""}
+  - {nombre: "Expansión",        url: "https://e00-expansion.uecdn.es/rss/mercados.xml", idioma: es, peso: 1.0, tema: MERCADOS}
+  - {nombre: "El País",          url: "https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/economia/portada", idioma: es, peso: 1.1, tema: ECONOMÍA}
+  - {nombre: "Infobae",          url: "https://www.infobae.com/arc/outboundfeeds/rss/category/america/mundo/?outputType=xml", idioma: es, peso: 1.2, tema: GEOPOLÍTICA}
+  - {nombre: "BBC Mundo",        url: "https://feeds.bbci.co.uk/mundo/rss.xml", idioma: es, peso: 1.3, tema: ""}
+  - {nombre: "DW Español",       url: "https://rss.dw.com/rdf/rss-sp-all", idioma: es, peso: 1.1, tema: ""}
+  - {nombre: "France 24",        url: "https://www.france24.com/es/rss", idioma: es, peso: 1.0, tema: ""}
+  - {nombre: "CriptoNoticias",   url: "https://www.criptonoticias.com/feed/", idioma: es, peso: 1.1, tema: CRIPTO}
+  - {nombre: "Cointelegraph",    url: "https://es.cointelegraph.com/rss", idioma: es, peso: 1.1, tema: CRIPTO}
+  # --- Google Noticias (junta muchos medios; sirve para ver qué tema está en todos lados) ---
+  - {nombre: "Google Noticias",  url: "https://news.google.com/rss/headlines/section/topic/BUSINESS?hl=es-419&gl=AR&ceid=AR:es-419", idioma: es, peso: 1.0, tema: ""}
+  - {nombre: "Google Noticias",  url: "https://news.google.com/rss/search?q=(Reserva%20Federal%20OR%20inflaci%C3%B3n%20OR%20aranceles%20OR%20sanciones%20OR%20petr%C3%B3leo)%20when%3A6h&hl=es-419&gl=AR&ceid=AR:es-419", idioma: es, peso: 1.0, tema: ""}
+  - {nombre: "Google Noticias",  url: "https://news.google.com/rss/search?q=(bitcoin%20OR%20criptomonedas%20OR%20ethereum%20OR%20stablecoin)%20(ley%20OR%20regulaci%C3%B3n%20OR%20SEC%20OR%20ETF%20OR%20hackeo)%20when%3A6h&hl=es-419&gl=AR&ceid=AR:es-419", idioma: es, peso: 1.0, tema: CRIPTO}
+  - {nombre: "Google Noticias",  url: "https://news.google.com/rss/search?q=(BCRA%20OR%20%22riesgo%20pa%C3%ADs%22%20OR%20FMI%20OR%20INDEC%20OR%20Merval)%20when%3A6h&hl=es-419&gl=AR&ceid=AR:es-419", idioma: es, peso: 1.0, tema: ARGENTINA}
+  # --- Internacionales (inglés; el bot las pasa a español) ---
+  - {nombre: "The Wall Street Journal", url: "https://feeds.content.dowjones.io/public/rss/RSSMarketsMain", idioma: en, peso: 1.6, tema: MERCADOS}
+  - {nombre: "The Wall Street Journal", url: "https://feeds.content.dowjones.io/public/rss/RSSWorldNews", idioma: en, peso: 1.4, tema: GEOPOLÍTICA}
+  - {nombre: "MarketWatch",      url: "https://feeds.content.dowjones.io/public/rss/mw_topstories", idioma: en, peso: 1.0, tema: MERCADOS}
+  - {nombre: "CNBC",             url: "https://www.cnbc.com/id/100003114/device/rss/rss.html", idioma: en, peso: 1.4, tema: ""}
+  - {nombre: "CNBC",             url: "https://www.cnbc.com/id/20910258/device/rss/rss.html", idioma: en, peso: 1.4, tema: ECONOMÍA}
+  - {nombre: "BBC",              url: "https://feeds.bbci.co.uk/news/business/rss.xml", idioma: en, peso: 1.3, tema: ECONOMÍA}
+  - {nombre: "Al Jazeera",       url: "https://www.aljazeera.com/xml/rss/all.xml", idioma: en, peso: 1.0, tema: GEOPOLÍTICA}
+  - {nombre: "CoinDesk",         url: "https://www.coindesk.com/arc/outboundfeeds/rss/", idioma: en, peso: 1.3, tema: CRIPTO}
+  - {nombre: "Cointelegraph",    url: "https://cointelegraph.com/rss", idioma: en, peso: 1.1, tema: CRIPTO}
+  - {nombre: "The Block",        url: "https://www.theblock.co/rss.xml", idioma: en, peso: 1.3, tema: CRIPTO}
+  - {nombre: "Decrypt",          url: "https://decrypt.co/feed", idioma: en, peso: 1.0, tema: CRIPTO}
+  # --- Fuentes oficiales ---
+  - {nombre: "Reserva Federal (Fed)", url: "https://www.federalreserve.gov/feeds/press_monetary.xml", idioma: en, peso: 2.0, tema: ECONOMÍA}
+  - {nombre: "SEC",              url: "https://www.sec.gov/news/pressreleases.rss", idioma: en, peso: 1.6, tema: REGULACIÓN}
+  - {nombre: "Banco Central Europeo", url: "https://www.ecb.europa.eu/rss/press.html", idioma: en, peso: 1.6, tema: ECONOMÍA}
+
+# ------------------------------------------------------------
+#  CEREBRO (la IA que elige y redacta).  Usa la primera clave que encuentre.
+#  No hace falta tocar esto.
+# ------------------------------------------------------------
+ia:
+  orden: [anthropic, gemini, groq, openai]
+  modelos:
+    anthropic: ["claude-haiku-4-5-20251001"]
+    gemini: ["gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-flash-latest"]
+    groq: ["openai/gpt-oss-120b", "qwen/qwen3.8-27b", "openai/gpt-oss-20b"]
+    openai: ["gpt-4.1-mini"]
+  candidatos_por_corrida: 30
+  candidatos_de_socios: 6         # de esos 30, como mucho 6 son noticias de tus socios (para que no tapen al resto)

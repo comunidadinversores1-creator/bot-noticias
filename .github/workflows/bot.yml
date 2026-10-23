@@ -1,0 +1,135 @@
+name: Bot de noticias
+
+on:
+  schedule:
+    - cron: "7 * * * *"          # una vez por hora, al minuto 7
+  workflow_dispatch:
+    inputs:
+      modo:
+        description: "prueba = arma la muestra y NO publica · real = publica · chats = ver los chats de Telegram"
+        type: choice
+        options: [prueba, real, chats]
+        default: prueba
+      cantidad:
+        description: "Cuántas noticias armar (1 a 5)"
+        default: "1"
+      forzar:
+        description: "Forzar: en prueba arma algo sí o sí; en real publica ahora aunque no toque por horario (respeta el tope del día)"
+        type: boolean
+        default: false
+      promo:
+        description: "Solo en prueba: escribí 1 (o el id de una promo) para ver una muestra de promo"
+        default: ""
+
+permissions:
+  contents: write                 # para guardar la memoria del bot
+
+concurrency:
+  group: bot-noticias             # nunca dos corridas a la vez
+  cancel-in-progress: false
+
+jobs:
+  correr:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: true     # hace falta para guardar la memoria más abajo
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Instalar lo necesario
+        run: pip install -q -r requirements.txt
+
+      - name: Recuperar la memoria del bot
+        run: |
+          # La memoria vive en la rama "memoria". ls-remote contesta: 0 = existe · 2 = todavía no existe ·
+          # cualquier otra cosa = no se pudo consultar. En ese último caso se corta acá: correr sin
+          # memoria repetiría publicaciones y después pisaría la memoria buena con una vacía.
+          codigo=0
+          git ls-remote --exit-code --heads origin memoria >/dev/null 2>&1 || codigo=$?
+          if [ "$codigo" = "0" ]; then
+            listo=""
+            for intento in 1 2 3; do
+              if git fetch -q --depth 1 origin +memoria:refs/remotes/origin/memoria && git show origin/memoria:estado.json > estado.tmp; then
+                listo=1
+                break
+              fi
+              sleep 5
+            done
+            if [ -z "$listo" ]; then
+              rm -f estado.tmp
+              echo "::error::No pude bajar la memoria del bot. Corto acá para no publicar repetido."
+              exit 1
+            fi
+            mv estado.tmp estado.json
+            echo "Memoria recuperada."
+          elif [ "$codigo" = "2" ]; then
+            echo "Todavía no hay memoria guardada."
+          else
+            echo "::error::No pude consultar la memoria del bot (código $codigo). Corto acá para no publicar repetido."
+            exit 1
+          fi
+
+      - name: Correr el bot
+        id: bot
+        env:
+          MODO: ${{ github.event_name == 'schedule' && 'real' || inputs.modo }}
+          CANTIDAD: ${{ inputs.cantidad || '1' }}
+          FORZAR: ${{ inputs.forzar && '1' || '' }}
+          PROMO: ${{ inputs.promo || '' }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_DESTINO: ${{ vars.TELEGRAM_DESTINO }}            # opcional: si está, le gana a ajustes.yaml
+          TELEGRAM_CHAT_PRUEBA: ${{ vars.TELEGRAM_CHAT_PRUEBA }}    # opcional: si está, le gana a ajustes.yaml
+          X_API_KEY: ${{ secrets.X_API_KEY }}
+          X_API_SECRET: ${{ secrets.X_API_SECRET }}
+          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_SECRET: ${{ secrets.X_ACCESS_SECRET }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: python -m bot.main
+
+      - name: Guardar la memoria del bot
+        # Solo si el bot llegó a correr: si falló la recuperación de la memoria, acá no se guarda nada.
+        if: always() && steps.bot.outcome != 'skipped'
+        run: |
+          [ -s estado.json ] || exit 0
+          # Nunca se guarda una memoria que no se pueda leer.
+          if ! python -c "import json; json.load(open('estado.json', encoding='utf-8'))" 2>/dev/null; then
+            echo "::warning::estado.json está dañado: no lo guardo."
+            exit 0
+          fi
+          if git show origin/memoria:estado.json 2>/dev/null | cmp -s - estado.json; then
+            echo "La memoria no cambió."
+            exit 0
+          fi
+          git config user.name "bot-noticias"
+          git config user.email "bot-noticias@users.noreply.github.com"
+          # La memoria vive en una rama aparte ("memoria") con una sola versión: no ensucia el historial.
+          archivo=$(git hash-object -w estado.json)
+          arbol=$(printf '100644 blob %s\testado.json\n' "$archivo" | git mktree)
+          version=$(git commit-tree "$arbol" -m "Memoria del bot")
+          for intento in 1 2 3; do
+            if git push -q --force origin "$version:refs/heads/memoria"; then
+              echo "Memoria guardada."
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "::error::No pude guardar la memoria del bot."
+          exit 1
+
+      - name: Guardar las muestras
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: salida
+          path: salida/
+          retention-days: 3
+          if-no-files-found: ignore
