@@ -713,14 +713,17 @@ class Corrida:
         lineas = []
         for c in chats:
             log.info("CHAT  id=%s  tipo=%s  nombre=%s  usuario=%s", c["id"], c["tipo"], c["nombre"], ("@" + c["usuario"]) if c["usuario"] else "-")
-            if c["tipo"] in ("group", "supergroup", "channel"):
+            if c["tipo"] == "private":
+                lineas.append(f"• Tu chat privado conmigo ({c['nombre']}): {c['id']}")
+            else:
                 lineas.append(f"• {c['nombre']}: {c['id']}")
             for tema, nombre in sorted(c.get("temas", {}).items()):
                 log.info("      tema %s %s  ->  destino: %s/%s", tema, nombre, c["id"], tema)
                 lineas.append(f"• {c['nombre']} › tema «{nombre or 'sin nombre'}»: {c['id']}/{tema}")
         # Para no tener que leer el registro de GitHub: se lo manda por Telegram a quien le escribió al bot.
         if lineas:
-            aviso = "Estos son los lugares donde estoy y su código (para copiar en ajustes.yaml):\n\n" + "\n".join(lineas)
+            aviso = ("¡Hola! Ya estoy funcionando. Estos son los lugares donde estoy y su código "
+                     "(mandale una captura de esto a Claude):\n\n" + "\n".join(lineas))
             for c in chats:
                 if c["tipo"] == "private":
                     try:
