@@ -203,6 +203,15 @@ class InternetFalso:
         else:
             sistema, usuario = datos["messages"][0]["content"], datos["messages"][1]["content"]
 
+        if "cuenta de X de Ezequiel" in sistema:
+            textos = getattr(self, "charlas", None) or [
+                "te pagan 3.000 usd por mes pero tu plata la maneja un bot que no podés apagar\n\n¿aceptás?"]
+            indice = getattr(self, "charla_n", 0)
+            self.charla_n = indice + 1
+            contenido = json.dumps({"texto": textos[min(indice, len(textos) - 1)]}, ensure_ascii=False)
+            if host == "api.anthropic.com":
+                return self._r(pedido, 200, {"content": [{"type": "text", "text": contenido}]})
+            return self._r(pedido, 200, {"choices": [{"message": {"role": "assistant", "content": contenido}}]})
         if "editor jefe" in sistema:
             elegidas = []
             for linea in usuario.splitlines():

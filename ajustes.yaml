@@ -35,6 +35,20 @@ x:
   texto_sin_link: "el link está en mi perfil"
   marcar_publicidad: true         # X exige avisar cuando un post tiene link de afiliado o es una promo
 
+# ------------------------------------------------------------
+#  CHARLA EN X: preguntas, dilemas y casos cortos para que la gente responda (solo en X).
+#  Van aparte de las noticias: no cuentan para el tope de 10 por día.
+#  Debajo de cada una, el bot responde con la invitación a seguirte (así la gente que llega
+#  por un post que se hace viral sabe por qué seguirte).
+# ------------------------------------------------------------
+x_charla:
+  activa: true
+  horarios: ["09:30", "14:00", "21:30"]      # una después de cada horario
+  respuesta: |-
+    si te gustan estas preguntas, seguime: subo una todos los días sobre trading, bots, IA y plata.
+
+    y las noticias que mueven el mercado las publico en mi canal de Telegram (link en mi perfil)
+
 ritmo:
   zona_horaria: "America/Argentina/Buenos_Aires"
   max_por_dia: 10                 # tope de publicaciones por día (noticias + promos)

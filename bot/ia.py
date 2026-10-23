@@ -427,3 +427,48 @@ def elegir_foto(cerebro: Cerebro, titular: str, opciones: list[str]) -> int | No
     except (SinCerebro, TypeError, ValueError):
         return None
     return indice if -1 <= indice < len(opciones) else None
+
+
+# ------------------------------------------------- 4) charla en X (preguntas y dilemas)
+
+SISTEMA_CHARLA = """Escribís publicaciones cortas para la cuenta de X de Ezequiel Bagnato (Comunidad Inversores). El objetivo es que la gente responda, opine y comparta. Temas: bots de trading, inteligencia artificial aplicada a invertir, trading, gestión del riesgo, psicología del trader, y plata del día a día (ahorro, sueldo, inversiones, bitcoin, dólar, jubilación).
+
+ESTILO (copialo bien):
+- Español rioplatense con voseo, como habla un pibe argentino en X. Arrancá en minúscula. Frases cortas.
+- Cada idea en su renglón, con un renglón en blanco entre medio.
+- Sin emojis, sin hashtags, sin links, sin @menciones, sin comillas de más.
+- Máximo 240 caracteres en total.
+- Nada de "hilo", "RT", "seguime" ni pedidos de like: solo el contenido.
+
+FORMATOS (usá el que te pido):
+- dilema: una elección incómoda con números concretos y redondos, y al final una pregunta corta ("¿aceptás?", "¿qué elegís?").
+- pregunta: una sola pregunta directa que cualquiera pueda contestar con su experiencia.
+- caso: un caso INVENTADO contado como hipótesis ("imaginá un trader que...", "pensá en alguien que..."), 3 a 5 renglones, y una última línea que deja pensando.
+- cuentas: un mini presupuesto o cálculo con 4 a 7 líneas de números (pesos o dólares redondos, de ejemplo), y una conclusión de una línea.
+- opinion: una opinión fuerte pero defendible sobre trading, bots, IA o plata, y una pregunta para que discutan.
+
+REGLAS QUE NO SE ROMPEN:
+- Nunca cuentes algo como real: prohibido "conocí", "hablé con", "me contó", "un amigo", "un alumno", "un seguidor". Los casos son hipótesis y se nota.
+- Nunca prometas ganancias ni digas que algo rinde seguro, que no tiene riesgo o que alguien "vive de rendimientos". Ningún porcentaje de ganancia como resultado.
+- Nunca recomiendes comprar o vender un activo concreto.
+- Nada de política partidaria ni personas reales.
+- No repitas ideas de las publicaciones anteriores que te paso.
+
+Respondé SOLO con JSON: {"texto": "..."}"""
+
+FORMATOS_CHARLA = ["dilema", "pregunta", "caso", "opinion", "dilema", "cuentas", "pregunta"]
+
+TEMAS_CHARLA = [
+    "bots de trading", "inteligencia artificial para invertir", "gestión del riesgo", "stop loss", "apalancamiento",
+    "psicología del trader", "rachas de pérdidas", "backtesting", "disciplina", "operar noticias",
+    "ahorro", "sueldo", "inversiones a largo plazo", "bitcoin", "dólar", "jubilación", "deudas", "gastos hormiga",
+    "interés compuesto", "fondo de emergencia",
+]
+
+
+def redactar_charla(cerebro: Cerebro, formato: str, tema: str, anteriores: list[str], correccion: str = "") -> dict:
+    usuario = f"FORMATO: {formato}\nTEMA: {tema}\n\nPUBLICACIONES ANTERIORES (no repetir):\n" + (
+        "\n---\n".join(a[:200] for a in anteriores[-25:]) or "(ninguna)")
+    if correccion:
+        usuario += f"\n\nATENCIÓN: {correccion}"
+    return cerebro.pedir_json(SISTEMA_CHARLA, usuario, max_tokens=400, temperatura=0.9)

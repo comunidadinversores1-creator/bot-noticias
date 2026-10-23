@@ -200,7 +200,7 @@ def _error_x(r: requests.Response, paso: str, claves: dict) -> ErrorPublicacion:
 
 
 def x_publicar(claves: dict, jpg: bytes | None, texto: str, publicidad: bool = False, hecha_con_ia: bool = False,
-               texto_corto: str = "") -> str:
+               texto_corto: str = "", en_respuesta_a: str = "") -> str:
     """Crea la publicación (con la imagen, si hay una). Devuelve el id del post.
 
     jpg=None          -> publica solo el texto.
@@ -234,6 +234,8 @@ def x_publicar(claves: dict, jpg: bytes | None, texto: str, publicidad: bool = F
                 raise
             log.warning("X no aceptó el texto largo (%s); publico la versión corta.", str(error)[:120])
         texto = texto_corto
+    if en_respuesta_a:
+        imagen = {**imagen, "reply": {"in_reply_to_tweet_id": str(en_respuesta_a)}}
     return _x_crear(firma, texto, imagen, publicidad, hecha_con_ia, claves)
 
 

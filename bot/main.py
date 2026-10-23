@@ -27,7 +27,7 @@ from .publicar import ErrorPublicacion, claves_x, telegram_chats, telegram_mensa
 from .texto import (
     anio_actual, armar_llamado, enlaces_extra, faltantes, faltantes_promo, fuente_limpia, idea_de_imagen, normalizar_post, normalizar_promo,
     numeros_inventados, promesas, promo_telegram, promo_x, texto_revisable, texto_revisable_promo,
-    link_en_x, texto_propio_telegram, texto_propio_x, texto_telegram, texto_x, x_largo, x_premium,
+    link_en_x, revisar_charla, texto_propio_telegram, texto_propio_x, texto_telegram, texto_x, x_largo, x_premium,
 )
 from .util import (
     RAIZ, a_hora, ahora_utc, cargar_ajustes, configurar_log, cupo_a_esta_hora, en_silencio, log, normalizar, socios_activos,
@@ -497,6 +497,7 @@ class Corrida:
                 return 1
             if self.estado.rota:
                 return self.recuperar_memoria()
+            self.tal_vez_charla()            # solo X: va por su cuenta, no cuenta para el tope de noticias
             hoy = self.estado.publicadas_hoy(cfg, self.ahora)
             promos_hoy = self.estado.publicadas_hoy(cfg, self.ahora, tipo="promo")
             if hoy >= tope + EXTRAS_URGENTES:
@@ -511,6 +512,13 @@ class Corrida:
         if not self.cerebro.disponible:
             self.avisar("sin_ia", "Falta la clave de la IA que redacta (GEMINI_API_KEY). Sin eso no puedo escribir los textos.")
             return 1
+
+        # --- muestra de charla para X (solo en modo prueba: promo = charla)
+        if not self.real and self.promo_pedida.lower() == "charla":
+            hechas = 0
+            for _ in range(max(1, self.cantidad)):
+                hechas += 1 if self.publicar_charla() else 0
+            return self.cerrar(hechas)
 
         # --- muestra de una promo (solo en modo prueba)
         if not self.real and self.promo_pedida:
@@ -692,6 +700,71 @@ class Corrida:
             self.estado.guardar_pendientes(sobrantes + guardadas)
             self.estado.guardar()
         return self.cerrar(hechas)
+
+    # ------------------------------------------------- charla en X
+    def charla_toca(self) -> bool:
+        """¿Toca publicar una charla (pregunta, dilema) en X? Una por cada horario ya pasado del día."""
+        ch = self.cfg.get("x_charla") or {}
+        if not verdadero(ch.get("activa")) or "x" not in self.canales or en_silencio(self.cfg, self.ahora):
+            return False
+        local = self.ahora.astimezone(zona(self.cfg))
+        pasados = [h for h in (a_hora(h) for h in (ch.get("horarios") or [])) if h is not None and h <= local.time()]
+        return self.estado.charlas_hoy(self.cfg, self.ahora) < len(pasados)
+
+    def tal_vez_charla(self) -> None:
+        if not self.charla_toca() or not self.cerebro.disponible:
+            return
+        try:
+            self.publicar_charla()
+        except ia.SinCerebro as error:
+            self.avisar("ia_caida_charla", f"La IA no respondió y no pude escribir la pregunta de X. ({str(error)[:200]})")
+        self.estado.guardar()
+
+    def publicar_charla(self) -> bool:
+        """Escribe una charla para X (la IA, con controles), la publica y abajo responde con la invitación
+        a seguirte. En modo prueba te la manda por privado."""
+        ch = self.cfg.get("x_charla") or {}
+        anteriores = self.estado.charlas_recientes()
+        numero = len(self.estado.datos["charlas"]) + (0 if self.real else int(self.ahora.timestamp()) // 60)
+        formatos = [str(f) for f in (ch.get("formatos") or ia.FORMATOS_CHARLA)]
+        temas = [str(t) for t in (ch.get("temas") or ia.TEMAS_CHARLA)]
+        formato, tema = formatos[numero % len(formatos)], temas[(numero * 7 + 3) % len(temas)]
+        texto, correccion, problemas = "", "", []
+        for _ in range(2):
+            texto, problemas = revisar_charla(ia.redactar_charla(self.cerebro, formato, tema, anteriores, correccion), anteriores)
+            if not problemas:
+                break
+            correccion = "tu intento anterior no sirve: " + "; ".join(problemas) + "."
+        if problemas:
+            log.warning("  la charla no pasó los controles: %s", problemas)
+            self.fallas += 1
+            return False
+        respuesta = str(ch.get("respuesta") or "").strip()
+        log.info("Charla en X (%s · %s): %s", formato, tema, texto.replace("\n", " / ")[:120])
+        if not self.real:
+            if self.token and self.chat_prueba:
+                muestra = f"💬 Pregunta para X ({formato} · {tema}):\n\n{texto}"
+                if respuesta:
+                    muestra += f"\n\n↳ y abajo, como respuesta:\n\n{respuesta}"
+                try:
+                    telegram_mensaje(self.token, self.chat_prueba, muestra)
+                except ErrorPublicacion as error:
+                    log.error("  no pude mandar la muestra: %s", error)
+                    self.fallas += 1
+            return True
+        try:
+            id_post = x_publicar(self.claves_x, None, texto)
+        except ErrorPublicacion as error:
+            self.fallas += 1
+            self.avisar(error.clave, str(error))
+            return False
+        self.estado.agregar_charla({"fecha": self.ahora.isoformat(), "formato": formato, "tema": tema, "texto": texto, "x": id_post})
+        if respuesta and id_post:
+            try:
+                x_publicar(self.claves_x, None, respuesta, en_respuesta_a=id_post)
+            except ErrorPublicacion as error:      # la pregunta ya salió: esto es un extra
+                log.warning("  no pude dejar la respuesta con la invitación: %s", error)
+        return True
 
     def cerrar(self, hechas: int) -> int:
         """Deja el informe de la corrida y decide si terminó bien o mal."""

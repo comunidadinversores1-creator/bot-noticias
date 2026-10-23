@@ -19,7 +19,15 @@ VACIO = {
     "variante": 0,        # para ir rotando el diseño de la imagen
     "promos": {},         # id de promo -> cuándo le tocó el turno por última vez
     "promos_hechas": 0,   # contador, para ir cambiando el enfoque del texto
+    "charlas": [],        # publicaciones de charla en X (preguntas, dilemas): fecha, formato, texto, id
 }
+
+
+def _fecha_o_nada(valor) -> datetime | None:
+    try:
+        return datetime.fromisoformat(str(valor))
+    except (TypeError, ValueError):
+        return None
 
 
 class Estado:
@@ -130,6 +138,18 @@ class Estado:
 
     def titulares_recientes(self, momento: datetime, horas: float = 48, cantidad: int = 15) -> list[str]:
         return [p.get("titular", "") for p in self._noticias(momento, horas)[-cantidad:] if p.get("titular")]
+
+    def charlas_hoy(self, cfg: dict, momento: datetime) -> int:
+        hoy = momento.astimezone(zona(cfg)).date()
+        return sum(1 for c in self.datos["charlas"]
+                   if isinstance(c, dict) and _fecha_o_nada(c.get("fecha")) and
+                   _fecha_o_nada(c.get("fecha")).astimezone(zona(cfg)).date() == hoy)
+
+    def charlas_recientes(self, cantidad: int = 30) -> list[str]:
+        return [str(c.get("texto", "")) for c in self.datos["charlas"][-cantidad:] if isinstance(c, dict) and c.get("texto")]
+
+    def agregar_charla(self, registro: dict) -> None:
+        self.datos["charlas"] = [c for c in self.datos["charlas"] if isinstance(c, dict)][-200:] + [registro]
 
     def agregar_publicada(self, registro: dict) -> None:
         self.datos["publicadas"].append(registro)

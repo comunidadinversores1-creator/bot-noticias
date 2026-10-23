@@ -49,7 +49,7 @@ def corrida(monkeypatch, tmp_path, red):
     for clave in ("X_API_KEY", "X_API_SECRET", "X_ACCESS_TOKEN", "X_ACCESS_SECRET"):
         monkeypatch.setenv(clave, "x-" + clave.lower())
 
-    def armar(modo="real", cantidad=1, forzar=False, ahora=AHORA, promo="", imagen="placa"):
+    def armar(modo="real", cantidad=1, forzar=False, ahora=AHORA, promo="", imagen="placa", charla=False):
         c = main.Corrida(modo, cantidad, forzar, promo)
         c.ahora = ahora
         c.cfg["encendido"] = True
@@ -64,6 +64,7 @@ def corrida(monkeypatch, tmp_path, red):
         c.cfg["x"]["premium"] = False                # X corto por defecto en las pruebas (las de Premium lo prenden)
         c.destino = "@canal_real"
         c.tambien_en = []                            # solo el canal (la prueba del grupo lo prende)
+        c.cfg["x_charla"]["activa"] = charla          # las preguntas para X, solo en sus pruebas
         c.chat_prueba = "555"
         return c
 
@@ -1660,3 +1661,61 @@ def test_cada_noticia_lleva_el_link_a_tus_redes(corrida, red, tmp_path):
     assert tg.rstrip().endswith('📲 <a href="https://linktr.ee/comunidadinversores">Seguime en todas mis redes</a>')
     x = red.x_posts[0]["text"]
     assert "Seguime en todas mis redes (el link está en mi perfil)" in x and "http" not in x
+
+
+# ============================== charla en X (preguntas y dilemas, solo X)
+
+def _hora(h, m=0):
+    return datetime(2026, 10, 9, h + 3, m, tzinfo=timezone.utc)      # hora de Argentina -> UTC
+
+
+def test_charla_sale_solo_en_x_con_la_invitacion_abajo(corrida, red, tmp_path):
+    _sin_la_fed(red)
+    c = corrida(imagen="ninguna", charla=True, ahora=_hora(9, 40))
+    assert c.correr() == 0
+    charla = [p for p in red.x_posts if "¿aceptás?" in p["text"]]
+    assert len(charla) == 1 and "reply" not in charla[0] and "paid_partnership" not in charla[0]
+    respuesta = [p for p in red.x_posts if "reply" in p]
+    assert len(respuesta) == 1 and "seguime" in respuesta[0]["text"]
+    assert respuesta[0]["reply"]["in_reply_to_tweet_id"]
+    assert not any("¿aceptás?" in m.get("text", "") for m in red.telegram_mensajes)     # nada en Telegram
+    memoria = _memoria(tmp_path)
+    assert len(memoria["charlas"]) == 1 and all(p.get("tipo") != "charla" for p in memoria["publicadas"])
+
+
+def test_charla_una_por_horario(corrida, red, tmp_path):
+    _sin_la_fed(red)
+    assert corrida(imagen="ninguna", charla=True, ahora=_hora(9, 40)).correr() == 0
+    red.charlas = ["primera?\n\n¿qué elegís?", "una pregunta distinta sobre stop loss\n\n¿lo usás siempre?"]
+    assert corrida(imagen="ninguna", charla=True, ahora=_hora(10, 40)).correr() == 0       # todavía no es el horario de las 14
+    assert len(_memoria(tmp_path)["charlas"]) == 1
+    assert corrida(imagen="ninguna", charla=True, ahora=_hora(14, 10)).correr() == 0
+    assert len(_memoria(tmp_path)["charlas"]) == 2
+
+
+def test_antes_del_primer_horario_no_hay_charla(corrida, red, tmp_path):
+    _sin_la_fed(red)
+    assert corrida(imagen="ninguna", charla=True, ahora=_hora(8, 10)).correr() == 0
+    assert _memoria(tmp_path)["charlas"] == []
+
+
+def test_charla_que_cuenta_algo_como_real_no_sale():
+    texto, problemas = texto_mod_revisar({"texto": "conocí un pibe de 26 que ahorra el 70%\n\nqué pensás?"})
+    assert problemas and "hipótesis" in problemas[0]
+    texto, problemas = texto_mod_revisar({"texto": "imaginá un trader que nunca usa stop loss\n\n¿cuánto dura?"})
+    assert problemas == []
+    _, problemas = texto_mod_revisar({"texto": "con este bot tenés ganancias aseguradas todos los meses\n\n¿lo probás?"})
+    assert any("promesa" in p for p in problemas)
+    _, problemas = texto_mod_revisar({"texto": "mirá esto https://x.com/algo" + " largo" * 60})
+    assert any("280" in p for p in problemas)
+
+
+def texto_mod_revisar(crudo):
+    return texto.revisar_charla(crudo, [])
+
+
+def test_muestra_de_charla_en_modo_prueba(corrida, red, tmp_path):
+    assert corrida(modo="prueba", promo="charla", cantidad=2, charla=True).correr() == 0
+    privados = [m["text"] for m in _al_privado(red)]
+    assert len(privados) == 2 and privados[0].startswith("💬 Pregunta para X") and "seguime" in privados[0]
+    assert red.x_posts == []

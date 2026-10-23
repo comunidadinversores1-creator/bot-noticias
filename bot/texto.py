@@ -759,3 +759,29 @@ def x_largo(texto_html: str, cfg_x: dict, con_links: bool) -> str:
         t = t.replace(f"({donde}) ({donde})", f"({donde})")
     t = re.sub(r"\n{3,}", "\n\n", t).strip()
     return t[:LIMITE_X_PREMIUM]
+
+
+# ------------------------------------------------ charla en X
+
+_CUENTO_REAL = re.compile(r"(?i)\b(conoc[ií]|habl[eé] con|me cont[oó]|un amigo|una amiga|un alumno|una alumna|un seguidor|mi primo|mi vecino)\b")
+
+
+def revisar_charla(crudo: dict, anteriores: list[str]) -> tuple[str, list[str]]:
+    """Limpia el texto de una charla y devuelve (texto, problemas). Sin problemas = se puede publicar."""
+    texto = crudo.get("texto") if isinstance(crudo, dict) else ""
+    texto = sin_links(str(texto or "")).strip().strip('"').strip()
+    texto = re.sub(r"\n{3,}", "\n\n", texto)
+    problemas = []
+    if len(texto) < 25:
+        problemas.append("quedó vacía o demasiado corta")
+    if peso_x(texto) > 280:
+        problemas.append("es más larga que 280 caracteres")
+    if _CUENTO_REAL.search(texto):
+        problemas.append("cuenta un caso como si fuera real (tiene que ser una hipótesis: 'imaginá...')")
+    malas = promesas(texto, "")
+    if malas:
+        problemas.append(f"suena a promesa de ganancia ({', '.join(malas)})")
+    clave = normalizar(texto)[:60]
+    if any(normalizar(a)[:60] == clave for a in anteriores):
+        problemas.append("repite una publicación anterior")
+    return texto, problemas
