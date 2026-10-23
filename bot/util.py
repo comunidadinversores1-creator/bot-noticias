@@ -32,6 +32,21 @@ def configurar_log() -> None:
     )
     # requests/urllib3 escriben la URL completa (con el token de Telegram) en modo DEBUG.
     logging.getLogger("urllib3").setLevel(logging.WARNING)
+    if os.environ.get("GITHUB_ACTIONS") == "true":
+        logging.getLogger().addHandler(_AvisoGitHub())
+
+
+class _AvisoGitHub(logging.Handler):
+    """En GitHub, los avisos y errores también quedan como cartelitos en el resumen de la corrida
+    (se ven sin abrir el registro completo)."""
+
+    def __init__(self) -> None:
+        super().__init__(level=logging.WARNING)
+
+    def emit(self, record: logging.LogRecord) -> None:
+        tipo = "error" if record.levelno >= logging.ERROR else "warning"
+        texto = self.format(record).replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+        print(f"::{tipo}::{texto[:900]}", flush=True)
 
 
 def verdadero(valor) -> bool:
