@@ -437,14 +437,16 @@ ESTILO (copialo bien):
 - Español rioplatense con voseo, como habla un pibe argentino en X. Arrancá en minúscula. Frases cortas.
 - Cada idea en su renglón, con un renglón en blanco entre medio.
 - Sin emojis, sin hashtags, sin links, sin @menciones, sin comillas de más.
-- Máximo 240 caracteres en total.
+- Largo: máximo 240 caracteres, salvo el formato "largo".
+- Cuando haya plata, escribila con símbolo y número concreto: $3.000.000, $800.000, 2.000 usd, $15.000 por mes. Los números concretos son los que hacen que la gente opine.
 - Nada de "hilo", "RT", "seguime" ni pedidos de like: solo el contenido.
 
 FORMATOS (usá el que te pido):
-- dilema: una elección incómoda con números concretos y redondos, y al final una pregunta corta ("¿aceptás?", "¿qué elegís?").
+- dilema: una elección incómoda con montos concretos en $ o usd, y al final una pregunta corta ("¿aceptás?", "¿qué elegís?"). Ej.: "te pagan $1.500 usd por mes pero solo laburás 4 horas por día\n\no $4.000 usd pero 10 horas por día\n\nqué elegís?"
 - pregunta: una sola pregunta directa que cualquiera pueda contestar con su experiencia.
 - caso: un caso INVENTADO contado como hipótesis ("imaginá un trader que...", "pensá en alguien que..."), 3 a 5 renglones, y una última línea que deja pensando.
-- cuentas: un mini presupuesto o cálculo con 4 a 7 líneas de números (pesos o dólares redondos, de ejemplo), y una conclusión de una línea.
+- cuentas: un mini presupuesto o cálculo de ejemplo, un renglón por línea y SIN renglón en blanco entre ellas ("Sueldo: $3.000.000", "Alquiler: $800.000"...), 6 a 12 líneas, y al final una conclusión corta que pega. Puede pasar los 240 caracteres (hasta 500).
+- largo: una reflexión o explicación de 500 a 1.200 caracteres sobre trading, riesgo, bots o plata: arranca con una frase gancho, después desarrolla en renglones cortos (puede tener una lista de pasos o errores) y cierra con una frase que queda o una pregunta.
 - opinion: una opinión fuerte pero defendible sobre trading, bots, IA o plata, y una pregunta para que discutan.
 
 REGLAS QUE NO SE ROMPEN:
@@ -456,7 +458,7 @@ REGLAS QUE NO SE ROMPEN:
 
 Respondé SOLO con JSON: {"texto": "..."}"""
 
-FORMATOS_CHARLA = ["dilema", "pregunta", "caso", "opinion", "dilema", "cuentas", "pregunta"]
+FORMATOS_CHARLA = ["dilema", "cuentas", "pregunta", "caso", "dilema", "largo", "opinion", "cuentas", "dilema", "pregunta", "largo"]
 
 TEMAS_CHARLA = [
     "bots de trading", "inteligencia artificial para invertir", "gestión del riesgo", "stop loss", "apalancamiento",

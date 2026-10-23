@@ -44,10 +44,11 @@ x:
 x_charla:
   activa: true
   horarios: ["09:30", "14:00", "21:30"]      # una después de cada horario
-  respuesta: |-
-    si te gustan estas preguntas, seguime: subo una todos los días sobre trading, bots, IA y plata.
-
-    y las noticias que mueven el mercado las publico en mi canal de Telegram (link en mi perfil)
+  # Debajo de cada pregunta, una de estas (van rotando):
+  respuestas:
+    - "si te hacen pensar estas preguntas, seguime.\n\ntodos los días subo una sobre trading, bots, IA y plata. y las noticias que mueven el mercado, apenas salen."
+    - "subo una de estas todos los días.\n\nsi te gusta pensar la plata, el trading y los bots con números en la mano, seguime y no te pierdas la próxima."
+    - "mañana hay otra.\n\nseguime si te interesa el trading, los bots de IA y cómo cuidar la plata sin vender humo."
 
 ritmo:
   zona_horaria: "America/Argentina/Buenos_Aires"

@@ -725,13 +725,18 @@ class Corrida:
         a seguirte. En modo prueba te la manda por privado."""
         ch = self.cfg.get("x_charla") or {}
         anteriores = self.estado.charlas_recientes()
-        numero = len(self.estado.datos["charlas"]) + (0 if self.real else int(self.ahora.timestamp()) // 60)
+        self._muestras_charla = getattr(self, "_muestras_charla", -1) + 1      # en una prueba, cada muestra distinta
+        numero = len(self.estado.datos["charlas"]) + (0 if self.real else int(self.ahora.timestamp()) // 3600 + self._muestras_charla)
         formatos = [str(f) for f in (ch.get("formatos") or ia.FORMATOS_CHARLA)]
         temas = [str(t) for t in (ch.get("temas") or ia.TEMAS_CHARLA)]
         formato, tema = formatos[numero % len(formatos)], temas[(numero * 7 + 3) % len(temas)]
+        # Lo corto entra en cualquier cuenta; lo largo necesita X Premium.
+        limite = {"largo": 1500, "cuentas": 600}.get(formato, 280) if x_premium(self.cfg["x"]) else 280
+        if limite == 280 and formato in ("largo", "cuentas"):
+            formato = "dilema"
         texto, correccion, problemas = "", "", []
         for _ in range(2):
-            texto, problemas = revisar_charla(ia.redactar_charla(self.cerebro, formato, tema, anteriores, correccion), anteriores)
+            texto, problemas = revisar_charla(ia.redactar_charla(self.cerebro, formato, tema, anteriores, correccion), anteriores, limite)
             if not problemas:
                 break
             correccion = "tu intento anterior no sirve: " + "; ".join(problemas) + "."
@@ -739,7 +744,9 @@ class Corrida:
             log.warning("  la charla no pasó los controles: %s", problemas)
             self.fallas += 1
             return False
-        respuesta = str(ch.get("respuesta") or "").strip()
+        opciones = ch.get("respuestas") or ch.get("respuesta") or []
+        opciones = [opciones] if isinstance(opciones, str) else [str(o).strip() for o in opciones if str(o).strip()]
+        respuesta = opciones[numero % len(opciones)] if opciones else ""        # va rotando: la misma siempre cansa
         log.info("Charla en X (%s · %s): %s", formato, tema, texto.replace("\n", " / ")[:120])
         if not self.real:
             if self.token and self.chat_prueba:

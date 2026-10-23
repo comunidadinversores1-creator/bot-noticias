@@ -766,7 +766,7 @@ def x_largo(texto_html: str, cfg_x: dict, con_links: bool) -> str:
 _CUENTO_REAL = re.compile(r"(?i)\b(conoc[ií]|habl[eé] con|me cont[oó]|un amigo|una amiga|un alumno|una alumna|un seguidor|mi primo|mi vecino)\b")
 
 
-def revisar_charla(crudo: dict, anteriores: list[str]) -> tuple[str, list[str]]:
+def revisar_charla(crudo: dict, anteriores: list[str], limite: int = 280) -> tuple[str, list[str]]:
     """Limpia el texto de una charla y devuelve (texto, problemas). Sin problemas = se puede publicar."""
     texto = crudo.get("texto") if isinstance(crudo, dict) else ""
     texto = sin_links(str(texto or "")).strip().strip('"').strip()
@@ -774,8 +774,8 @@ def revisar_charla(crudo: dict, anteriores: list[str]) -> tuple[str, list[str]]:
     problemas = []
     if len(texto) < 25:
         problemas.append("quedó vacía o demasiado corta")
-    if peso_x(texto) > 280:
-        problemas.append("es más larga que 280 caracteres")
+    if peso_x(texto) > limite:
+        problemas.append(f"es más larga que {limite} caracteres")
     if _CUENTO_REAL.search(texto):
         problemas.append("cuenta un caso como si fuera real (tiene que ser una hipótesis: 'imaginá...')")
     malas = promesas(texto, "")
