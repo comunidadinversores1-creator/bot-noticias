@@ -14,7 +14,7 @@ import json
 import os
 import re
 import sys
-from datetime import date
+from datetime import date, datetime
 
 from PIL import Image
 
@@ -639,6 +639,9 @@ class Corrida:
                 log.info("Ya van %d publicaciones (el tope del día): aunque se fuerce, solo sale lo de impacto %d o más.", hoy, urgente)
         elif self.real:
             lugar_para_promos = min(int(r.get("promos_por_dia", 0) or 0), len(r.get("horarios_promos") or [])) if self.promos_activas() else 0
+            # Lo urgente que salió de madrugada es un extra: no le saca lugar a las noticias del día.
+            nocturnas = self.nocturnas_hoy()
+            hoy -= nocturnas
             noticias_hoy = hoy - promos_hoy
             cupo = cupo_a_esta_hora(cfg, self.ahora)
             motivo = ""
@@ -704,6 +707,19 @@ class Corrida:
         return self.cerrar(hechas)
 
     # ------------------------------------------------- charla en X
+    def nocturnas_hoy(self) -> int:
+        """Cuántas noticias de hoy salieron en el horario de silencio (solo pueden ser urgentes)."""
+        hoy = self.ahora.astimezone(zona(self.cfg)).date()
+        total = 0
+        for p in self.estado.datos["publicadas"]:
+            try:
+                fecha = datetime.fromisoformat(p["fecha"])
+            except (KeyError, TypeError, ValueError):
+                continue
+            if fecha.astimezone(zona(self.cfg)).date() == hoy and p.get("tipo", "noticia") == "noticia" and en_silencio(self.cfg, fecha):
+                total += 1
+        return total
+
     def charla_toca(self, ensenanza: bool = False) -> bool:
         """¿Toca publicar una charla en X (o una enseñanza)? Una por cada horario ya pasado del día."""
         ch = self.cfg.get("ensenanza" if ensenanza else "x_charla") or {}

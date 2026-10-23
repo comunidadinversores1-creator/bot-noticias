@@ -1768,3 +1768,14 @@ def test_ensenanza_sale_en_telegram_y_en_x(corrida, red, tmp_path):
 def test_charla_que_dice_plata_no_pasa():
     _, problemas = texto.revisar_charla({"texto": "te pagan bien pero tu plata la maneja un bot\n\n¿aceptás?"}, [])
     assert any("dinero" in p for p in problemas)
+
+
+def test_lo_urgente_de_madrugada_no_le_saca_lugar_al_dia(corrida, red, tmp_path):
+    _sin_la_fed(red)
+    madrugada = datetime(2026, 10, 9, 6, 40, tzinfo=timezone.utc).isoformat()      # 03:40 en Argentina
+    (tmp_path / "estado.json").write_text(json.dumps({"publicadas": [
+        {"fecha": madrugada, "tipo": "noticia", "titular": f"urgente {i}", "telegram": 1, "x": "1"} for i in range(2)]}), encoding="utf-8")
+    c = corrida(imagen="ninguna", ahora=_hora(9, 40))
+    assert c.nocturnas_hoy() == 2
+    assert c.correr() == 0
+    assert len(_al_canal(red)) == 1                               # a las 9:40 sale la noticia común del día

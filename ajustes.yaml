@@ -661,7 +661,6 @@ fuentes:
   - {nombre: "Ámbito",           url: "https://www.ambito.com/rss/pages/finanzas.xml", idioma: es, peso: 1.3, tema: ARGENTINA}
   - {nombre: "Infobae",          url: "https://www.infobae.com/arc/outboundfeeds/rss/category/economia/?outputType=xml", idioma: es, peso: 1.2, tema: ARGENTINA}
   - {nombre: "La Nación",        url: "https://www.lanacion.com.ar/arc/outboundfeeds/rss/category/economia/?outputType=xml", idioma: es, peso: 1.2, tema: ARGENTINA}
-  - {nombre: "El Cronista",      url: "https://www.cronista.com/files/rss/finanzas-mercados.xml", idioma: es, peso: 1.2, tema: ARGENTINA}
   - {nombre: "iProfesional",     url: "https://www.iprofesional.com/rss/finanzas", idioma: es, peso: 1.1, tema: ARGENTINA}
   - {nombre: "Clarín",           url: "https://www.clarin.com/rss/economia/", idioma: es, peso: 1.1, tema: ARGENTINA}
   - {nombre: "Bloomberg Línea",  url: "https://www.bloomberglinea.com/arc/outboundfeeds/rss/?outputType=xml", idioma: es, peso: 1.5, tema: ""}
@@ -672,7 +671,6 @@ fuentes:
   - {nombre: "DW Español",       url: "https://rss.dw.com/rdf/rss-sp-all", idioma: es, peso: 1.1, tema: ""}
   - {nombre: "France 24",        url: "https://www.france24.com/es/rss", idioma: es, peso: 1.0, tema: ""}
   - {nombre: "CriptoNoticias",   url: "https://www.criptonoticias.com/feed/", idioma: es, peso: 1.1, tema: CRIPTO}
-  - {nombre: "Cointelegraph",    url: "https://es.cointelegraph.com/rss", idioma: es, peso: 1.1, tema: CRIPTO}
   # --- Google Noticias (junta muchos medios; sirve para ver qué tema está en todos lados) ---
   - {nombre: "Google Noticias",  url: "https://news.google.com/rss/headlines/section/topic/BUSINESS?hl=es-419&gl=AR&ceid=AR:es-419", idioma: es, peso: 1.0, tema: ""}
   - {nombre: "Google Noticias",  url: "https://news.google.com/rss/search?q=(Reserva%20Federal%20OR%20inflaci%C3%B3n%20OR%20aranceles%20OR%20sanciones%20OR%20petr%C3%B3leo)%20when%3A6h&hl=es-419&gl=AR&ceid=AR:es-419", idioma: es, peso: 1.0, tema: ""}
