@@ -56,8 +56,11 @@ la corrida queda en rojo y GitHub manda un mail.
 - **Datos propios de una promo**: `enlace` (su link, si no es el del socio), `aviso` (una aclaración debajo del
   llamado), `extras` (hasta 3 links más, solo en Telegram), `texto_sin_link` (qué decir en X en lugar del link)
   y `dato_fijo` (algo que nunca puede faltar, como un código de descuento).
-- **Sin cifras de resultados**: las ventas no dan números de backtest ni "en cuánto se convirtió la plata".
-  Invitan a ver el dossier o el video, donde están los resultados completos con sus riesgos.
+- **Texto propio** (`texto_fijo` y `texto_x`): la promo sale con el texto de Eze tal cual, con sus cifras, y la IA no
+  lo toca. Si es más largo de lo que entra debajo de una foto, sale la foto y enseguida el texto.
+- **Ventas que escribe la IA** (las que tienen `datos`): no dan números de resultados ni prometen ganancias.
+- **Llamado en dos pasos** (`paso_2`): 1) registrate con mi link (así queda como referido) y 2) entrá a la campaña.
+- **Imagen propia** (`imagen`): el flyer de la promo, en `assets/promos/`. Sale tal cual.
 - **Imagen de una promo**: si la promo tiene su propia imagen (`imagen: assets/promos/...`, por ejemplo hecha
   a mano en ChatGPT), en modo `ninguna` se publica tal cual junto con el texto. Lo que diga esa imagen no pasa
   por los controles del bot.
