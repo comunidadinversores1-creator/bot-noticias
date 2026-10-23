@@ -63,6 +63,7 @@ def corrida(monkeypatch, tmp_path, red):
             socio["activo"] = True
         c.cfg["x"]["premium"] = False                # X corto por defecto en las pruebas (las de Premium lo prenden)
         c.destino = "@canal_real"
+        c.tambien_en = []                            # solo el canal (la prueba del grupo lo prende)
         c.chat_prueba = "555"
         return c
 
@@ -1440,6 +1441,7 @@ def test_asi_vienen_los_ajustes(cfg):
     assert cfg["socios"]["binance"]["enlace"] == "https://www.binance.com/join?ref=202718448"
     assert cfg["x"]["poner_links"] is False and cfg["encendido"] is False and cfg["x"]["premium"] is True
     assert cfg["telegram"]["destino"] == "@comunidad_inversores_anuncios"
+    assert cfg["telegram"]["tambien_en"] == ["@Tu_Comunidad_Inversores/150910"]
     c = main.Corrida("prueba", 1, False)
     c.ahora = AHORA
     assert [p["id"] for p in c.promos_activas()] == [
