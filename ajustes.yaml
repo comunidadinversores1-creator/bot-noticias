@@ -16,7 +16,7 @@ telegram:
   destino: "@comunidad_inversores_anuncios"   # canal donde publica (tu canal "Noticias Financieras Diarias"). Se puede cambiar por otro
   # Otros lugares donde sale exactamente lo mismo. Para el tema de un grupo: "número-del-grupo/número-del-tema"
   # Ej: ["-1001234567890/45"]   (el bot tiene que estar en el grupo y poder escribir en ese tema)
-  tambien_en: []
+  tambien_en: ["@Tu_Comunidad_Inversores/150910"]   # grupo general, solo el tema "Noticias Financieras"
   chat_prueba: ""                 # chat privado donde llegan las pruebas y los avisos de error
 
 x:
