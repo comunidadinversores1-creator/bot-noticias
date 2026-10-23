@@ -118,3 +118,21 @@ def virales(cfg: dict, momento: datetime, cantidad: int = 5) -> list[dict]:
 
 def guardar_json(datos) -> str:
     return json.dumps(datos, ensure_ascii=False)
+
+
+def para_citar(cfg: dict, momento: datetime, titular: str, resumen: str) -> dict | None:
+    """El post de X más importante sobre una noticia grande (de un medio o una cuenta conocida), para que
+    Eze lo cite con su opinión."""
+    consigna = (
+        f"Esta noticia acaba de salir: \"{titular}\". {resumen}\n"
+        "Buscá en X el post sobre esta noticia que más interacción tiene en este momento, de un medio, un periodista o una cuenta "
+        "reconocida de finanzas o cripto (en español o en inglés). Proponé una cita corta (máximo 200 caracteres) con la mirada "
+        "de un trader: qué significa para el mercado o qué conviene mirar, sin predecir precios ni recomendar comprar o vender, "
+        "en español rioplatense y diciendo 'dinero', nunca 'plata'. "
+        "Respondé SOLO con JSON: {\"url\": \"https://x.com/...\", \"cuenta\": \"@usuario\", \"cita\": \"...\"}"
+    )
+    datos = preguntar(cfg, consigna, momento - timedelta(days=1))
+    url = str(datos.get("url") or "").strip()
+    if not (url.startswith("https://x.com/") or url.startswith("https://twitter.com/")):
+        return None
+    return {"url": url, "cuenta": str(datos.get("cuenta") or "").strip()[:60], "cita": str(datos.get("cita") or "").strip()[:300]}

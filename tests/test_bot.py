@@ -71,6 +71,8 @@ def corrida(monkeypatch, tmp_path, red):
         c.cfg["ritmo"]["horarios_noticias"] = []      # reparto parejo (los horarios fijos tienen su prueba)
         c.cfg["imagen"]["idea_para_chatgpt"] = True    # la función sigue existiendo (Eze la tiene apagada)
         c.cfg["x_charla"]["horarios"] = ["09:30", "14:00", "21:30"]
+        c.cfg["x_charla"]["encuesta_turno"] = 0       # sin encuestas, salvo en su prueba
+        c.cfg["hilo_semanal"]["activa"] = False
         c.chat_prueba = "555"
         return c
 
@@ -1868,6 +1870,7 @@ def test_grok_temas_del_dia_y_virales(corrida, red, tmp_path, monkeypatch):
     _grok_responde(red)
     red.charlas = ["bitcoin cayó 8% en un día\n\n¿vendés, comprás o no tocás nada?"]
     c = corrida(imagen="ninguna", charla=True, ahora=_hora(13, 10))
+    c.cfg["grok"]["citar_impacto"] = 99
     assert c.correr() == 0
     memoria = _memoria(tmp_path)
     assert memoria["grok"]["temas"][0]["tema"] == "bitcoin cae 8% tras datos de empleo"
@@ -1878,7 +1881,9 @@ def test_grok_temas_del_dia_y_virales(corrida, red, tmp_path, monkeypatch):
     assert memoria["grok"]["usados"] == ["bitcoin cae 8% tras datos de empleo"]
     # Otra corrida el mismo día: no vuelve a mandar los virales ni a pedir los temas.
     pedidos_antes = len([p for p in red.pedidos if "api.x.ai" in (p.url or "")])
-    assert corrida(imagen="ninguna", ahora=_hora(13, 40)).correr() == 0
+    c = corrida(imagen="ninguna", ahora=_hora(13, 40))
+    c.cfg["grok"]["citar_impacto"] = 99                     # (lo de citar tiene su propia prueba)
+    assert c.correr() == 0
     assert len([p for p in red.pedidos if "api.x.ai" in (p.url or "")]) == pedidos_antes
 
 
@@ -1888,3 +1893,51 @@ def test_sin_llave_de_grok_sigue_como_siempre(corrida, red, tmp_path, monkeypatc
     assert corrida(imagen="ninguna", charla=True, ahora=_hora(13, 10)).correr() == 0
     assert not any("api.x.ai" in (p.url or "") for p in red.pedidos)
     assert len(_memoria(tmp_path)["charlas"]) == 1
+
+
+
+# ============================== encuestas, hilo semanal y noticias para citar
+
+def test_la_segunda_pregunta_del_dia_es_una_encuesta(corrida, red, tmp_path):
+    _sin_la_fed(red)
+    red.charlas = ["pregunta uno sobre stop loss\n\n¿lo usás?"]
+    red.encuesta = {"texto": "bitcoin cae 10% mañana. ¿qué hacés?", "opciones": ["compro más", "vendo todo", "no toco nada", "ni me entero"]}
+    for h in (9, 14):
+        c = corrida(imagen="ninguna", charla=True, ahora=_hora(h, 40))
+        c.cfg["x_charla"]["encuesta_turno"] = 2
+        assert c.correr() == 0
+    encuestas = [p for p in red.x_posts if "poll" in p]
+    assert len(encuestas) == 1 and encuestas[0]["poll"] == {"options": ["compro más", "vendo todo", "no toco nada", "ni me entero"], "duration_minutes": 1440}
+    assert [c["formato"] for c in _memoria(tmp_path)["charlas"]] == ["dilema", "encuesta"]
+
+
+def test_hilo_semanal_del_domingo(corrida, red, tmp_path):
+    _sin_la_fed(red)
+    domingo = datetime(2026, 10, 11, 14, 10, tzinfo=timezone.utc)        # domingo 11:10 en Argentina
+    titulos = ["El petróleo sube a más de 114 dólares", "El riesgo país sube a 720 puntos", "La Fed recortó la tasa 25 puntos básicos",
+               "JP Morgan tokeniza dos fondos en Solana", "Bitcoin cae 8% tras el dato de empleo", "El BCRA compró reservas"]
+    (tmp_path / "estado.json").write_text(json.dumps({"publicadas": [
+        {"fecha": (domingo - timedelta(days=2, hours=i)).isoformat(), "tipo": "noticia", "titular": t, "categoria": "MERCADOS", "impacto": 8, "telegram": 1, "x": "1"}
+        for i, t in enumerate(titulos)]}), encoding="utf-8")
+    red.hilo = {"gancho": "la semana tuvo de todo: petróleo arriba de 114 dólares y riesgo país en 720.\n\nlo que movió el mercado, en 5 posts 👇",
+                "posts": [f"{i}/ {t}." for i, t in enumerate(titulos[:5], start=1)], "cierre": "¿cuál te pegó más? seguime para el de la semana que viene."}
+    c = corrida(imagen="ninguna", ahora=domingo)
+    c.cfg["hilo_semanal"]["activa"] = True
+    assert c.correr() == 0
+    hilo = [p for p in red.x_posts if "movió el mercado" in p["text"] or p["text"][:2] in ("1/", "2/", "3/", "4/", "5/") or "seguime" in p["text"]]
+    assert len(hilo) == 7
+    assert all(p["reply"]["in_reply_to_tweet_id"] for p in hilo[1:]) and "reply" not in hilo[0]
+    assert any("🗓" in m["text"] for m in _al_canal(red))
+    assert _memoria(tmp_path)["publicadas"][-1]["titular"] == titulos[-1]                 # en esa corrida no salió otra cosa
+
+
+def test_noticia_grande_te_llega_para_citar(corrida, red, tmp_path, monkeypatch):
+    _sin_la_fed(red)
+    monkeypatch.setenv("XAI_API_KEY", "clave-xai")
+    _grok_responde(red)
+    red.cita = {"url": "https://x.com/medio/status/9", "cuenta": "@medio", "cita": "ojo con el dólar esta semana"}
+    c = corrida(imagen="ninguna", ahora=_hora(9, 40))
+    c.cfg["grok"]["virales_hora"] = "23:00"
+    assert c.correr() == 0
+    citas = [m["text"] for m in _al_privado(red) if "para citar" in m["text"]]
+    assert len(citas) == 1 and "https://x.com/medio/status/9" in citas[0] and "ojo con el dólar" in citas[0]

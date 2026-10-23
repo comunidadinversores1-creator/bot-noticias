@@ -452,6 +452,8 @@ FORMATOS (usá el que te pido):
 - largo: una reflexión o explicación de 500 a 1.200 caracteres sobre trading, riesgo, bots o dinero: arranca con una frase gancho, después desarrolla en renglones cortos (puede tener una lista de pasos o errores) y cierra con una frase que queda o una pregunta.
 - ensenanza: explicá UN tema concreto para alguien que recién empieza (el TEMA viene como pregunta, tal como la busca la gente en Google). Primera línea: la pregunta, tal cual. Después la respuesta en renglones cortos y simples, de 400 a 1.000 caracteres: qué es, para qué sirve, un ejemplo, y un error común o un cuidado a tener. Si es un paso a paso de una app (Exness, Binance), explicá el camino en general y no inventes nombres exactos de botones, montos mínimos ni comisiones: si no estás seguro de un detalle, no lo pongas. Si te paso DATOS, usá solo esos datos. Cerrá con una pregunta corta para que comenten.
 - venta: una pregunta que haga pensar en el problema que resuelve el PRODUCTO que te paso, sin nombrarlo como aviso y sin prometer resultados (ej.: "¿cuánto tiempo pasás mirando gráficos para encontrar una entrada?"). Corta, como las otras.
+- encuesta: una pregunta corta que divida opiniones (máximo 200 caracteres) y entre 2 y 4 opciones de respuesta de hasta 25 caracteres cada una, sin emojis. Las opciones van en "opciones". Ej.: "bitcoin cae 10% mañana. ¿qué hacés?" con opciones "compro más", "vendo todo", "no toco nada", "ni me entero".
+- lista: un post para guardar. Primera línea: un título gancho con número ("5 errores que te vacían la cuenta", "checklist antes de abrir una operación"). Después de 5 a 7 puntos numerados, cortos y concretos, uno por renglón. Última línea: "guardalo para tenerlo a mano". Entre 400 y 900 caracteres.
 - opinion: una opinión fuerte pero defendible sobre trading, bots, IA o dinero, y una pregunta para que discutan.
 
 REGLAS QUE NO SE ROMPEN:
@@ -461,9 +463,9 @@ REGLAS QUE NO SE ROMPEN:
 - Nada de política partidaria ni personas reales.
 - No repitas ideas de las publicaciones anteriores que te paso.
 
-Respondé SOLO con JSON: {"texto": "..."}"""
+Respondé SOLO con JSON: {"texto": "..."} (en el formato encuesta: {"texto": "...", "opciones": ["...", "..."]})"""
 
-FORMATOS_CHARLA = ["dilema", "venta", "cuentas", "pregunta", "caso", "dilema", "largo", "venta", "opinion", "cuentas"]
+FORMATOS_CHARLA = ["dilema", "lista", "venta", "cuentas", "pregunta", "caso", "dilema", "lista", "venta", "opinion", "largo", "cuentas"]
 
 TEMAS_CHARLA = [
     "bots de trading", "inteligencia artificial para invertir", "gestión del riesgo", "stop loss", "apalancamiento",
@@ -486,3 +488,25 @@ def redactar_charla(cerebro: Cerebro, formato: str, tema: str, anteriores: list[
     if correccion:
         usuario += f"\n\nATENCIÓN: {correccion}"
     return cerebro.pedir_json(SISTEMA_CHARLA, usuario, max_tokens=400, temperatura=0.9)
+
+
+# ------------------------------------------------- 5) hilo semanal en X
+
+SISTEMA_HILO = """Armás el hilo semanal de X de Ezequiel Bagnato (Comunidad Inversores): "lo que movió el mercado esta semana". Te paso las noticias que se publicaron en la semana (título y categoría).
+
+- Elegí las CANTIDAD más importantes para alguien que invierte o hace trading, de temas distintos.
+- "gancho": el primer post, que haga querer leer el hilo (máximo 200 caracteres), sin emojis al principio. Ej.: "la semana tuvo de todo: petróleo arriba de 114 dólares, riesgo país récord y un ETF nuevo de bitcoin.\n\nlo que movió el mercado, en 5 posts 👇"
+- "posts": uno por noticia elegida, numerados ("1/", "2/"...), cada uno de hasta 260 caracteres: qué pasó y por qué importa, en criollo.
+- "cierre": una pregunta para que comenten y la invitación a seguir la cuenta para no perderse el de la semana que viene.
+- Usá SOLO los hechos y cifras que están en los títulos. No inventes números ni detalles.
+- Español rioplatense con voseo. Decí siempre "dinero", nunca "plata". Sin hashtags ni links.
+
+Respondé SOLO con JSON: {"gancho": "...", "posts": ["1/ ...", "2/ ..."], "cierre": "..."}"""
+
+
+def redactar_hilo(cerebro: Cerebro, noticias: list[dict], cantidad: int = 5, correccion: str = "") -> dict:
+    lista = "\n".join(f"- [{n.get('categoria', '')}] {n.get('titular', '')}" for n in noticias)
+    usuario = f"CANTIDAD: {cantidad}\n\nNOTICIAS DE LA SEMANA:\n{lista}"
+    if correccion:
+        usuario += f"\n\nATENCIÓN: {correccion}"
+    return cerebro.pedir_json(SISTEMA_HILO.replace("CANTIDAD", str(cantidad)), usuario, max_tokens=1500, temperatura=0.5)

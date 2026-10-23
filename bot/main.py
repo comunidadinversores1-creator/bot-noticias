@@ -29,7 +29,7 @@ from .publicar import ErrorPublicacion, claves_x, telegram_chats, telegram_mensa
 from .texto import (
     anio_actual, armar_llamado, enlaces_extra, faltantes, faltantes_promo, fuente_limpia, idea_de_imagen, normalizar_post, normalizar_promo,
     numeros_inventados, promesas, promo_telegram, promo_x, texto_revisable, texto_revisable_promo,
-    LIMITE_X, hashtags_para, recortar_x, link_en_x, revisar_charla, sumar_hashtags, texto_propio_telegram, texto_propio_x, texto_telegram, texto_x, x_largo, x_premium,
+    LIMITE_X, hashtags_para, peso_x, recortar_x, sin_links, link_en_x, revisar_charla, sumar_hashtags, texto_propio_telegram, texto_propio_x, texto_telegram, texto_x, x_largo, x_premium,
 )
 from .util import (
     RAIZ, a_hora, ahora_utc, cargar_ajustes, configurar_log, cupo_a_esta_hora, en_silencio, log, normalizar, socios_activos,
@@ -286,7 +286,39 @@ class Corrida:
             self.estado.marcar_foto(foto.titulo)
         if resultado == "ok" and self.sin_imagen:
             self.mandar_idea(post, g, registro)
+        if resultado == "ok" and self.real:
+            self.mandar_cita(post, g)
         return resultado
+
+    def mandar_cita(self, post: dict, g: Grupo) -> None:
+        """Noticia grande: Grok busca el post más fuerte sobre ella en X y te lo manda para que lo cites."""
+        c = self.cfg.get("grok") or {}
+        if not (verdadero(c.get("activa")) and grok.disponible() and self.token and self.chat_prueba):
+            return
+        if g.impacto < int(c.get("citar_impacto", 8)) or en_silencio(self.cfg, self.ahora):
+            return
+        memoria = self.estado.datos["grok"]
+        hoy = self.ahora.astimezone(zona(self.cfg)).date().isoformat()
+        if memoria.get("citas_dia") != hoy:
+            memoria["citas_dia"], memoria["citas"] = hoy, 0
+        if int(memoria.get("citas", 0)) >= int(c.get("citas_por_dia", 3)):
+            return
+        try:
+            cita = grok.para_citar(self.cfg, self.ahora, post["titular"], post.get("resumen", ""))
+        except grok.SinGrok as error:
+            log.warning("  Grok no encontró qué citar: %s", error)
+            return
+        if not cita:
+            return
+        memoria["citas"] = int(memoria.get("citas", 0)) + 1
+        e = lambda s: html.escape(s, quote=False)
+        mensaje = (f"📣 <b>Noticia grande para citar</b>\n{e(post['titular'])}\n\n"
+                   f'<a href="{html.escape(cita["url"], quote=True)}">Abrí el post de {e(cita["cuenta"] or "X")}</a>, tocá "Repostear" → "Citar" y poné tu mirada.\n\n'
+                   f"💡 Idea: {e(cita['cita'])}")
+        try:
+            telegram_mensaje(self.token, self.chat_prueba, mensaje, html=True)
+        except ErrorPublicacion as error:
+            log.warning("  no pude mandar la noticia para citar: %s", error)
 
     def redes(self) -> dict | None:
         """El link a todas tus redes que va al pie de cada noticia ('redes' en 'marca')."""
@@ -506,6 +538,8 @@ class Corrida:
             self.tal_vez_grok()              # no publica nada: busca temas del día y te manda los virales
             self.ocupado = self.tal_vez_calendario()
             if not self.ocupado:
+                self.ocupado = self.tal_vez_hilo()
+            if not self.ocupado:
                 self.ocupado = self.tal_vez_charla()
             hoy = self.estado.publicadas_hoy(cfg, self.ahora)
             promos_hoy = self.estado.publicadas_hoy(cfg, self.ahora, tipo="promo")
@@ -523,6 +557,8 @@ class Corrida:
             return 1
 
         # --- muestra de charla para X (solo en modo prueba: promo = charla)
+        if not self.real and self.promo_pedida.lower() == "hilo":
+            return self.muestra_hilo()
         if not self.real and self.promo_pedida.lower() == "grok":
             return self.muestra_grok()
         if not self.real and self.promo_pedida.lower() == "calendario":
@@ -764,8 +800,14 @@ class Corrida:
         for ensenanza in (True, False):
             if not self.charla_toca(ensenanza):
                 continue
+            forzado = "ensenanza" if ensenanza else ""
+            if not ensenanza:
+                # Una de las preguntas del día es una encuesta (votar es un toque: es lo que más interacción saca).
+                turno = int((self.cfg.get("x_charla") or {}).get("encuesta_turno", 0) or 0)
+                if turno and self.estado.charlas_hoy(self.cfg, self.ahora) == turno - 1:
+                    forzado = "encuesta"
             try:
-                salio = self.publicar_charla("ensenanza" if ensenanza else "")
+                salio = self.publicar_charla(forzado)
             except ia.SinCerebro as error:
                 self.avisar("ia_caida_charla", f"La IA no respondió y no pude escribir la publicación. ({str(error)[:200]})")
             break                                        # la otra, si también tocaba, sale la próxima hora
@@ -800,6 +842,87 @@ class Corrida:
                 self.fallas += 1
                 self.avisar(error.clave, str(error))
         return id_tg, id_x
+
+    # ------------------------------------------------- hilo semanal en X
+    def tal_vez_hilo(self) -> bool:
+        """Los domingos: 'lo que movió el mercado esta semana', como hilo en X y un resumen en Telegram."""
+        c = self.cfg.get("hilo_semanal") or {}
+        if not verdadero(c.get("activa")) or not self.canales or en_silencio(self.cfg, self.ahora):
+            return False
+        local = self.ahora.astimezone(zona(self.cfg))
+        hora = a_hora(c.get("hora") or "11:00")
+        if local.weekday() != int(c.get("dia", 6)) or hora is None or local.time() < hora:
+            return False
+        memoria = self.estado.datos["hilo"]
+        if memoria.get("ultimo") == local.date().isoformat():
+            return False
+        memoria["ultimo"] = local.date().isoformat()
+        self.estado.guardar()
+        return self.publicar_hilo()
+
+    def publicar_hilo(self) -> bool:
+        c = self.cfg.get("hilo_semanal") or {}
+        desde = self.ahora - timedelta(days=7)
+        noticias = []
+        for p in self.estado.datos["publicadas"]:
+            try:
+                if p.get("tipo", "noticia") == "noticia" and datetime.fromisoformat(p["fecha"]) >= desde:
+                    noticias.append({"titular": p.get("titular", ""), "categoria": p.get("categoria", ""), "impacto": p.get("impacto", 0)})
+            except (KeyError, TypeError, ValueError):
+                continue
+        cantidad = int(c.get("cantidad", 5))
+        if len(noticias) < cantidad:
+            log.info("Hilo semanal: hay pocas noticias en la semana (%d); no lo armo.", len(noticias))
+            return False
+        noticias.sort(key=lambda n: -int(n.get("impacto") or 0))
+        # La numeración del hilo ("1/", "en 5 posts") no son cifras inventadas.
+        referencia = " ".join(n["titular"] for n in noticias) + " " + " ".join(str(i) for i in range(1, cantidad + 3))
+        hilo, correccion = None, ""
+        for _ in range(2):
+            crudo = ia.redactar_hilo(self.cerebro, noticias[:25], cantidad, correccion)
+            partes = [str(crudo.get("gancho") or "").strip()] + [str(x).strip() for x in (crudo.get("posts") or []) if str(x).strip()] + [str(crudo.get("cierre") or "").strip()]
+            partes = [sin_links(x) for x in partes if x]
+            inventados = numeros_inventados(" ".join(partes), referencia, anio_actual(self.ahora))
+            plata = any(re.search(r"(?i)\bplata\b", x) for x in partes)
+            if len(partes) >= cantidad + 1 and not inventados and not plata and all(peso_x(x) <= 280 for x in partes):
+                hilo = partes
+                break
+            correccion = "tu intento anterior no sirve: " + ("; ".join(filter(None, [
+                f"pusiste cifras que no están en los títulos ({', '.join(inventados)})" if inventados else "",
+                'dijiste "plata" (tiene que ser "dinero")' if plata else "",
+                "algún post pasa los 260 caracteres" if any(peso_x(x) > 280 for x in partes) else "",
+                f"faltan posts (tienen que ser {cantidad})" if len(partes) < cantidad + 1 else "",
+            ]))) + "."
+        if hilo is None:
+            self.avisar("hilo", "No pude armar el hilo semanal: la IA no lo escribió bien dos veces. Sale el domingo que viene.")
+            return False
+        if not self.real:
+            if self.token and self.chat_prueba:
+                telegram_mensaje(self.token, self.chat_prueba, "🧵 Así saldría el hilo semanal en X:\n\n" + "\n\n— — —\n\n".join(hilo))
+            return True
+        anterior = ""
+        for i, parte in enumerate(hilo):
+            try:
+                anterior = x_publicar(self.claves_x, None, parte, en_respuesta_a=anterior) if "x" in self.canales else ""
+            except ErrorPublicacion as error:
+                self.fallas += 1
+                self.avisar(error.clave, f"El hilo semanal se cortó en el post {i + 1}: {error}")
+                break
+            if not anterior:
+                break
+        if "telegram" in self.canales:
+            cuerpo = "🗓 <b>" + html.escape(hilo[0].split("\n")[0], quote=False) + "</b>\n\n" + "\n\n".join(html.escape(x, quote=False) for x in hilo[1:])
+            for i, lugar in enumerate([self.destino, *self.tambien_en]):
+                try:
+                    telegram_publicar(self.token, lugar, None, cuerpo)
+                except ErrorPublicacion as error:
+                    self.fallas += 1
+                    self.avisar(error.clave, str(error))
+        log.info("Hilo semanal publicado (%d posts)", len(hilo))
+        return True
+
+    def muestra_hilo(self) -> int:
+        return self.cerrar(1 if self.publicar_hilo() else 0)
 
     # ------------------------------------------------- Grok (X en tiempo real)
     def tema_caliente(self) -> dict | None:
@@ -994,9 +1117,20 @@ class Corrida:
             limite = 1300
         elif limite == 280 and formato in ("largo", "cuentas"):
             formato = "dilema"
-        texto, correccion, problemas = "", "", []
+        if formato == "lista":
+            limite = 1000 if premium else 280
+            if not premium:
+                formato = "pregunta"
+        texto, correccion, problemas, encuesta = "", "", [], []
         for _ in range(2):
-            texto, problemas = revisar_charla(ia.redactar_charla(self.cerebro, formato, tema, anteriores, correccion, datos), anteriores, limite)
+            crudo = ia.redactar_charla(self.cerebro, formato, tema, anteriores, correccion, datos)
+            texto, problemas = revisar_charla(crudo, anteriores, limite)
+            if formato == "encuesta":
+                encuesta = [sin_links(str(o)).strip() for o in (crudo.get("opciones") or []) if str(o).strip()][:4]
+                if not 2 <= len(encuesta) <= 4 or any(len(o) > 25 for o in encuesta):
+                    problemas.append("las opciones de la encuesta tienen que ser de 2 a 4, de hasta 25 caracteres cada una")
+                if any(re.search(r"(?i)\bplata\b", o) for o in encuesta):
+                    problemas.append('una opción dice "plata": tiene que decir "dinero"')
             if not problemas:
                 break
             correccion = "tu intento anterior no sirve: " + "; ".join(problemas) + "."
@@ -1018,6 +1152,8 @@ class Corrida:
             if self.token and self.chat_prueba:
                 titulo = "📚 Enseñanza para Telegram y X" if ensenanza else "💬 Pregunta para X"
                 muestra = f"{titulo} ({formato} · {tema}):\n\n{texto}"
+                if encuesta:
+                    muestra += "\n\nOpciones de la encuesta:\n" + "\n".join(f"◻️ {o}" for o in encuesta)
                 if respuesta:
                     muestra += f"\n\n↳ y abajo, como respuesta:\n\n{respuesta}"
                 try:
@@ -1044,7 +1180,7 @@ class Corrida:
                     self.avisar(error.clave, str(error))
         if "x" in self.canales:
             try:
-                id_post = x_publicar(self.claves_x, None, texto if premium else recortar_x(texto))
+                id_post = x_publicar(self.claves_x, None, texto if premium else recortar_x(texto), encuesta=encuesta or None)
             except ErrorPublicacion as error:
                 self.fallas += 1
                 self.avisar(error.clave, str(error))

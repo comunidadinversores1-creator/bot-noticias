@@ -239,7 +239,7 @@ def _error_x(r: requests.Response, paso: str, claves: dict) -> ErrorPublicacion:
 
 
 def x_publicar(claves: dict, jpg: bytes | None, texto: str, publicidad: bool = False, hecha_con_ia: bool = False,
-               texto_corto: str = "", en_respuesta_a: str = "") -> str:
+               texto_corto: str = "", en_respuesta_a: str = "", encuesta: list[str] | None = None) -> str:
     """Crea la publicación (con la imagen, si hay una). Devuelve el id del post.
 
     jpg=None          -> publica solo el texto.
@@ -275,6 +275,9 @@ def x_publicar(claves: dict, jpg: bytes | None, texto: str, publicidad: bool = F
         texto = texto_corto
     if en_respuesta_a:
         imagen = {**imagen, "reply": {"in_reply_to_tweet_id": str(en_respuesta_a)}}
+    if encuesta:
+        # Encuesta de X: de 2 a 4 opciones de hasta 25 letras, abierta 24 horas (no lleva imagen).
+        imagen = {**imagen, "poll": {"options": [o[:25] for o in encuesta[:4]], "duration_minutes": 1440}}
     return _x_crear(firma, texto, imagen, publicidad, hecha_con_ia, claves)
 
 

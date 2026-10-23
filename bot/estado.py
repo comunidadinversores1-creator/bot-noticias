@@ -22,6 +22,7 @@ VACIO = {
     "charlas": [],        # publicaciones de charla en X (preguntas, dilemas): fecha, formato, texto, id
     "calendario": {},     # "agenda": día de la última agenda · "avisos": evento -> cuándo se avisó
     "grok": {},           # temas del día en X (de Grok) y cuándo se mandaron los posts virales
+    "hilo": {},           # "ultimo": día del último hilo semanal
 }
 
 

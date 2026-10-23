@@ -113,7 +113,12 @@ class InternetFalso:
             cuerpo = json.loads(self._cuerpo(pedido))
             consigna = cuerpo["input"][0]["content"]
             datos = getattr(self, "grok", {})
-            contenido = {"temas": datos.get("temas", [])} if "temas con más conversación" in consigna else {"posts": datos.get("posts", [])}
+            if "temas con más conversación" in consigna:
+                contenido = {"temas": datos.get("temas", [])}
+            elif "acaba de salir" in consigna:
+                contenido = getattr(self, "cita", {})
+            else:
+                contenido = {"posts": datos.get("posts", [])}
             return self._r(pedido, 200, {"output": [{"type": "message", "content": [{"type": "output_text", "text": json.dumps(contenido, ensure_ascii=False)}]}]})
         if host == "nfs.faireconomy.media":
             return self._r(pedido, 200, list(getattr(self, "calendario", [])))
@@ -211,6 +216,16 @@ class InternetFalso:
         else:
             sistema, usuario = datos["messages"][0]["content"], datos["messages"][1]["content"]
 
+        if "hilo semanal de X" in sistema:
+            contenido = json.dumps(getattr(self, "hilo", {}), ensure_ascii=False)
+            if host == "api.anthropic.com":
+                return self._r(pedido, 200, {"content": [{"type": "text", "text": contenido}]})
+            return self._r(pedido, 200, {"choices": [{"message": {"role": "assistant", "content": contenido}}]})
+        if "cuenta de X de Ezequiel" in sistema and "FORMATO: encuesta" in usuario and getattr(self, "encuesta", None):
+            contenido = json.dumps(self.encuesta, ensure_ascii=False)
+            if host == "api.anthropic.com":
+                return self._r(pedido, 200, {"content": [{"type": "text", "text": contenido}]})
+            return self._r(pedido, 200, {"choices": [{"message": {"role": "assistant", "content": contenido}}]})
         if "cuenta de X de Ezequiel" in sistema:
             textos = getattr(self, "charlas", None) or [
                 "te pagan 3.000 usd por mes pero tu dinero lo maneja un bot que no podés apagar\n\n¿aceptás?"]
