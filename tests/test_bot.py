@@ -804,7 +804,7 @@ def test_una_promo_nunca_promete_ganancias(corrida, red, tmp_path):
 
 def test_muestra_de_promo_rechazada_avisa(corrida, red, tmp_path):
     red.promo_tramposa = 99
-    assert corrida(modo="prueba", promo="1").correr() == 1          # no hay muestra: la corrida queda en rojo
+    assert corrida(modo="prueba", promo="binance-tarjeta").correr() == 1          # no hay muestra: la corrida queda en rojo
     assert red.telegram_fotos == [] and red.x_posts == []
     assert "no salió" in red.telegram_mensajes[-1]["text"]
 
