@@ -61,6 +61,20 @@ hashtags:
   - {hashtag: "Trading",     si_dice: ["trading", "traders", "trader"]}
 
 # ------------------------------------------------------------
+#  CALENDARIO ECONÓMICO (Telegram y X):
+#  - a la mañana, la agenda del día con los datos importantes (inflación, empleo, tasas...)
+#  - un rato antes de cada dato, un aviso: a qué hora sale, qué se espera y que puede haber volatilidad
+#  Datos: calendario público de Forex Factory. Solo los de impacto alto y de estos países.
+# ------------------------------------------------------------
+calendario:
+  activa: true
+  agenda_hora: "07:30"
+  impacto: ["High"]
+  paises: ["USD", "EUR", "AUD", "CAD", "CNY"]     # EE.UU., zona euro, Australia, Canadá y China (AUD y CAD: los pares del bot de señales)
+  aviso_desde_min: 10                             # el aviso sale entre 10 y 80 minutos antes del dato
+  aviso_hasta_min: 80
+
+# ------------------------------------------------------------
 #  CHARLA EN X: preguntas, dilemas y casos cortos para que la gente responda (solo en X).
 #  Van aparte de las noticias: no cuentan para el tope de 10 por día.
 #  Debajo de cada una, el bot responde con la invitación a seguirte (así la gente que llega

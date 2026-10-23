@@ -2,7 +2,7 @@ name: Bot de noticias
 
 on:
   schedule:
-    - cron: "7 * * * *"          # una vez por hora, al minuto 7
+    - cron: "7,37 * * * *"       # cada media hora (al minuto 7 y 37): así cada publicación sale sola, sin amontonarse
   workflow_dispatch:
     inputs:
       modo:

@@ -109,6 +109,8 @@ class InternetFalso:
             return self._ia(pedido, host)
         if host.endswith("wikipedia.org") or host == "commons.wikimedia.org":
             return self._wiki(pedido, u, host)
+        if host == "nfs.faireconomy.media":
+            return self._r(pedido, 200, list(getattr(self, "calendario", [])))
         if host == "upload.wikimedia.org":
             return self._r(pedido, 200, self._jpg, {"content-type": "image/jpeg"})
         for dominio, contenido in self.feeds.items():

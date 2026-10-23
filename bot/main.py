@@ -14,10 +14,11 @@ import json
 import os
 import re
 import sys
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 
 from PIL import Image
 
+from . import calendario as cal
 from . import ia
 from .estado import Estado
 from .filtro import Grupo, es_mala_noticia, nombra_prohibido, preparar, puntaje, ya_contada
@@ -75,6 +76,7 @@ class Corrida:
     def __init__(self, modo: str, cantidad: int, forzar: bool, promo: str = "") -> None:
         self.modo, self.cantidad, self.forzar = modo, cantidad, forzar
         self.promo_pedida = promo.strip()
+        self.ocupado = False          # True si en esta corrida ya salió algo (no salen dos juntas, salvo lo urgente)
         self.real = modo == "real"
         self.cfg = cargar_ajustes()
         self.ahora = ahora_utc()
@@ -498,7 +500,11 @@ class Corrida:
                 return 1
             if self.estado.rota:
                 return self.recuperar_memoria()
-            self.tal_vez_charla()            # solo X: va por su cuenta, no cuenta para el tope de noticias
+            # De a una por vez: si en esta corrida sale algo del calendario, una enseñanza o una pregunta,
+            # la promo y las noticias comunes esperan a la próxima hora (lo urgente sale igual).
+            self.ocupado = self.tal_vez_calendario()
+            if not self.ocupado:
+                self.ocupado = self.tal_vez_charla()
             hoy = self.estado.publicadas_hoy(cfg, self.ahora)
             promos_hoy = self.estado.publicadas_hoy(cfg, self.ahora, tipo="promo")
             if hoy >= tope + EXTRAS_URGENTES:
@@ -515,6 +521,8 @@ class Corrida:
             return 1
 
         # --- muestra de charla para X (solo en modo prueba: promo = charla)
+        if not self.real and self.promo_pedida.lower() == "calendario":
+            return self.muestra_calendario()
         if not self.real and self.promo_pedida.lower() in ("charla", "ensenanza"):
             hechas = 0
             forzado = "ensenanza" if self.promo_pedida.lower() == "ensenanza" else ""
@@ -540,7 +548,7 @@ class Corrida:
 
         if self.real:
             self.avisar_vencidas()
-        promo = self.promo_que_toca() if self.real and hoy < tope else None
+        promo = self.promo_que_toca() if self.real and hoy < tope and not self.ocupado else None
 
         noticias, salud = leer_fuentes(cfg, self.ahora)
         self.informe["fuentes"] = salud
@@ -651,6 +659,8 @@ class Corrida:
                 motivo = f"ya van {hoy} publicaciones y a esta hora corresponden {cupo}"
             elif noticias_hoy >= tope - lugar_para_promos:
                 motivo = "lo que queda del día está reservado para las promos"
+            if not motivo and self.ocupado:
+                motivo = "en esta corrida ya salió otra publicación (no salen dos juntas)"
             if motivo:
                 umbral = urgente
                 log.info("Solo sale lo de impacto %d o más: %s.", urgente, motivo)
@@ -731,17 +741,116 @@ class Corrida:
         pasados = [h for h in (a_hora(h) for h in (ch.get("horarios") or [])) if h is not None and h <= local.time()]
         return self.estado.charlas_hoy(self.cfg, self.ahora, ensenanza) < len(pasados)
 
-    def tal_vez_charla(self) -> None:
+    def tal_vez_charla(self) -> bool:
+        """Publica la enseñanza o la pregunta de X que toque (una sola por corrida). Devuelve si salió algo."""
         if not self.cerebro.disponible:
-            return
+            return False
+        salio = False
         for ensenanza in (True, False):
             if not self.charla_toca(ensenanza):
                 continue
             try:
-                self.publicar_charla("ensenanza" if ensenanza else "")
+                salio = self.publicar_charla("ensenanza" if ensenanza else "")
             except ia.SinCerebro as error:
                 self.avisar("ia_caida_charla", f"La IA no respondió y no pude escribir la publicación. ({str(error)[:200]})")
+            break                                        # la otra, si también tocaba, sale la próxima hora
         self.estado.guardar()
+        return salio
+
+    # ------------------------------------------------- calendario económico
+    def publicar_suelto(self, tg_html: str, para_x: str, hashtags: list[str] | None = None) -> tuple[int | None, str]:
+        """Publica algo que no es noticia ni promo (calendario) en Telegram (canal y grupo) y en X."""
+        id_tg, id_x = None, ""
+        tags = hashtags or []
+        if self.redes():
+            r = self.redes()
+            tg_html += f'\n\n📲 <a href="{html.escape(r["enlace"], quote=True)}">{html.escape(r["texto"], quote=False)}</a>'
+        tg_html = sumar_hashtags(tg_html, tags)
+        if "telegram" in self.canales:
+            for i, lugar in enumerate([self.destino, *self.tambien_en]):
+                try:
+                    resultado = telegram_publicar(self.token, lugar, None, tg_html)
+                    id_tg = id_tg if i else resultado
+                except ErrorPublicacion as error:
+                    self.fallas += 1
+                    self.avisar(error.clave, str(error))
+        if "x" in self.canales:
+            texto = cal.limpiar_x(para_x)
+            texto = sumar_hashtags(texto, tags, None if x_premium(self.cfg["x"]) else LIMITE_X)
+            if not x_premium(self.cfg["x"]):
+                texto = recortar_x(texto)
+            try:
+                id_x = x_publicar(self.claves_x, None, texto)
+            except ErrorPublicacion as error:
+                self.fallas += 1
+                self.avisar(error.clave, str(error))
+        return id_tg, id_x
+
+    def tal_vez_calendario(self) -> bool:
+        """La agenda del día (a la mañana) y el aviso un rato antes de cada dato importante."""
+        c = self.cfg.get("calendario") or {}
+        if not verdadero(c.get("activa")) or not self.canales or en_silencio(self.cfg, self.ahora):
+            return False
+        memoria = self.estado.datos["calendario"]
+        avisados = memoria.setdefault("avisos", {})
+        local = self.ahora.astimezone(zona(self.cfg))
+        hora_agenda = a_hora(c.get("agenda_hora") or "07:30")
+        toca_agenda = memoria.get("agenda") != local.date().isoformat() and hora_agenda is not None and local.time() >= hora_agenda
+        eventos = cal.leer(self.cfg, self.ahora)
+        if not eventos:
+            return False
+        hoy = cal.de_hoy(eventos, self.cfg, self.ahora)
+        publicado = False
+        if toca_agenda:
+            memoria["agenda"] = local.date().isoformat()
+            futuros = [e for e in hoy if e["fecha"] > self.ahora]
+            if futuros:
+                tg, x = cal.agenda(futuros)
+                self.publicar_suelto(tg, x, hashtags_para(cal.para_hashtags(futuros), self.cfg.get("hashtags") or []))
+                log.info("Calendario: agenda del día con %d datos", len(futuros))
+                publicado = True
+                # Lo que sale dentro de la próxima hora ya quedó avisado en la agenda.
+                for e in cal.proximos(eventos, self.ahora):
+                    avisados[e["clave"]] = self.ahora.isoformat()
+        if not publicado:
+            ya_avisados = set(avisados)
+            pronto = [e for e in cal.proximos(eventos, self.ahora, int(c.get("aviso_desde_min", 10)), int(c.get("aviso_hasta_min", 80)))
+                      if e["clave"] not in ya_avisados]
+            if pronto:
+                tg, x = cal.aviso_previo(pronto, self.ahora)
+                self.publicar_suelto(tg, x, hashtags_para(cal.para_hashtags(pronto), self.cfg.get("hashtags") or []))
+                for e in pronto:
+                    avisados[e["clave"]] = self.ahora.isoformat()
+                log.info("Calendario: aviso previo de %s", ", ".join(e["nombre"] for e in pronto))
+                publicado = True
+        # La memoria del calendario se poda: solo hace falta la última semana.
+        limite = (self.ahora - timedelta(days=8)).isoformat()
+        memoria["avisos"] = {k: v for k, v in avisados.items() if str(v) >= limite}
+        self.estado.guardar()
+        return publicado
+
+    def muestra_calendario(self) -> int:
+        """Modo prueba: te manda por privado la agenda y un aviso de ejemplo con los datos reales de la semana."""
+        eventos = cal.leer(self.cfg, self.ahora)
+        if not eventos:
+            self.avisar("calendario", "No pude leer el calendario económico (no respondió o no hay datos importantes esta semana).")
+            return self.cerrar(0)
+        hoy = cal.de_hoy(eventos, self.cfg, self.ahora)
+        futuros = [e for e in eventos if e["fecha"] > self.ahora]
+        lista, titulo = (hoy, "Agenda económica de hoy") if hoy else (futuros, "Próximos datos importantes")
+        hechas = 0
+        if lista and self.token and self.chat_prueba:
+            tg, x = cal.agenda(lista, titulo)
+            telegram_mensaje(self.token, self.chat_prueba, "📅 Así saldría la agenda en Telegram:\n\n" + tg, html=True)
+            hechas += 1
+        if futuros and self.token and self.chat_prueba:
+            primero = futuros[0]["fecha"]
+            juntos = [e for e in futuros if e["fecha"] == primero]
+            tg, x = cal.aviso_previo(juntos, primero - timedelta(minutes=60))
+            telegram_mensaje(self.token, self.chat_prueba, "⏰ Así saldría el aviso 1 hora antes:\n\n" + tg, html=True)
+            telegram_mensaje(self.token, self.chat_prueba, "Y así en X:\n\n" + cal.limpiar_x(x))
+            hechas += 1
+        return self.cerrar(hechas)
 
     def publicar_charla(self, forzado: str = "") -> bool:
         """Escribe una charla para X (la IA, con controles), la publica y abajo responde con la invitación

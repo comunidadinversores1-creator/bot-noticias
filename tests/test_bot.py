@@ -67,6 +67,7 @@ def corrida(monkeypatch, tmp_path, red):
         c.cfg["x_charla"]["activa"] = charla          # las preguntas para X, solo en sus pruebas
         c.cfg["hashtags"] = []                        # sin hashtags, salvo en su prueba
         c.cfg["ensenanza"]["activa"] = False          # las enseñanzas, solo en sus pruebas
+        c.cfg["calendario"]["activa"] = False         # el calendario económico, solo en sus pruebas
         c.chat_prueba = "555"
         return c
 
@@ -1779,3 +1780,54 @@ def test_lo_urgente_de_madrugada_no_le_saca_lugar_al_dia(corrida, red, tmp_path)
     assert c.nocturnas_hoy() == 2
     assert c.correr() == 0
     assert len(_al_canal(red)) == 1                               # a las 9:40 sale la noticia común del día
+
+
+
+# ============================== calendario económico y de a una publicación por vez
+
+def _evento(hora_arg, minuto=30, titulo="CPI m/m", pais="USD", impacto="High"):
+    fecha = datetime(2026, 10, 9, hora_arg, minuto, tzinfo=timezone(timedelta(hours=-3)))
+    return {"title": titulo, "country": pais, "date": fecha.isoformat(), "impact": impacto, "forecast": "0.3%", "previous": "0.2%"}
+
+
+def test_agenda_del_dia_a_la_manana(corrida, red, tmp_path):
+    _sin_la_fed(red)
+    red.calendario = [_evento(9), _evento(9, titulo="Core CPI m/m"), _evento(15, 0, "Federal Funds Rate"),
+                      _evento(11, titulo="Retail Sales m/m", impacto="Low"), _evento(10, titulo="GDP q/q", pais="JPY")]
+    c = corrida(imagen="ninguna", ahora=_hora(7, 40))
+    c.cfg["calendario"]["activa"] = True
+    assert c.correr() == 0
+    canal = _al_canal(red)
+    assert len(canal) == 1                                         # la agenda, y nada más en esta corrida
+    t = canal[0]["text"]
+    assert t.startswith("📅 <b>Agenda económica de hoy</b>") and "09:30" in t and "inflación (IPC)" in t
+    assert "decisión de tasas de la Fed" in t and "Retail" not in t and "ventas minoristas" not in t and "Japón" not in t
+    assert "Previsión: 0.3%" in t and "volatilidad" not in t and "movimientos bruscos" in t
+    assert len(red.x_posts) == 1 and "Agenda económica de hoy" in red.x_posts[0]["text"]
+    assert _memoria(tmp_path)["publicadas"] == []                  # la noticia del BCRA espera a la próxima hora
+
+
+def test_aviso_antes_del_dato(corrida, red, tmp_path):
+    _sin_la_fed(red)
+    red.calendario = [_evento(10, 30), _evento(10, 30, "Core CPI m/m")]
+    for minuto in (40, 50):
+        c = corrida(imagen="ninguna", ahora=_hora(9, minuto))
+        c.cfg["calendario"]["activa"] = True
+        c.estado.datos["calendario"]["agenda"] = "2026-10-09"       # la agenda ya salió
+        assert c.correr() == 0
+    avisos = [m["text"] for m in _al_canal(red) if "⏰" in m["text"]]
+    assert len(avisos) == 1                                         # una sola vez
+    assert "inflación (IPC) y inflación núcleo (IPC) de EE.UU." in avisos[0] and "10:30" in avisos[0]
+    assert "volatilidad" in avisos[0] and "gestión de riesgo" in avisos[0]
+    assert any("⏰" in p["text"] for p in red.x_posts)
+
+
+def test_no_salen_dos_publicaciones_juntas(corrida, red, tmp_path):
+    _sin_la_fed(red)
+    c = _con_promos(corrida(imagen="ninguna", charla=True, ahora=_hora(10, 40)))   # toca la pregunta de las 9:30 y la promo de las 10:30
+    assert c.correr() == 0
+    memoria = _memoria(tmp_path)
+    assert len(memoria["charlas"]) == 1 and memoria["publicadas"] == []           # la promo espera a la próxima corrida
+    c = _con_promos(corrida(imagen="ninguna", charla=True, ahora=_hora(11, 40)))
+    assert c.correr() == 0
+    assert [p["tipo"] for p in _memoria(tmp_path)["publicadas"]] == ["promo"]

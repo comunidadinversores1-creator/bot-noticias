@@ -20,6 +20,7 @@ VACIO = {
     "promos": {},         # id de promo -> cuándo le tocó el turno por última vez
     "promos_hechas": 0,   # contador, para ir cambiando el enfoque del texto
     "charlas": [],        # publicaciones de charla en X (preguntas, dilemas): fecha, formato, texto, id
+    "calendario": {},     # "agenda": día de la última agenda · "avisos": evento -> cuándo se avisó
 }
 
 
