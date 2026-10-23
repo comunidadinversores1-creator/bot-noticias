@@ -205,7 +205,7 @@ class InternetFalso:
 
         if "cuenta de X de Ezequiel" in sistema:
             textos = getattr(self, "charlas", None) or [
-                "te pagan 3.000 usd por mes pero tu plata la maneja un bot que no podés apagar\n\n¿aceptás?"]
+                "te pagan 3.000 usd por mes pero tu dinero lo maneja un bot que no podés apagar\n\n¿aceptás?"]
             indice = getattr(self, "charla_n", 0)
             self.charla_n = indice + 1
             contenido = json.dumps({"texto": textos[min(indice, len(textos) - 1)]}, ensure_ascii=False)

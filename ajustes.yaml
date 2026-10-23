@@ -71,13 +71,55 @@ x_charla:
   horarios: ["09:30", "14:00", "21:30"]      # una después de cada horario
   # Debajo de cada pregunta, una de estas (van rotando):
   respuestas:
-    - "si te hacen pensar estas preguntas, seguime.\n\ntodos los días subo una sobre trading, bots, IA y plata. y las noticias que mueven el mercado, apenas salen."
-    - "subo una de estas todos los días.\n\nsi te interesan el trading, los bots y la plata, hablados con números y sin humo, seguime para no perderte la próxima."
-    - "mañana hay otra.\n\nseguime si te interesa el trading, los bots de IA y cómo cuidar la plata sin vender humo."
+    - "si te hacen pensar estas preguntas, seguime.\n\ntodos los días subo una sobre trading, bots, IA y dinero. y las noticias que mueven el mercado, apenas salen."
+    - "subo una de estas todos los días.\n\nsi te interesan el trading, los bots y el dinero, hablados con números y sin humo, seguime para no perderte la próxima."
+    - "mañana hay otra.\n\nseguime si te interesa el trading, los bots de IA y cómo cuidar tu dinero sin vender humo."
+
+  # VENTA: preguntas que hacen pensar en el problema que resuelve un producto tuyo.
+  # Abajo, la respuesta lleva al producto (X la marca como publicidad).
+  ventas:
+    - producto: "las señales gratuitas del bot de trading de Ezequiel para EUR/AUD y AUD/CAD, en Exness"
+      datos: "El bot indica entrada, Stop Loss, Take Profit y cuándo pasar a Break Even. El canal es gratis para quien se registra en Exness con el link de Ezequiel. No garantiza resultados."
+      respuesta: "por eso armé un bot que me avisa la entrada, el stop loss y el take profit en EUR/AUD y AUD/CAD.\n\nlas señales son gratis si te registrás en Exness con mi link (está en mi perfil). operar con apalancamiento implica riesgo."
+    - producto: "Exness Terminal: operar con un clic, stop loss y take profit desde el gráfico, hasta 8 gráficos y calendario económico"
+      datos: "Exness Terminal tiene One-Click Trading, más de 100 indicadores, hasta 8 gráficos a la vez, SL y TP desde el gráfico y calendario económico integrado."
+      respuesta: "yo opero desde Exness Terminal: un clic para entrar, stop loss y take profit desde el gráfico, y el calendario económico a la vista.\n\nsi querés probarlo, mi link está en el perfil. operar con apalancamiento implica riesgo."
+
+# ------------------------------------------------------------
+#  ENSEÑANZA: 3 por día, en Telegram (canal y tema del grupo) y en X.
+#  Cada una explica una de las preguntas que más se buscan en Google, de a una y sin repetir.
+#  Si un tema necesita datos exactos (una herramienta, los pasos de una app), ponelos en "datos"
+#  y la IA usa SOLO eso. Para sumar temas, agregá renglones.
+# ------------------------------------------------------------
+ensenanza:
+  activa: true
+  horarios: ["08:30", "12:30", "18:30"]
+  temas:
+    - "¿Qué es Bitcoin y cómo funciona?"
+    - {pregunta: "¿Cómo se usa el trading con un clic en Exness Terminal?", datos: "Exness Terminal tiene One-Click Trading: permite abrir y cerrar operaciones de mercado con un solo clic, sin una ventana adicional de confirmación. Puede servir para scalping o para operar noticias, donde la velocidad importa. Operar con apalancamiento implica riesgo de perder el capital."}
+    - "¿Qué es la blockchain, explicado fácil?"
+    - "¿Qué es el P2P en cripto y cómo se usa sin que te estafen?"
+    - "¿Qué es un stop loss y cómo se usa?"
+    - "¿Qué es una stablecoin como USDT o USDC?"
+    - {pregunta: "¿Cómo poner stop loss y take profit desde el gráfico en Exness Terminal?", datos: "En Exness Terminal el Stop Loss y el Take Profit se pueden gestionar directamente desde el gráfico. El Terminal tiene más de 100 indicadores, hasta 8 gráficos al mismo tiempo y calendario económico integrado."}
+    - "¿Qué es el apalancamiento en trading y por qué es peligroso?"
+    - "¿Qué es el trading y en qué se diferencia de invertir?"
+    - "¿Qué es un bot de trading y cómo funciona?"
+    - {pregunta: "¿Para qué sirve el calendario económico de Exness Terminal?", datos: "Exness Terminal tiene un calendario económico integrado: muestra los eventos que pueden mover el mercado (datos de empleo, inflación, decisiones de tasas) para no operar a ciegas cuando sale una noticia fuerte."}
+    - "¿Qué es el spread en un broker?"
+    - "¿Qué es un backtest y para qué sirve?"
+    - "¿Qué es una billetera cripto y cuál es la diferencia con un exchange?"
+    - "¿Qué es el take profit?"
+    - "¿Qué es el drawdown de una estrategia?"
+    - "¿Qué es un lote en forex?"
+    - "¿Qué es el staking?"
+    - "¿Cuánto dinero necesito para empezar a invertir?"
+    - "¿Qué es la inflación y cómo afecta a tus ahorros?"
+    - "¿Qué es el riesgo país?"
 
 ritmo:
   zona_horaria: "America/Argentina/Buenos_Aires"
-  max_por_dia: 10                 # tope de publicaciones por día (noticias + promos)
+  max_por_dia: 7                  # noticias + promos por día (4 noticias + 3 promos). Las enseñanzas y las preguntas de X van aparte
   promos_por_dia: 3               # cuántas de esas 10 son ventas de tus herramientas y campañas
   horarios_promos: ["10:30", "15:30", "20:30"]   # desde esa hora sale la promo que toca
   horas_entre_promos: 3           # nunca dos promos pegadas

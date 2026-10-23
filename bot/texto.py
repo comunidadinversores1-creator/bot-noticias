@@ -772,6 +772,9 @@ def revisar_charla(crudo: dict, anteriores: list[str], limite: int = 280) -> tup
     texto = sin_links(str(texto or "")).strip().strip('"').strip()
     texto = re.sub(r"\n{3,}", "\n\n", texto)
     problemas = []
+    # Eze dice "dinero", nunca "plata" (no se reemplaza solo: "la plata" -> "la dinero" quedaría mal).
+    if re.search(r"(?i)\bplata\b", texto):
+        problemas.append('dice "plata": tiene que decir "dinero" (y concordar: "el dinero", "tu dinero lo...")')
     if len(texto) < 25:
         problemas.append("quedó vacía o demasiado corta")
     if peso_x(texto) > limite:

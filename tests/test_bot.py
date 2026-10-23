@@ -66,6 +66,7 @@ def corrida(monkeypatch, tmp_path, red):
         c.tambien_en = []                            # solo el canal (la prueba del grupo lo prende)
         c.cfg["x_charla"]["activa"] = charla          # las preguntas para X, solo en sus pruebas
         c.cfg["hashtags"] = []                        # sin hashtags, salvo en su prueba
+        c.cfg["ensenanza"]["activa"] = False          # las enseñanzas, solo en sus pruebas
         c.chat_prueba = "555"
         return c
 
@@ -579,7 +580,8 @@ def _solo(red, titulo: str, resumen: str = "", fuente: str = "coindesk.com"):
 
 
 def test_cupo_reparte_las_diez_a_lo_largo_del_dia(cfg):
-    assert cfg["ritmo"]["max_por_dia"] == 10
+    assert cfg["ritmo"]["max_por_dia"] == 7               # hoy: 4 noticias + 3 promos (las enseñanzas van aparte)
+    cfg["ritmo"]["max_por_dia"] = 10
     assert cupo_a_esta_hora(cfg, _local(3)) == 1        # madrugada
     assert cupo_a_esta_hora(cfg, _local(7)) == 1        # arranca el día
     assert cupo_a_esta_hora(cfg, _local(12)) == 3
@@ -1747,3 +1749,22 @@ def test_la_noticia_sale_con_sus_hashtags(corrida, red, tmp_path):
     c.cfg["hashtags"] = [{"hashtag": "Argentina", "si_dice": ["bcra"]}]
     assert c.correr() == 0
     assert _al_canal(red)[0]["text"].rstrip().endswith("#Argentina") and red.x_posts[0]["text"].rstrip().endswith("#Argentina")
+
+
+
+def test_ensenanza_sale_en_telegram_y_en_x(corrida, red, tmp_path):
+    _sin_la_fed(red)
+    red.charlas = ["¿Qué es Bitcoin y cómo funciona?\n\nes una moneda digital que no depende de ningún banco.\n\n¿vos ya tenés?"]
+    c = corrida(imagen="ninguna", ahora=_hora(8, 40))
+    c.cfg["ensenanza"]["activa"] = True
+    assert c.correr() == 0
+    canal = [m for m in _al_canal(red) if "📚" in m["text"]]
+    assert len(canal) == 1 and canal[0]["text"].startswith("📚 <b>¿Qué es Bitcoin y cómo funciona?</b>")
+    assert any("¿Qué es Bitcoin" in p["text"] for p in red.x_posts)
+    memoria = _memoria(tmp_path)["charlas"]
+    assert len(memoria) == 1 and memoria[0]["formato"] == "ensenanza"
+
+
+def test_charla_que_dice_plata_no_pasa():
+    _, problemas = texto.revisar_charla({"texto": "te pagan bien pero tu plata la maneja un bot\n\n¿aceptás?"}, [])
+    assert any("dinero" in p for p in problemas)

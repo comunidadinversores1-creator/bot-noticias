@@ -139,11 +139,13 @@ class Estado:
     def titulares_recientes(self, momento: datetime, horas: float = 48, cantidad: int = 15) -> list[str]:
         return [p.get("titular", "") for p in self._noticias(momento, horas)[-cantidad:] if p.get("titular")]
 
-    def charlas_hoy(self, cfg: dict, momento: datetime) -> int:
+    def charlas_hoy(self, cfg: dict, momento: datetime, ensenanza: bool = False) -> int:
+        """Cuántas charlas de X (o, con ensenanza=True, cuántas enseñanzas) salieron hoy."""
         hoy = momento.astimezone(zona(cfg)).date()
         return sum(1 for c in self.datos["charlas"]
                    if isinstance(c, dict) and _fecha_o_nada(c.get("fecha")) and
-                   _fecha_o_nada(c.get("fecha")).astimezone(zona(cfg)).date() == hoy)
+                   _fecha_o_nada(c.get("fecha")).astimezone(zona(cfg)).date() == hoy
+                   and (c.get("formato") == "ensenanza") == ensenanza)
 
     def charlas_recientes(self, cantidad: int = 30) -> list[str]:
         return [str(c.get("texto", "")) for c in self.datos["charlas"][-cantidad:] if isinstance(c, dict) and c.get("texto")]

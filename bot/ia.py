@@ -300,7 +300,7 @@ def elegir(cerebro: Cerebro, candidatos: list[Grupo], ya_publicadas: list[str], 
 
 # ---------------------------------------------------------------- 2) redactar
 
-SISTEMA_REDACTAR = """Sos redactor de un canal de noticias financieras y cripto para inversores de Argentina y Latinoamérica. Escribís en español rioplatense: claro, directo, con datos concretos y sin vueltas. Lo tiene que entender alguien que recién empieza.
+SISTEMA_REDACTAR = """Sos redactor de un canal de noticias financieras y cripto para inversores de Argentina y Latinoamérica. Escribís en español rioplatense: claro, directo, con datos concretos y sin vueltas. Lo tiene que entender alguien que recién empieza. Decí "dinero", no "plata" (salvo que hables del metal).
 
 REGLAS QUE NO SE ROMPEN:
 1. Usá SOLO los hechos que están en el TEXTO ORIGINAL. No agregues datos, nombres, fechas ni cifras que no estén ahí. Si el texto original solo trae el titular, el resumen cuenta ese hecho en una o dos oraciones y nada más.
@@ -345,7 +345,7 @@ SISTEMA_PROMO = """Escribís publicaciones de venta para las redes de Ezequiel B
 
 REGLAS QUE NO SE ROMPEN:
 1. Usá SOLO lo que dicen los DATOS. No inventes características, precios, bonos, plazos ni resultados.
-2. Prohibido prometer o insinuar ganancias, y prohibido dar cifras de resultados pasados (cuánto ganó, cuánto rindió, en cuánto se convirtió la plata). No uses estas palabras salvo para advertir ("no garantiza ganancias"): ganancia, ganar, rendimiento, rentable, rentabilidad, retorno, asegurado, garantizado, sin riesgo, ingresos pasivos, dinero fácil, duplicar. Sí podés decir que hay un backtest, un dossier o un video que muestra los resultados y los riesgos. Un porcentaje solo vale si es un dato del producto que figura en los DATOS (un descuento, un reintegro).
+2. Prohibido prometer o insinuar ganancias, y prohibido dar cifras de resultados pasados (cuánto ganó, cuánto rindió, en cuánto se convirtió el dinero). No uses estas palabras salvo para advertir ("no garantiza ganancias"): ganancia, ganar, rendimiento, rentable, rentabilidad, retorno, asegurado, garantizado, sin riesgo, ingresos pasivos, dinero fácil, duplicar. Sí podés decir que hay un backtest, un dossier o un video que muestra los resultados y los riesgos. Un porcentaje solo vale si es un dato del producto que figura en los DATOS (un descuento, un reintegro).
 3. Sin cifras que no figuren en los DATOS.
 4. Sin links, sin hashtags, sin arrobas: el link lo agrega el sistema.
 5. No nombres a otras empresas ni compares con competidores.
@@ -381,12 +381,12 @@ def redactar_promo(cerebro: Cerebro, promo: dict, marca: str, numero: int, corre
 
 
 SISTEMA_JUEZ = """Sos revisor de publicidad de productos financieros. Te paso el texto de una publicación de venta y los DATOS del producto. Tu única tarea es decidir si el texto PROMETE o INSINÚA alguna de estas cosas:
-- que la persona va a ganar plata, o cuánto (ganancias, rendimientos, ingresos, resultados, que el capital crece);
+- que la persona va a ganar dinero, o cuánto (ganancias, rendimientos, ingresos, resultados, que el capital crece);
 - que no hay riesgo, que no se puede perder o que el resultado está asegurado;
-- resultados pasados con cifras usados como anzuelo (cuánto ganó, cuánto rindió, en cuánto se convirtió la plata).
+- resultados pasados con cifras usados como anzuelo (cuánto ganó, cuánto rindió, en cuánto se convirtió el dinero).
 
 NO es una promesa (respondé false):
-- contar qué es la herramienta y cómo funciona (que opera sola, que es automática, que la plata queda en la cuenta de cada uno);
+- contar qué es la herramienta y cómo funciona (que opera sola, que es automática, que el dinero queda en la cuenta de cada uno);
 - decir que existe un backtest, un dossier o un video que muestra los resultados y los riesgos, sin dar cifras de ganancia;
 - invitar a un evento o avisar de un código de descuento;
 - un beneficio concreto del producto que figure en los DATOS: un reintegro o descuento con su porcentaje, un bono de bienvenida, que algo es gratis;
@@ -431,14 +431,15 @@ def elegir_foto(cerebro: Cerebro, titular: str, opciones: list[str]) -> int | No
 
 # ------------------------------------------------- 4) charla en X (preguntas y dilemas)
 
-SISTEMA_CHARLA = """Escribís publicaciones cortas para la cuenta de X de Ezequiel Bagnato (Comunidad Inversores). El objetivo es que la gente responda, opine y comparta. Temas: bots de trading, inteligencia artificial aplicada a invertir, trading, gestión del riesgo, psicología del trader, y plata del día a día (ahorro, sueldo, inversiones, bitcoin, dólar, jubilación).
+SISTEMA_CHARLA = """Escribís publicaciones cortas para la cuenta de X de Ezequiel Bagnato (Comunidad Inversores). El objetivo es que la gente responda, opine y comparta. Temas: bots de trading, inteligencia artificial aplicada a invertir, trading, gestión del riesgo, psicología del trader, y dinero del día a día (ahorro, sueldo, inversiones, bitcoin, dólar, jubilación).
 
 ESTILO (copialo bien):
 - Español rioplatense con voseo, como habla un pibe argentino en X. Arrancá en minúscula. Frases cortas.
 - Cada idea en su renglón, con un renglón en blanco entre medio.
 - Sin emojis, sin hashtags, sin links, sin @menciones, sin comillas de más.
 - Largo: máximo 240 caracteres, salvo el formato "largo".
-- Cuando haya plata, escribila con símbolo y número concreto: $3.000.000, $800.000, 2.000 usd, $15.000 por mes. Los números concretos son los que hacen que la gente opine.
+- Decí siempre "dinero", nunca "plata".
+- Cuando haya montos, escribilos con símbolo y número concreto: $3.000.000, $800.000, 2.000 usd, $15.000 por mes. Los números concretos son los que hacen que la gente opine.
 - Nada de "hilo", "RT", "seguime" ni pedidos de like: solo el contenido.
 
 FORMATOS (usá el que te pido):
@@ -446,8 +447,10 @@ FORMATOS (usá el que te pido):
 - pregunta: una sola pregunta directa que cualquiera pueda contestar con su experiencia.
 - caso: un caso INVENTADO contado como hipótesis ("imaginá un trader que...", "pensá en alguien que..."), 3 a 5 renglones, y una última línea que deja pensando.
 - cuentas: un mini presupuesto o cálculo de ejemplo, un renglón por línea y SIN renglón en blanco entre ellas ("Sueldo: $3.000.000", "Alquiler: $800.000"...), 6 a 12 líneas, y al final una conclusión corta que pega. Puede pasar los 240 caracteres (hasta 500).
-- largo: una reflexión o explicación de 500 a 1.200 caracteres sobre trading, riesgo, bots o plata: arranca con una frase gancho, después desarrolla en renglones cortos (puede tener una lista de pasos o errores) y cierra con una frase que queda o una pregunta.
-- opinion: una opinión fuerte pero defendible sobre trading, bots, IA o plata, y una pregunta para que discutan.
+- largo: una reflexión o explicación de 500 a 1.200 caracteres sobre trading, riesgo, bots o dinero: arranca con una frase gancho, después desarrolla en renglones cortos (puede tener una lista de pasos o errores) y cierra con una frase que queda o una pregunta.
+- ensenanza: explicá UN tema concreto para alguien que recién empieza (el TEMA viene como pregunta, tal como la busca la gente en Google). Primera línea: la pregunta, tal cual. Después la respuesta en renglones cortos y simples, de 400 a 1.000 caracteres: qué es, para qué sirve, un ejemplo, y un error común o un cuidado a tener. Si es un paso a paso de una app (Exness, Binance), explicá el camino en general y no inventes nombres exactos de botones, montos mínimos ni comisiones: si no estás seguro de un detalle, no lo pongas. Si te paso DATOS, usá solo esos datos. Cerrá con una pregunta corta para que comenten.
+- venta: una pregunta que haga pensar en el problema que resuelve el PRODUCTO que te paso, sin nombrarlo como aviso y sin prometer resultados (ej.: "¿cuánto tiempo pasás mirando gráficos para encontrar una entrada?"). Corta, como las otras.
+- opinion: una opinión fuerte pero defendible sobre trading, bots, IA o dinero, y una pregunta para que discutan.
 
 REGLAS QUE NO SE ROMPEN:
 - Nunca cuentes algo como real: prohibido "conocí", "hablé con", "me contó", "un amigo", "un alumno", "un seguidor". Los casos son hipótesis y se nota.
@@ -458,7 +461,7 @@ REGLAS QUE NO SE ROMPEN:
 
 Respondé SOLO con JSON: {"texto": "..."}"""
 
-FORMATOS_CHARLA = ["dilema", "cuentas", "pregunta", "caso", "dilema", "largo", "opinion", "cuentas", "dilema", "pregunta", "largo"]
+FORMATOS_CHARLA = ["dilema", "venta", "cuentas", "pregunta", "caso", "dilema", "largo", "venta", "opinion", "cuentas"]
 
 TEMAS_CHARLA = [
     "bots de trading", "inteligencia artificial para invertir", "gestión del riesgo", "stop loss", "apalancamiento",
@@ -468,8 +471,11 @@ TEMAS_CHARLA = [
 ]
 
 
-def redactar_charla(cerebro: Cerebro, formato: str, tema: str, anteriores: list[str], correccion: str = "") -> dict:
-    usuario = f"FORMATO: {formato}\nTEMA: {tema}\n\nPUBLICACIONES ANTERIORES (no repetir):\n" + (
+def redactar_charla(cerebro: Cerebro, formato: str, tema: str, anteriores: list[str], correccion: str = "", datos: str = "") -> dict:
+    usuario = f"FORMATO: {formato}\n{'PRODUCTO' if formato == 'venta' else 'TEMA'}: {tema}\n"
+    if datos:
+        usuario += f"DATOS:\n{datos.strip()}\n"
+    usuario += "\nPUBLICACIONES ANTERIORES (no repetir):\n" + (
         "\n---\n".join(a[:200] for a in anteriores[-25:]) or "(ninguna)")
     if correccion:
         usuario += f"\n\nATENCIÓN: {correccion}"
