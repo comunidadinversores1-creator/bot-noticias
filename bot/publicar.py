@@ -1,6 +1,7 @@
 """Publica en Telegram y en X. Si algo falla, explica el motivo en criollo."""
 from __future__ import annotations
 
+import html as html_lib
 import json
 import os
 import re
@@ -94,6 +95,30 @@ def telegram_texto(token: str, destino: str, texto_html: str) -> int:
         {"chat_id": destino, "text": texto_html[:4096], "parse_mode": "HTML", "link_preview_options": _SIN_VISTA_PREVIA},
     )
     return int(resultado.get("message_id", 0))
+
+
+LIMITE_PIE_DE_FOTO = 1024    # Telegram no deja poner más que esto debajo de una foto
+
+
+def largo_visible(texto_html: str) -> int:
+    """Cuántos caracteres ve la gente (sin las marcas de negrita y de link)."""
+    return len(html_lib.unescape(re.sub(r"<[^>]+>", "", texto_html or "")))
+
+
+def telegram_publicar(token: str, destino: str, jpg: bytes | None, texto_html: str) -> int:
+    """Publica con foto o sin foto. Si el texto es más largo de lo que entra debajo de una foto
+    (pasa con los textos propios de Eze), sale la foto sola y enseguida el texto completo."""
+    if jpg is None:
+        return telegram_texto(token, destino, texto_html)
+    if largo_visible(texto_html) <= LIMITE_PIE_DE_FOTO:
+        return telegram_foto(token, destino, jpg, texto_html)
+    telegram_foto(token, destino, jpg, "")
+    try:
+        return telegram_texto(token, destino, texto_html)
+    except ErrorPublicacion as error:
+        # La foto ya salió: repetir todo la duplicaría.
+        error.incierto, error.reintentar = True, False
+        raise
 
 
 def telegram_mensaje(token: str, destino: str, texto: str, html: bool = False) -> None:

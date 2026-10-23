@@ -23,11 +23,11 @@ from .estado import Estado
 from .filtro import Grupo, es_mala_noticia, nombra_prohibido, preparar, puntaje, ya_contada
 from .fuentes import leer_fuentes
 from .imagen import armar_placa, armar_promo, buscar_foto, generar_con_ia, logo_guardado, tal_cual
-from .publicar import ErrorPublicacion, claves_x, telegram_chats, telegram_foto, telegram_mensaje, telegram_texto, x_publicar
+from .publicar import ErrorPublicacion, claves_x, telegram_chats, telegram_mensaje, telegram_publicar, x_publicar
 from .texto import (
     anio_actual, armar_llamado, enlaces_extra, faltantes, faltantes_promo, fuente_limpia, idea_de_imagen, normalizar_post, normalizar_promo,
     numeros_inventados, promesas, promo_telegram, promo_x, texto_revisable, texto_revisable_promo,
-    texto_telegram, texto_x,
+    texto_propio_telegram, texto_propio_x, texto_telegram, texto_x,
 )
 from .util import (
     RAIZ, a_hora, ahora_utc, cargar_ajustes, configurar_log, cupo_a_esta_hora, en_silencio, log, normalizar, socios_activos,
@@ -57,6 +57,18 @@ def promo_vencida(promo: dict, hoy: date) -> bool:
         return False
     limite = fecha_de_vencimiento(promo)
     return limite is None or hoy > limite
+
+
+def imagen_propia(ruta: str) -> Image.Image | None:
+    """Una imagen hecha a mano (por ejemplo, el flyer de una promo) guardada en el proyecto."""
+    if not ruta or not (RAIZ / ruta).exists():
+        return None
+    try:
+        imagen = Image.open(RAIZ / ruta)
+        imagen.load()
+        return imagen
+    except OSError:
+        return None
 
 
 class Corrida:
@@ -114,10 +126,7 @@ class Corrida:
         if not self.real:
             if self.token and self.chat_prueba:
                 try:
-                    if jpg is None:
-                        telegram_texto(self.token, self.chat_prueba, para_telegram)
-                    else:
-                        telegram_foto(self.token, self.chat_prueba, jpg, para_telegram)
+                    telegram_publicar(self.token, self.chat_prueba, jpg, para_telegram)
                     telegram_mensaje(self.token, self.chat_prueba, f"👆 Así saldría en Telegram.\n\nY así saldría en X:\n\n{para_x}")
                 except ErrorPublicacion as error:
                     log.error("  no pude mandar la muestra: %s", error)
@@ -127,10 +136,7 @@ class Corrida:
         errores: list[ErrorPublicacion] = []
         if "telegram" in self.canales:
             try:
-                if jpg is None:
-                    registro["telegram"] = telegram_texto(self.token, self.destino, para_telegram)
-                else:
-                    registro["telegram"] = telegram_foto(self.token, self.destino, jpg, para_telegram)
+                registro["telegram"] = telegram_publicar(self.token, self.destino, jpg, para_telegram)
                 log.info("  publicado en Telegram")
             except ErrorPublicacion as error:
                 errores.append(error)
@@ -285,7 +291,8 @@ class Corrida:
         activos = socios_activos(self.cfg)
         return [
             p for p in self.cfg["promos"]
-            if p.get("id") and verdadero(p.get("activa")) and str(p.get("datos") or "").strip() and not promo_vencida(p, hoy)
+            if p.get("id") and verdadero(p.get("activa")) and str(p.get("datos") or p.get("texto_fijo") or "").strip()
+            and not promo_vencida(p, hoy)
             and (not p.get("socio") or str(p["socio"]) in activos)
         ]
 
@@ -330,10 +337,13 @@ class Corrida:
         (estas dos últimas: no se pudo publicar; ver entregar)."""
         nombre = str(promo.get("nombre") or promo.get("id"))
         log.info("Promo %d: %s", numero, nombre)
+        propio = str(promo.get("texto_fijo") or "").strip()
+        if propio:
+            return self.promo_con_texto_propio(promo, propio, numero)
         socio = self.cfg["socios"].get(str(promo.get("socio") or ""), {})
         llamado = armar_llamado(
             socio, self.cfg, str(promo.get("llamado") or ""), str(promo.get("enlace") or ""), promo.get("aviso"),
-            str(promo.get("texto_sin_link") or ""),
+            str(promo.get("texto_sin_link") or ""), promo.get("paso_2"),
         )
         if llamado is None:
             self.avisar(f"promo_{promo.get('id')}", f"La promo «{nombre}» no salió: le falta el texto del llamado o el link. Revisala en ajustes.yaml.")
@@ -377,14 +387,8 @@ class Corrida:
             )
             return "rechazada"
 
-        imagen = None
         ruta = str(promo.get("imagen") or "").strip()
-        if ruta and (RAIZ / ruta).exists():
-            try:
-                imagen = Image.open(RAIZ / ruta)
-                imagen.load()
-            except OSError:
-                imagen = None
+        imagen = imagen_propia(ruta)
         etiqueta = str(promo.get("etiqueta") or "PROMO")
         emoji = str(promo.get("emoji") or ("🤖" if "HERRAMIENTA" in etiqueta.upper() else "🎁"))
         if self.sin_imagen:
@@ -405,6 +409,26 @@ class Corrida:
             promo_x(texto, llamado, self.cfg["x"], emoji, dato_fijo), registro,
             publicidad=True, original=datos,
         )
+        if resultado == "ok" and self.real:
+            self.estado.marcar_promo(str(promo.get("id")), self.ahora)
+        return resultado
+
+    def promo_con_texto_propio(self, promo: dict, propio: str, numero: int) -> str:
+        """Promo con el texto que escribió Eze: sale tal cual (la IA no lo toca), con su imagen si tiene."""
+        ruta = str(promo.get("imagen") or "").strip()
+        imagen = imagen_propia(ruta)
+        if ruta and imagen is None:
+            self.avisar(f"promo_imagen_{promo.get('id')}", f"La promo «{promo.get('nombre') or promo.get('id')}» salió sin imagen: no encontré {ruta}.")
+        jpg = tal_cual(imagen) if imagen is not None else None
+        para_telegram = texto_propio_telegram(propio)
+        para_x = texto_propio_x(str(promo.get("texto_x") or ""), propio, self.cfg["x"])
+        primera = next((l.strip() for l in re.sub(r"<[^>]+>", "", para_telegram).splitlines() if l.strip()), "")
+        registro = {
+            "fecha": self.ahora.isoformat(), "tipo": "promo", "promo_id": str(promo.get("id")), "titular": html.unescape(primera)[:200],
+            "categoria": "PROMO", "impacto": 0, "fuente": "", "foto": ruta, "socio": str(promo.get("socio") or ""),
+            "llamado": True, "titulos_originales": [], "telegram": None, "x": None,
+        }
+        resultado = self.entregar(numero, jpg, para_telegram, para_x, registro, publicidad=True, original=propio)
         if resultado == "ok" and self.real:
             self.estado.marcar_promo(str(promo.get("id")), self.ahora)
         return resultado
@@ -463,10 +487,10 @@ class Corrida:
 
         # --- muestra de una promo (solo en modo prueba)
         if not self.real and self.promo_pedida:
-            con_datos = [p for p in cfg["promos"] if p.get("id") and str(p.get("datos") or "").strip()]
+            con_datos = [p for p in cfg["promos"] if p.get("id") and str(p.get("datos") or p.get("texto_fijo") or "").strip()]
             elegida = next((p for p in con_datos if str(p["id"]) == self.promo_pedida), con_datos[0] if con_datos else None)
             if elegida is None:
-                log.error("No hay ninguna promo con datos cargados en ajustes.yaml.")
+                log.error("No hay ninguna promo con datos o texto cargados en ajustes.yaml.")
                 return 1
             try:
                 resultado = self.procesar_promo(elegida, 1)

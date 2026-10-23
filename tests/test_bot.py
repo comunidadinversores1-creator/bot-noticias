@@ -918,7 +918,7 @@ def test_promo_con_reintegro_puede_decir_el_porcentaje(corrida, red, tmp_path):
     assert _solo_promo(corrida(), "binance-tarjeta").correr() == 0
     pie = red.telegram_fotos[0]["caption"]
     assert "✅ 3% de reintegro en USDC" in pie and "31 de diciembre" in pie
-    assert '<a href="https://www.binance.com/join?ref=202718448">Abrí tu cuenta en Binance con mi link</a>' in pie
+    assert '<a href="https://www.binance.com/join?ref=202718448">Registrate en Binance con mi link</a>' in pie
     assert red.x_posts[0]["paid_partnership"] is True and "http" not in red.x_posts[0]["text"]
     memoria = json.loads((tmp_path / "estado.json").read_text(encoding="utf-8"))
     assert memoria["publicadas"][0]["promo_id"] == "binance-tarjeta"
@@ -1438,21 +1438,25 @@ def test_asi_vienen_los_ajustes(cfg):
     assert cfg["socios"]["exness"]["enlace"] == "https://one.exnessonelink.com/a/ptf6lzlrc8"
     assert cfg["socios"]["binance"]["enlace"] == "https://www.binance.com/join?ref=202718448"
     assert cfg["x"]["poner_links"] is False and cfg["encendido"] is False
+    assert cfg["telegram"]["destino"] == "@comunidad_inversores_anuncios"
     c = main.Corrida("prueba", 1, False)
     c.ahora = AHORA
     assert [p["id"] for p in c.promos_activas()] == [
-        "senales-exness", "video-senales", "labitconf-2026", "binance-tarjeta-octubre", "binance-tarjeta"]
+        "senales-exness", "exness-un-clic", "video-senales", "labitconf-2026", "binance-tarjeta-octubre", "binance-tarjeta"]
     hoy = AHORA.date()
-    for promo in cfg["promos"]:
-        assert str(promo["datos"]).strip(), promo["id"]
+    for promo in c.promos_activas():
+        assert main.imagen_propia(promo["imagen"]) is not None, promo["id"]      # cada una con su imagen
         if str(promo.get("vence") or "").strip():
             assert main.fecha_de_vencimiento(promo) is not None and not main.promo_vencida(promo, hoy), promo["id"]
+        if promo.get("texto_fijo"):
+            # el texto de Eze: su versión para X entra entera y sin links
+            x = texto.texto_propio_x(promo["texto_x"], promo["texto_fijo"], cfg["x"])
+            assert not x.endswith("…") and texto.peso_x(x) <= 280 and "http" not in x, promo["id"]
+            continue
         socio = cfg["socios"].get(str(promo.get("socio") or ""))
         assert texto.armar_llamado(socio, cfg, promo["llamado"], str(promo.get("enlace") or "")), promo["id"]
-        # las ventas no llevan cifras de resultados: ni el backtest ni "en cuánto se convirtió la plata"
+        # en las que escribe la IA no hay cifras de resultados
         assert texto.promesas(promo["datos"], promo["datos"]) == [], (promo["id"], texto.promesas(promo["datos"], promo["datos"]))
-        for cifra in ("77,8", "3.217", "20,7"):
-            assert cifra not in promo["datos"], (promo["id"], cifra)
 
 
 def test_socio_apagado_no_se_promociona(corrida, red, tmp_path):
@@ -1469,56 +1473,93 @@ def test_socio_apagado_no_se_promociona(corrida, red, tmp_path):
     assert [p["tipo"] for p in _memoria(tmp_path)["publicadas"]] != ["promo"]
 
 
-def test_promo_de_labitconf(corrida, red, tmp_path):
+def test_promo_de_labitconf_con_el_texto_de_eze(corrida, red, tmp_path):
     _sin_la_fed(red)
     assert _solo_promo(corrida(), "labitconf-2026").correr() == 0
+    assert red.llamadas_ia == [] or all("PROMO" not in json.dumps(l) for l in red.llamadas_ia[-1:])
     pie = red.telegram_fotos[0]["caption"]
-    assert '👉 <a href="https://www.hallos.io/event/labitconf/checkout">Sacá tu entrada con 40% OFF</a>' in pie
+    assert '👉 <a href="https://www.hallos.io/event/labitconf/checkout">Sacá tu entrada acá</a>' in pie
     assert "COMUNIDADINVERSORES40" in pie and "30 y 31 de octubre" in pie
     x = red.x_posts[0]
-    assert "Sacá tu entrada con 40% OFF (en la web de LABITCONF)" in x["text"]
     assert "COMUNIDADINVERSORES40" in x["text"] and "http" not in x["text"] and x["paid_partnership"] is True
-    assert texto.peso_x(x["text"]) <= 280
+    assert "media" in x                                                     # con el flyer de Eze
     assert _memoria(tmp_path)["publicadas"][0]["promo_id"] == "labitconf-2026"
 
 
-def test_promo_de_senales_de_exness(corrida, red, tmp_path):
+def test_promo_de_senales_con_el_texto_de_eze(corrida, red, tmp_path):
     _sin_la_fed(red)
     assert _solo_promo(corrida(), "senales-exness").correr() == 0
     pie = red.telegram_fotos[0]["caption"]
-    assert '<a href="https://one.exnessonelink.com/a/ptf6lzlrc8">Registrate en Exness con mi link</a>' in pie
-    assert "<i>Operar con apalancamiento implica riesgo de perder tu capital.</i>" in pie
-    assert '📎 <a href="https://drive.google.com/file/d/1mzqNl57Hj3rjzvWKR_6IoVOQ7xSbbf_C/view">Dossier completo: resultados, metodología y riesgos</a>' in pie
-    assert '📎 <a href="https://youtu.be/WGP222nUgvA">Tutorial paso a paso</a>' in pie
-    assert "✅ 20% de devolución de comisiones" in pie
+    assert "77,8% cierran en ganancia o en cero" in pie and "no garantizan resultados futuros" in pie
+    assert '👉 <a href="https://one.exnessonelink.com/a/ptf6lzlrc8">Registrate en Exness con mi link</a>' in pie
+    assert '📎 <a href="https://drive.google.com/file/d/1mzqNl57Hj3rjzvWKR_6IoVOQ7xSbbf_C/view">' in pie
     x = red.x_posts[0]["text"]
-    assert "Registrate en Exness con mi link (el link está en mi perfil)" in x and "⚠️ Operar con apalancamiento" in x
-    assert "http" not in x and texto.peso_x(x) <= 280
+    assert "77,8%" in x and "-20,7%" in x and "http" not in x and texto.peso_x(x) <= 280
 
 
-def test_promo_del_video(corrida, red, tmp_path):
+def test_texto_largo_de_eze_sale_foto_y_despues_el_texto(corrida, red, tmp_path):
+    _sin_la_fed(red)
+    assert _solo_promo(corrida(), "exness-un-clic").correr() == 0
+    assert len(red.telegram_fotos) == 1 and red.telegram_fotos[0].get("caption", "") == ""
+    canal = _al_canal(red)
+    assert len(canal) == 1 and "One-Click Trading" in canal[0]["text"]
+    assert "utm_source" not in canal[0]["text"]                              # se limpia el rastreo de ChatGPT
+    assert '<a href="https://one.exnessonelink.com/a/ptf6lzlrc8">Exness — registro</a>' in canal[0]["text"]
+    assert len(red.x_posts) == 1 and "media" in red.x_posts[0]
+
+
+def test_promo_del_video_con_el_texto_de_eze(corrida, red, tmp_path):
     _sin_la_fed(red)
     assert _solo_promo(corrida(), "video-senales").correr() == 0
     pie = red.telegram_fotos[0]["caption"]
-    assert '👉 <a href="https://youtu.be/WGP222nUgvA">Mirá el video completo</a>' in pie and "9.300" in pie
-    assert "Mirá el video completo (el link está en mi perfil)" in red.x_posts[0]["text"]
+    assert "https://youtu.be/WGP222nUgvA" in pie and "https://linktr.ee/comunidadinversores" in pie and "9.300" in pie
+    assert "El video completo está en mi perfil" in red.x_posts[0]["text"]
 
 
-def test_las_cifras_del_backtest_no_pueden_salir_en_una_venta(corrida, red, tmp_path):
+def test_las_cifras_inventadas_no_pueden_salir_en_una_venta_de_la_ia(corrida, red, tmp_path):
     _sin_la_fed(red)
-    red.alterar["promo"] = lambda s: json.dumps(dict(json.loads(s), texto="En la simulación, US$1.000 se convirtieron en US$3.217."), ensure_ascii=False)
-    assert _solo_promo(corrida(), "senales-exness").correr() == 0
+    red.alterar["promo"] = lambda s: json.dumps(dict(json.loads(s), texto="Con la tarjeta, US$1.000 se convirtieron en US$3.217."), ensure_ascii=False)
+    assert _solo_promo(corrida(), "binance-tarjeta").correr() == 0
     assert [p["tipo"] for p in _memoria(tmp_path)["publicadas"]] == ["noticia"]      # la venta no salió
     assert "cifras que no están en los datos" in red.telegram_mensajes[-1]["text"]
 
 
-def test_campana_de_la_tarjeta_de_binance(corrida, red, tmp_path):
+def test_campana_de_binance_en_dos_pasos(corrida, red, tmp_path):
     _sin_la_fed(red)
-    assert _solo_promo(corrida(), "binance-tarjeta").correr() == 0
-    pie = red.telegram_fotos[0]["caption"]
-    assert '<a href="https://www.binance.com/join?ref=202718448">Abrí tu cuenta en Binance con mi link</a>' in pie
+    assert _solo_promo(corrida(imagen="ninguna"), "binance-tarjeta").correr() == 0
+    pie = red.telegram_fotos[0]["caption"]                                   # con la imagen de la tarjeta
+    assert '👉 1) <a href="https://www.binance.com/join?ref=202718448">Registrate en Binance con mi link</a>' in pie
+    assert '👉 2) <a href="https://www.binance.com/es-AR/events/binance-physical-card-launch">Participá del lanzamiento de la tarjeta</a>' in pie
+    assert '🎥 <a href="https://www.instagram.com/p/Dd77w_stfdZ/">Mirá el video de la tarjeta</a>' in pie
     assert "<i>Promoción de Binance: tiene cupos limitados y condiciones propias.</i>" in pie
-    assert "⚠️ Promoción de Binance" in red.x_posts[0]["text"]
+    x = red.x_posts[0]["text"]
+    assert "Registrate en Binance con mi link y participá del lanzamiento de la tarjeta (los links están en mi perfil)" in x
+    assert "⚠️ Promoción de Binance" in x and "http" not in x
+
+
+def test_texto_propio_links_y_limpieza():
+    t = texto.texto_propio_telegram("Hola <yo> & vos [mirá esto](https://a.test/x?utm_source=chatgpt.com&id=3)\n\n\n\nhttps://b.test/y?utm_medium=z")
+    assert '<a href="https://a.test/x?id=3">mirá esto</a>' in t and "&lt;yo&gt; &amp; vos" in t
+    assert t.endswith("https://b.test/y") and "\n\n\n" not in t
+    x = texto.texto_propio_x("", "Primera línea con [link](https://a.test)\nresto", {"texto_sin_link": "el link está en mi perfil"})
+    assert x.startswith("Primera línea con link") and "El link está en mi perfil" in x and "http" not in x
+
+
+def test_si_falla_el_texto_despues_de_la_foto_no_se_repite(red):
+    from bot import publicar
+    publicar.telegram_foto("t", "@c", b"jpg", "")
+    largo = "<b>x</b>" + "a" * 1100
+    red.telegram_error = None
+    original = publicar.telegram_texto
+    def falla(*a, **k):
+        raise publicar.ErrorPublicacion("se cortó", reintentar=True)
+    publicar.telegram_texto = falla
+    try:
+        with pytest.raises(publicar.ErrorPublicacion) as e:
+            publicar.telegram_publicar("t", "@c", b"jpg", largo)
+        assert e.value.incierto and not e.value.reintentar
+    finally:
+        publicar.telegram_texto = original
 
 
 def test_el_dato_fijo_de_una_promo_nunca_falta(cfg):
@@ -1539,3 +1580,9 @@ def test_take_profit_no_es_una_promesa():
     assert texto.promesas("Te indica dónde poner el Stop Loss y el Take Profit") == []
     assert texto.promesas("Puro profit todos los meses") == ["profit"]
 
+
+
+def test_muestra_de_una_promo_con_texto_propio(corrida, red, tmp_path):
+    assert corrida(modo="prueba", promo="labitconf-2026").correr() == 0
+    assert [f["chat_id"] for f in red.telegram_fotos] == ["555"] and red.x_posts == []
+    assert "COMUNIDADINVERSORES40" in red.telegram_fotos[0]["caption"]

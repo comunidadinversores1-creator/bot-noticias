@@ -433,7 +433,7 @@ def faltantes(post: dict) -> list[str]:
 # --------------------------------------------------- llamado a registrarse
 
 def armar_llamado(socio: dict | None, cfg: dict, texto: str = "", enlace: str = "", aviso: str | None = None,
-                  sin_link: str = "") -> dict | None:
+                  sin_link: str = "", paso_2: dict | None = None) -> dict | None:
     """El 'registrate con mi link': texto, link y aviso. Los datos salen del socio; una promo puede
     traer los suyos (su propio link, su propio aviso y qué decir en X cuando no se pone el link)."""
     socio = socio or {}
@@ -444,13 +444,26 @@ def armar_llamado(socio: dict | None, cfg: dict, texto: str = "", enlace: str = 
     if not texto or not enlace:
         return None
     aviso = socio.get("aviso") if aviso is None else aviso
-    return {"texto": texto, "enlace": enlace, "aviso": sin_links(str(aviso or "").strip()), "sin_link": sin_links(str(sin_link or "").strip())}
+    llamado = {"texto": texto, "enlace": enlace, "aviso": sin_links(str(aviso or "").strip()), "sin_link": sin_links(str(sin_link or "").strip())}
+    # Paso 2 (opcional): después de registrarse con tu link, entrar a la campaña o al evento.
+    if isinstance(paso_2, dict):
+        texto_2 = sin_links(str(paso_2.get("texto") or "").strip())
+        enlace_2 = str(paso_2.get("enlace") or "").strip()
+        if texto_2 and enlace_2.startswith("http"):
+            llamado["paso_2"] = {"texto": texto_2, "enlace": enlace_2}
+    return llamado
 
 
 def _llamado_telegram(ll: dict) -> tuple[str, str]:
     """Devuelve (con formato, lo que se ve)."""
-    linea = f'👉 <a href="{html.escape(ll["enlace"], quote=True)}">{html.escape(ll["texto"], quote=False)}</a>'
-    visible = f"👉 {ll['texto']}"
+    a = lambda enlace, texto: f'<a href="{html.escape(enlace, quote=True)}">{html.escape(texto, quote=False)}</a>'
+    if ll.get("paso_2"):
+        p2 = ll["paso_2"]
+        linea = f"👉 1) {a(ll['enlace'], ll['texto'])}\n👉 2) {a(p2['enlace'], p2['texto'])}"
+        visible = f"👉 1) {ll['texto']}\n👉 2) {p2['texto']}"
+    else:
+        linea = f"👉 {a(ll['enlace'], ll['texto'])}"
+        visible = f"👉 {ll['texto']}"
     if ll["aviso"]:
         linea += f"\n<i>{html.escape(ll['aviso'], quote=False)}</i>"
         visible += f"\n{ll['aviso']}"
@@ -467,10 +480,16 @@ def link_en_x(cfg_x: dict, es_promo: bool) -> bool:
 
 
 def _llamado_x(ll: dict, cfg_x: dict, es_promo: bool = False) -> str:
+    texto = ll["texto"]
+    if ll.get("paso_2"):
+        segundo = ll["paso_2"]["texto"]
+        texto = f"{texto.rstrip('.')} y {segundo[:1].lower()}{segundo[1:]}"
     if link_en_x(cfg_x, es_promo):
-        return f"👉 {ll['texto']}: {ll['enlace']}"
+        return f"👉 {texto}: {ll['enlace']}"
     donde = ll.get("sin_link") or sin_links(str(cfg_x.get("texto_sin_link") or "el link está en mi perfil"))
-    return f"👉 {ll['texto']} ({donde})"
+    if ll.get("paso_2") and not ll.get("sin_link"):
+        donde = "los links están en mi perfil"
+    return f"👉 {texto} ({donde})"
 
 
 # ------------------------------------------------------------- noticias
@@ -598,7 +617,8 @@ def enlaces_extra(promo_cfg: dict) -> list[dict]:
     extras = []
     for item in _lista(promo_cfg.get("extras")):
         if isinstance(item, dict) and str(item.get("texto") or "").strip() and str(item.get("enlace") or "").strip().startswith("http"):
-            extras.append({"texto": sin_links(str(item["texto"]).strip()), "enlace": str(item["enlace"]).strip()})
+            extras.append({"texto": sin_links(str(item["texto"]).strip()), "enlace": str(item["enlace"]).strip(),
+                           "emoji": str(item.get("emoji") or "📎").strip()[:4] or "📎"})
     return extras[:3]
 
 
@@ -623,8 +643,9 @@ def promo_telegram(p: dict, llamado: dict, emoji: str = "📢", extras: list[dic
         lineas += ["", con_formato]
         visibles += ["", visible]
         for extra in extras or []:
-            lineas.append(f'📎 <a href="{html.escape(extra["enlace"], quote=True)}">{e(extra["texto"])}</a>')
-            visibles.append(f"📎 {extra['texto']}")
+            simbolo = extra.get("emoji") or "📎"
+            lineas.append(f'{simbolo} <a href="{html.escape(extra["enlace"], quote=True)}">{e(extra["texto"])}</a>')
+            visibles.append(f"{simbolo} {extra['texto']}")
         return "\n".join(lineas), len("\n".join(visibles))
 
     texto = p["texto"]
@@ -656,3 +677,52 @@ def promo_x(p: dict, llamado: dict, cfg_x: dict, emoji: str = "📢", dato_fijo:
         return elegido
     cierre = "\n\n".join(parte for parte in con_dato()[0:] if parte)
     return recortar_x(cabeza, LIMITE_X - peso_x("\n\n" + cierre)) + "\n\n" + cierre
+
+
+# ------------------------------------------------ textos propios de Eze
+
+_LINK_MD = re.compile(r"\[([^\]\n]+)\]\((https?://[^)\s]+)\)")
+_LINK_SUELTO = re.compile(r"https?://[^\s<>()\[\]]+")
+
+
+def limpiar_enlace(enlace: str) -> str:
+    """Saca el rastreo que agregan otras herramientas (?utm_source=chatgpt.com y parecidos)."""
+    base, _, consulta = enlace.partition("?")
+    resto = [p for p in consulta.split("&") if p and not p.lower().startswith("utm_")]
+    return base + ("?" + "&".join(resto) if resto else "")
+
+
+def texto_propio_telegram(texto: str) -> str:
+    """El texto que escribió Eze, tal cual, listo para Telegram. Los links se pueden escribir
+    sueltos (https://...) o como [texto](https://...): en ese caso se ve solo el texto, con el link."""
+    partes, pos = [], 0
+    for m in _LINK_MD.finditer(texto):
+        partes.append(_escapar_con_links(texto[pos:m.start()]))
+        partes.append(f'<a href="{html.escape(limpiar_enlace(m.group(2)), quote=True)}">{html.escape(m.group(1), quote=False)}</a>')
+        pos = m.end()
+    partes.append(_escapar_con_links(texto[pos:]))
+    salida = "".join(partes)
+    salida = re.sub(r"[ \t]+\n", "\n", salida)
+    return re.sub(r"\n{3,}", "\n\n", salida).strip()
+
+
+def _escapar_con_links(trozo: str) -> str:
+    partes, pos = [], 0
+    for m in _LINK_SUELTO.finditer(trozo):
+        partes.append(html.escape(trozo[pos:m.start()], quote=False))
+        partes.append(html.escape(limpiar_enlace(m.group(0)), quote=False))
+        pos = m.end()
+    partes.append(html.escape(trozo[pos:], quote=False))
+    return "".join(partes)
+
+
+def texto_propio_x(texto_x: str, texto_largo: str, cfg_x: dict) -> str:
+    """La versión corta para X. Si no hay una escrita, va la primera línea del texto largo y el
+    aviso de que el link está en el perfil. Nunca lleva links (X cobra más por cada post con link)."""
+    corto = str(texto_x or "").strip()
+    if not corto:
+        primera = next((l.strip() for l in _LINK_MD.sub(r"\1", texto_largo).splitlines() if l.strip()), "")
+        donde = sin_links(str(cfg_x.get("texto_sin_link") or "el link está en mi perfil"))
+        corto = f"{primera}\n\n👉 {donde[:1].upper()}{donde[1:]}"
+    corto = sin_links(_LINK_MD.sub(r"\1", corto))
+    return recortar_x(corto)

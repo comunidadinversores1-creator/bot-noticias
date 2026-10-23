@@ -119,7 +119,11 @@ enlace_general: "https://linktr.ee/comunidadinversores"
 #    aviso           una aclaración propia que va debajo del llamado
 #    texto_sin_link  qué decir en X en lugar de "el link está en mi perfil"
 #    dato_fijo       algo que no puede faltar nunca en la publicación (un código de descuento)
-#    extras          hasta 3 links más, solo en Telegram (un dossier, un tutorial)
+#    extras          hasta 3 links más, solo en Telegram (un dossier, un tutorial, un video). Con emoji: "🎥" cambia el 📎
+#    paso_2          un segundo paso del llamado: 1) registrate con mi link  2) entrá a la campaña o al evento
+#    texto_fijo      TU texto: sale tal cual en Telegram y la IA no lo toca (no hace falta 'datos').
+#                    Links sueltos (https://...) o así: [lo que se ve](https://...)
+#    texto_x         la versión corta de tu texto para X (hasta 280 letras, sin links)
 #    vence           último día en que sale. Ej: "2026-12-31". Después deja de salir sola y te avisa
 #    imagen          una imagen propia, ej. assets/promos/senales.jpg
 #                    (en modo "ninguna" se publica tal cual · en modo "placa" va arriba y el bot le suma el texto)
@@ -127,57 +131,171 @@ enlace_general: "https://linktr.ee/comunidadinversores"
 #  (un reintegro, un descuento). Nunca como rendimiento o ganancia.
 # ------------------------------------------------------------
 promos:
+  # ===== Con TU texto (sale tal cual, la IA no lo toca) =====
   - id: senales-exness
     activa: true
     socio: exness
-    etiqueta: "MIS HERRAMIENTAS"
-    nombre: "Señales de trading en Exness"
-    llamado: "Registrate en Exness con mi link"
-    extras:
-      - {texto: "Dossier completo: resultados, metodología y riesgos", enlace: "https://drive.google.com/file/d/1mzqNl57Hj3rjzvWKR_6IoVOQ7xSbbf_C/view"}
-      - {texto: "Tutorial paso a paso", enlace: "https://youtu.be/WGP222nUgvA"}
-    datos: |
-      Sistema de señales de trading para operar en Exness. Analiza dos pares de divisas: AUD/CAD y EUR/AUD.
-      Indica cuándo entrar, dónde colocar el Stop Loss y el Take Profit, y cuándo pasar a Break Even.
-      El canal de señales es gratuito.
-      Cómo acceder: 1) registrarse en Exness con el enlace de Ezequiel, 2) verificar la identidad y depositar al menos US$100, 3) escribirle a Ezequiel para pedir el acceso.
-      Además hay un 20% de devolución de comisiones, según las condiciones de la propuesta.
-      Hay un dossier con el backtest de 2022 a 2026 (1.485 operaciones analizadas): muestra la curva de capital, la metodología y los riesgos. También hay un tutorial en video, paso a paso.
+    nombre: "Bot de señales de Forex con Exness"
+    imagen: assets/promos/senales-exness.jpg
+    texto_fijo: |
+      🤖 BOT DE SEÑALES DE TRADING EN FOREX — gratis con Exness
+
+      Recibís en Telegram las señales del sistema para EUR/AUD y AUD/CAD: entrada, Stop Loss, Take Profit y cuándo pasar a Break Even (seguro).
+
+      📊 Resultados del backtest 2022-2026 (simulación con US$1.000):
+      • 1.485 operaciones en 4 años
+      • 77,8% cierran en ganancia o en cero
+      • +33,5% de rendimiento promedio anual
+      • -20,7% de máxima caída del saldo
+
+      Son resultados históricos de una simulación: no garantizan resultados futuros.
+
+      ✅ Señales en tiempo real
+      ✅ Manual paso a paso
+      ✅ PDF completo con los resultados
+      💰 20% de devolución en comisiones
+
+      Cómo acceder:
+      1) Registrate en Exness con mi link
+      2) Verificá tu cuenta y depositá al menos US$100
+      3) Escribime por Telegram (@ezequiel_comunidad_inversores) y te doy el acceso al canal
+
+      👉 [Registrate en Exness con mi link](https://one.exnessonelink.com/a/ptf6lzlrc8)
+      📎 [Dossier completo: resultados, metodología y riesgos](https://drive.google.com/file/d/1mzqNl57Hj3rjzvWKR_6IoVOQ7xSbbf_C/view)
+      🎥 [Tutorial paso a paso](https://youtu.be/WGP222nUgvA)
+
+      ⚠️ Operar con apalancamiento implica riesgo de perder tu capital.
+    texto_x: |
+      🤖 Bot de señales de Forex gratis con Exness: EUR/AUD y AUD/CAD, con entrada, SL y TP.
+
+      Backtest 2022-2026 (simulación con US$1.000): 1.485 operaciones, 77,8% en ganancia o en cero, máxima caída -20,7%.
+
+      👉 Link en mi perfil
+      ⚠️ Operar con apalancamiento implica riesgo.
+
+  - id: exness-un-clic
+    activa: true
+    socio: exness
+    nombre: "Exness: operar con un solo clic"
+    imagen: assets/promos/exness-un-clic.jpg
+    texto_fijo: |
+      ⚡️ EXNESS: ahora podés operar con un solo clic
+
+      Exness acaba de incorporar One-Click Trading en su Terminal: una modalidad que permite abrir y cerrar operaciones de mercado con un solo clic, sin una ventana adicional de confirmación. (Fuente: [blog oficial de Exness](https://www.exness.com/blog/product/one-click-trading-exness-terminal/))
+
+      Esto puede ser especialmente útil para quienes hacen scalping o trading de noticias, donde la velocidad de ejecución forma parte del proceso operativo.
+
+      Además, desde el Terminal podés tener en un mismo espacio:
+
+      📊 +100 indicadores
+      📈 Hasta 8 gráficos simultáneos
+      🛑 Gestión de SL y TP directamente desde el gráfico
+      ⚡️ Trading con un clic
+      📅 Calendario económico integrado
+      💰 Gestión de posiciones y cuenta
+
+      La idea no es operar más rápido por operar más rápido.
+
+      Es tener menos fricción entre tu análisis y la ejecución.
+
+      Si querés probar Exness y acceder a mis herramientas y estrategias:
+
+      👉 Registrate desde mi link:
+      [Exness — registro](https://one.exnessonelink.com/a/ptf6lzlrc8)
+
+      💰 Además, podés acceder al 20% de devolución en comisiones durante la promoción correspondiente.
+
+      ⚠️ Operar con apalancamiento implica riesgo de perder tu capital.
+    texto_x: |
+      ⚡️ EXNESS: ahora podés operar con un solo clic
+
+      One-Click Trading en el Terminal: abrís y cerrás operaciones sin ventana de confirmación. Útil para scalping o trading de noticias.
+
+      👉 Registrate con mi link (está en mi perfil)
+      ⚠️ Operar con apalancamiento implica riesgo.
 
   - id: video-senales
     activa: true
-    etiqueta: "VIDEO"
     nombre: "Video: probé más de 9.300 combinaciones de trading"
-    llamado: "Mirá el video completo"
-    enlace: "https://youtu.be/WGP222nUgvA"
-    datos: |
-      Video de Ezequiel. Probó más de 9.300 combinaciones de trading y solo 2 pares pasaron: AUD/CAD y EUR/AUD.
-      La pregunta del video: ¿puede una estrategia funcionar durante años y seguir funcionando en el futuro?
-      Muestra el backtest de más de 4 años sobre esos dos pares, cómo funciona el sistema y cómo seguir las señales.
-      No muestra solo una curva linda: también muestra el drawdown, los períodos negativos y los datos usados para el backtest.
+    imagen: assets/promos/video-senales.jpg
+    texto_fijo: |
+      📊 Probé más de 9.300 combinaciones de trading. Solo 2 pares pasaron.
+
+      ¿Puede una estrategia funcionar durante años y seguir siendo rentable en el futuro? Esa es la pregunta que intento responder en este video.
+
+      Te muestro el backtest de más de 4 años sobre AUDCAD y EURAUD, cómo funcionan las señales y, lo más importante, cuánto se puede ganar y cuánto se puede perder.
+
+      En el video vas a ver:
+
+      📈 Los resultados históricos y el rendimiento.
+      📉 El drawdown y los períodos negativos.
+      ⚙️ Cómo funciona el sistema y cómo seguir las señales.
+      🧪 Los datos utilizados para el backtest.
+
+      No se trata de mostrarte una curva linda: también te muestro los riesgos.
+
+      ▶️ Mirá el video completo acá:
+
+      https://youtu.be/WGP222nUgvA
+
+      Y si querés conocer más sobre las señales y la comunidad, tenés todos mis enlaces acá:
+
+      👉 https://linktr.ee/comunidadinversores
+
+      ¿Qué mirás primero cuando evaluás una estrategia: rentabilidad, drawdown o consistencia?
+    texto_x: |
+      📊 Probé más de 9.300 combinaciones de trading. Solo 2 pares pasaron.
+
+      Backtest de más de 4 años sobre AUDCAD y EURAUD: resultados, drawdown, períodos negativos y riesgos.
+
+      ▶️ El video completo está en mi perfil
+
+      ¿Qué mirás primero: rentabilidad, drawdown o consistencia?
 
   - id: labitconf-2026
     activa: true
-    etiqueta: "BENEFICIO"
     nombre: "40% OFF en LABITCONF 2026"
-    llamado: "Sacá tu entrada con 40% OFF"
-    enlace: "https://www.hallos.io/event/labitconf/checkout"
-    texto_sin_link: "en la web de LABITCONF"
-    dato_fijo: "Código: COMUNIDADINVERSORES40"
+    imagen: assets/promos/labitconf-2026.jpg
     vence: "2026-10-31"
-    datos: |
-      Comunidad Inversores es Media Partner de LABITCONF 2026.
-      Beneficio para la comunidad: 40% OFF en la entrada GENERAL con el código COMUNIDADINVERSORES40.
-      El código tiene hasta 100 usos, es válido para los dos días y se puede usar hasta el evento.
-      LABITCONF 2026 es el 30 y 31 de octubre en Costa Salguero, Buenos Aires.
-      Además hay 6 entradas para sortear entre la comunidad.
+    texto_fijo: |
+      🎟️ LABITCONF 2026 con 40% OFF para la comunidad
 
+      Comunidad Inversores es Media Partner de LABITCONF 2026.
+
+      📅 30 y 31 de octubre
+      📍 Costa Salguero, Buenos Aires
+
+      🔥 40% OFF en la entrada general con el código:
+      COMUNIDADINVERSORES40
+
+      ✅ Hasta 100 usos
+      ✅ Válido para los dos días
+      ✅ Válido hasta el evento
+
+      👉 [Sacá tu entrada acá](https://www.hallos.io/event/labitconf/checkout)
+
+      Además, vamos a sortear 6 entradas entre la comunidad. ¡Nos vemos ahí!
+    texto_x: |
+      🎟️ LABITCONF 2026 con 40% OFF para la comunidad
+
+      📅 30 y 31 de octubre · Costa Salguero, Buenos Aires
+      🔥 Código: COMUNIDADINVERSORES40 (entrada general, hasta 100 usos)
+
+      👉 Sacá tu entrada en la web de LABITCONF
+
+  # ===== Campañas de Binance (el texto lo escribe la IA, solo con estos datos) =====
+  # El llamado sale en 2 pasos: 1) registrarse con tu link (así queda como tu referido)
+  # y 2) entrar a la página de la campaña.
   - id: binance-tarjeta-octubre
     activa: true                  # datos de la página oficial de la campaña (leída el 9/10/2026)
     socio: binance
     etiqueta: "PROMO"
     nombre: "Cashback de octubre con la Binance Card"
-    llamado: "Abrí tu cuenta en Binance con mi link"
+    llamado: "Registrate en Binance con mi link"
+    paso_2: {texto: "Participá de la campaña", enlace: "https://www.binance.com/es-AR/events/binance-october-card-campaign"}
+    extras:
+      - {emoji: "🎥", texto: "Mirá el video de la tarjeta", enlace: "https://www.instagram.com/p/Dd77w_stfdZ/"}
+    imagen: assets/promos/binance-tarjeta.jpg
     aviso: "Promoción de Binance: tiene cupos limitados y condiciones propias."
     vence: "2026-10-28"           # la campaña termina el 29/10 a las 20:59 de Argentina: el último día entero es el 28
     datos: |
@@ -191,7 +309,11 @@ promos:
     socio: binance
     etiqueta: "PROMO"
     nombre: "Tarjeta física de Binance"
-    llamado: "Abrí tu cuenta en Binance con mi link"
+    llamado: "Registrate en Binance con mi link"
+    paso_2: {texto: "Participá del lanzamiento de la tarjeta", enlace: "https://www.binance.com/es-AR/events/binance-physical-card-launch"}
+    extras:
+      - {emoji: "🎥", texto: "Mirá el video de la tarjeta", enlace: "https://www.instagram.com/p/Dd77w_stfdZ/"}
+    imagen: assets/promos/binance-tarjeta.jpg
     aviso: "Promoción de Binance: tiene cupos limitados y condiciones propias."
     vence: "2026-10-30"           # el envío es gratis si se pide antes del 31/10; en noviembre hay que actualizar los datos
     datos: |
