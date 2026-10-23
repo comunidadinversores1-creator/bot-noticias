@@ -65,6 +65,7 @@ def corrida(monkeypatch, tmp_path, red):
         c.destino = "@canal_real"
         c.tambien_en = []                            # solo el canal (la prueba del grupo lo prende)
         c.cfg["x_charla"]["activa"] = charla          # las preguntas para X, solo en sus pruebas
+        c.cfg["hashtags"] = []                        # sin hashtags, salvo en su prueba
         c.chat_prueba = "555"
         return c
 
@@ -1727,3 +1728,22 @@ def test_en_la_charla_se_puede_hablar_de_plata_pero_no_prometer():
     assert texto.promesas_charla("no existe el trading sin riesgo") == []
     assert texto.promesas_charla("imaginá vivir de rendimientos con un bot") != []
     assert texto.promesas_charla("con este bot tenés ganancias aseguradas") != []
+
+
+
+def test_hashtags_solo_los_que_tienen_que_ver(cfg):
+    reglas = cfg["hashtags"]
+    assert texto.hashtags_para({"titular": "Suiza aprueba el primer ETF de Bitcoin", "resumen": "", "categoria": "CRIPTO"}, reglas) == ["#Bitcoin", "#ETF"]
+    assert texto.hashtags_para({"titular": "Hackean un exchange", "resumen": "robaron fondos", "categoria": "EXCHANGES"}, reglas) == []
+    assert texto.hashtags_para({"titular": "Asia cierra en baja", "resumen": "", "categoria": "MERCADOS"}, reglas) == []    # 'ia' suelto, no adentro de 'Asia'
+    corto = "x" * 275
+    assert texto.sumar_hashtags(corto, ["#Bitcoin", "#ETF"], 280) == corto                      # si no entra, no va
+    assert texto.sumar_hashtags("hola", ["#Bitcoin", "#ETF"], 280) == "hola\n\n#Bitcoin #ETF"
+
+
+def test_la_noticia_sale_con_sus_hashtags(corrida, red, tmp_path):
+    _sin_la_fed(red)
+    c = corrida(imagen="ninguna")
+    c.cfg["hashtags"] = [{"hashtag": "Argentina", "si_dice": ["bcra"]}]
+    assert c.correr() == 0
+    assert _al_canal(red)[0]["text"].rstrip().endswith("#Argentina") and red.x_posts[0]["text"].rstrip().endswith("#Argentina")

@@ -805,3 +805,42 @@ def promesas_charla(texto: str) -> list[str]:
             continue          # "no existe el trading sin riesgo" es justo lo contrario de una promesa
         malas.add(m.group(0))
     return sorted(malas)
+
+
+# ------------------------------------------------ hashtags
+
+def hashtags_para(post: dict, reglas: list, maximo: int = 2) -> list[str]:
+    """Hasta 2 hashtags que tengan que ver con la noticia, sacados de la lista de ajustes.yaml
+    (nunca inventados: así no se cuela uno raro o de otro tema). Gana el que aparece en el título."""
+    titulo = normalizar(post.get("titular", ""))
+    cuerpo = normalizar(" ".join([post.get("resumen", ""), post.get("categoria", "")]))
+    elegidos: list[tuple[int, int, str]] = []
+    for orden, regla in enumerate(reglas or []):
+        if not isinstance(regla, dict):
+            continue
+        tag = "#" + re.sub(r"[^\w]", "", str(regla.get("hashtag") or "").lstrip("#"))
+        palabras = [normalizar(str(p)) for p in (regla.get("si_dice") or []) if str(p).strip()]
+        if len(tag) < 3 or not palabras:
+            continue
+        def aparece(texto: str) -> bool:
+            return any(re.search(r"(?<!\w)" + re.escape(p) + r"(?!\w)", texto) for p in palabras)
+        if aparece(titulo):
+            elegidos.append((0, orden, tag))
+        elif aparece(cuerpo):
+            elegidos.append((1, orden, tag))
+    salida: list[str] = []
+    for _, _, tag in sorted(elegidos):
+        if tag.lower() not in (t.lower() for t in salida):
+            salida.append(tag)
+    return salida[:maximo]
+
+
+def sumar_hashtags(texto: str, tags: list[str], limite: int | None = None) -> str:
+    """Agrega los hashtags en un renglón al final, solo si entran (en X, sin pasarse del largo)."""
+    if not tags:
+        return texto
+    for cantidad in range(len(tags), 0, -1):
+        candidato = texto.rstrip() + "\n\n" + " ".join(tags[:cantidad])
+        if limite is None or peso_x(candidato) <= limite:
+            return candidato
+    return texto

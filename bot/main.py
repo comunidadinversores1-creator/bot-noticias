@@ -27,7 +27,7 @@ from .publicar import ErrorPublicacion, claves_x, telegram_chats, telegram_mensa
 from .texto import (
     anio_actual, armar_llamado, enlaces_extra, faltantes, faltantes_promo, fuente_limpia, idea_de_imagen, normalizar_post, normalizar_promo,
     numeros_inventados, promesas, promo_telegram, promo_x, texto_revisable, texto_revisable_promo,
-    link_en_x, revisar_charla, texto_propio_telegram, texto_propio_x, texto_telegram, texto_x, x_largo, x_premium,
+    LIMITE_X, hashtags_para, link_en_x, revisar_charla, sumar_hashtags, texto_propio_telegram, texto_propio_x, texto_telegram, texto_x, x_largo, x_premium,
 )
 from .util import (
     RAIZ, a_hora, ahora_utc, cargar_ajustes, configurar_log, cupo_a_esta_hora, en_silencio, log, normalizar, socios_activos,
@@ -266,8 +266,9 @@ class Corrida:
             foto = self.imagen_para(g, post)
             log.info("  imagen: %s%s", foto.titulo if foto else "ninguna (placa de texto)", " · con llamado a registrarse" if llamado else "")
             jpg = armar_placa(post, foto, self.cfg, self.ahora, self.estado.proxima_variante(), g.urgente)
-        para_telegram = texto_telegram(post, g.urgente, llamado, self.redes())
-        para_x = texto_x(post, g.urgente, llamado, self.cfg["x"])
+        tags = hashtags_para({**post, "categoria": g.categoria}, self.cfg.get("hashtags") or [])
+        para_telegram = sumar_hashtags(texto_telegram(post, g.urgente, llamado, self.redes()), tags)
+        para_x = sumar_hashtags(texto_x(post, g.urgente, llamado, self.cfg["x"]), tags, LIMITE_X)
         llamado_en_x = bool(llamado) and llamado["texto"] in para_x      # en X puede no entrar con su aviso
         registro = {
             "fecha": self.ahora.isoformat(), "tipo": "noticia", "titular": post["titular"], "categoria": g.categoria,

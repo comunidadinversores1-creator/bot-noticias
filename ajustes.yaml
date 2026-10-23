@@ -36,6 +36,31 @@ x:
   marcar_publicidad: true         # X exige avisar cuando un post tiene link de afiliado o es una promo
 
 # ------------------------------------------------------------
+#  HASHTAGS: cada noticia lleva como mucho 2, y solo si tienen que ver con lo que cuenta
+#  (gana el que aparece en el título). Las preguntas de X no llevan: así le funcionan a Nehuen.
+#  Para sumar uno: copiá un renglón y cambiá el hashtag y las palabras.
+# ------------------------------------------------------------
+hashtags:
+  - {hashtag: "Bitcoin",     si_dice: ["bitcoin", "btc"]}
+  - {hashtag: "Ethereum",    si_dice: ["ethereum", "ether", "eth"]}
+  - {hashtag: "Binance",     si_dice: ["binance"]}
+  - {hashtag: "Exness",      si_dice: ["exness"]}
+  - {hashtag: "IA",          si_dice: ["inteligencia artificial", "ia", "openai", "chatgpt", "nvidia", "ai"]}
+  - {hashtag: "ETF",         si_dice: ["etf", "etfs"]}
+  - {hashtag: "Stablecoins", si_dice: ["stablecoin", "stablecoins", "usdt", "usdc", "tether"]}
+  - {hashtag: "Fed",         si_dice: ["fed", "reserva federal", "powell", "fomc"]}
+  - {hashtag: "Inflación",   si_dice: ["inflacion", "ipc", "cpi"]}
+  - {hashtag: "Dólar",       si_dice: ["dolar", "dolares", "blue", "mep"]}
+  - {hashtag: "Oro",         si_dice: ["oro", "gold"]}
+  - {hashtag: "Petróleo",    si_dice: ["petroleo", "crudo", "brent", "opep"]}
+  - {hashtag: "WallStreet",  si_dice: ["wall street", "s&p 500", "nasdaq", "dow jones"]}
+  - {hashtag: "Merval",      si_dice: ["merval", "acciones argentinas", "adr"]}
+  - {hashtag: "Argentina",   si_dice: ["bcra", "milei", "caputo", "indec", "riesgo pais"]}
+  - {hashtag: "Forex",       si_dice: ["forex", "divisas", "eur/usd", "euro"]}
+  - {hashtag: "Cripto",      si_dice: ["cripto", "criptomonedas", "crypto"]}
+  - {hashtag: "Trading",     si_dice: ["trading", "traders", "trader"]}
+
+# ------------------------------------------------------------
 #  CHARLA EN X: preguntas, dilemas y casos cortos para que la gente responda (solo en X).
 #  Van aparte de las noticias: no cuentan para el tope de 10 por día.
 #  Debajo de cada una, el bot responde con la invitación a seguirte (así la gente que llega
