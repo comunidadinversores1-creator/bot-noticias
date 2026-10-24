@@ -495,11 +495,18 @@ def test_de_madrugada_solo_sale_lo_muy_fuerte(corrida, red, monkeypatch):
     del falso.feeds["federalreserve.gov"], falso.feeds["news.google.com"]  # sin la noticia de impacto 9
     assert corrida(ahora=madrugada).correr() == 0
     assert falso.telegram_fotos == []                                       # la de impacto 8 espera
-    # ...y con la de la Fed (impacto 9) sí sale aunque sea de madrugada
+    # ...con la de la Fed (impacto 9) tampoco sale de madrugada (Eze no quiere nada de noche)...
     falso2 = InternetFalso(madrugada)
     monkeypatch.setattr(requests.adapters.HTTPAdapter, "send", falso2.enviar)
     assert corrida(ahora=madrugada + timedelta(minutes=5)).correr() == 0
-    assert len(falso2.telegram_fotos) == 1 and "Fed" in falso2.telegram_fotos[0]["caption"]
+    assert falso2.telegram_fotos == []
+    # ...salvo que se prendan los urgentes de noche.
+    falso3 = InternetFalso(madrugada)
+    monkeypatch.setattr(requests.adapters.HTTPAdapter, "send", falso3.enviar)
+    c = corrida(ahora=madrugada + timedelta(minutes=10))
+    c.cfg["ritmo"]["urgentes_de_noche"] = True
+    assert c.correr() == 0
+    assert len(falso3.telegram_fotos) == 1 and "Fed" in falso3.telegram_fotos[0]["caption"]
 
 
 def test_apagado_no_hace_nada(corrida, red):
@@ -733,6 +740,7 @@ def _con_promos(c, cuantas: int = 2):
     elegidas = ("bots-pionex", "pionex-bienvenida")[:cuantas]
     for p in c.cfg["promos"]:
         p["activa"] = p["id"] in elegidas
+    c.cfg["ritmo"]["horarios_promos"] = ["10:30", "15:30", "20:30"]   # los horarios con los que se escribieron estas pruebas
     return c
 
 

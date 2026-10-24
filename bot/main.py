@@ -763,7 +763,13 @@ class Corrida:
                 motivo = "en esta corrida ya salió otra publicación (no salen dos juntas)"
             if motivo:
                 umbral = urgente
-                log.info("Solo sale lo de impacto %d o más: %s.", urgente, motivo)
+                if self.ocupado:
+                    # Ya salió otra cosa en esta corrida: solo lo gigante sale igual; lo demás, en la próxima hora.
+                    umbral = max(urgente, int(r.get("impacto_urgente_ocupado", 10)))
+                if en_silencio(cfg, self.ahora) and not verdadero(r.get("urgentes_de_noche", False)):
+                    # De madrugada no sale nada: lo importante queda guardado y sale a la mañana.
+                    umbral = 99
+                log.info("Solo sale lo de impacto %d o más: %s.", umbral, motivo)
             elif cupo - hoy >= 2 and relleno < minimo:
                 # El día viene flojo: para acercarse a las publicaciones del día, se acepta una noticia
                 # un escalón más abajo (siempre sale primero la de más impacto que haya).

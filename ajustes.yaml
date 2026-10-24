@@ -137,8 +137,8 @@ calendario:
 # ------------------------------------------------------------
 x_charla:
   activa: true
-  horarios: ["13:00", "19:30", "22:00"]      # una después de cada horario (en los huecos de X, sin pisar noticias ni promos)
-  encuesta_turno: 2                           # la 2.ª pregunta del día (19:30) es una ENCUESTA de X (0 = sin encuestas)
+  horarios: ["19:00", "22:00"]      # una después de cada horario (en los huecos de X, sin pisar noticias ni promos)
+  encuesta_turno: 2                           # la 2.ª pregunta del día (22:00) es una ENCUESTA de X (0 = sin encuestas)
   # Debajo de cada pregunta, una de estas (van rotando):
   respuestas:
     - "si te hacen pensar estas preguntas, seguime.\n\ntodos los días subo una sobre trading, bots, IA y dinero. y las noticias que mueven el mercado, apenas salen."
@@ -163,7 +163,7 @@ x_charla:
 # ------------------------------------------------------------
 ensenanza:
   activa: true
-  horarios: ["08:30", "12:30", "18:30"]
+  horarios: ["08:00", "13:00", "18:00"]
   temas:
     - "¿Qué es Bitcoin y cómo funciona?"
     - {pregunta: "¿Cómo se usa el trading con un clic en Exness Terminal?", datos: "Exness Terminal tiene One-Click Trading: permite abrir y cerrar operaciones de mercado con un solo clic, sin una ventana adicional de confirmación. Puede servir para scalping o para operar noticias, donde la velocidad importa. Operar con apalancamiento implica riesgo de perder el capital."}
@@ -191,11 +191,11 @@ ritmo:
   zona_horaria: "America/Argentina/Buenos_Aires"
   max_por_dia: 7                  # noticias + promos por día (4 noticias + 3 promos). Las enseñanzas y las preguntas de X van aparte
   promos_por_dia: 3               # cuántas de esas 10 son ventas de tus herramientas y campañas
-  horarios_promos: ["10:30", "15:30", "20:30"]   # desde esa hora sale la promo que toca
+  horarios_promos: ["10:00", "15:00", "20:00"]   # desde esa hora sale la promo que toca
   # Las noticias comunes salen después de cada uno de estos horarios (lo urgente sale siempre).
   # Así queda el día en Telegram: 7:30 agenda · 8:30 enseñanza · 9:30 noticia · 10:30 promo · 11:30 noticia
   # · 12:30 enseñanza · 14:00 noticia · 15:30 promo · 17:00 noticia · 18:30 enseñanza · 20:30 promo
-  horarios_noticias: ["09:30", "11:30", "14:00", "17:00"]
+  horarios_noticias: ["09:00", "11:00", "14:00", "17:00"]
   horas_entre_promos: 3           # nunca dos promos pegadas
   max_llamados_por_dia: 2         # tope de noticias con "registrate con mi link" (aparte de las promos)
   minutos_entre_publicaciones: 40 # separación mínima entre una y otra (el bot mira una vez por hora)
@@ -204,6 +204,8 @@ ritmo:
   silencio_desde: "00:00"         # de madrugada no publica...
   silencio_hasta: "07:00"
   impacto_urgente: 9              # ...salvo que la noticia sea de este impacto o más
+  impacto_urgente_ocupado: 10     # si en esa hora ya salió otra cosa, solo sale igual lo de este impacto (si no, espera a la hora siguiente)
+  urgentes_de_noche: false        # de madrugada no sale nada, ni lo urgente: queda guardado y sale a la mañana
   antiguedad_maxima_horas: 6      # no publica noticias más viejas que esto
 
 # ------------------------------------------------------------
