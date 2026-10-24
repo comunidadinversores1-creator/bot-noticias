@@ -25,7 +25,7 @@ from .estado import Estado
 from .filtro import Grupo, es_mala_noticia, nombra_prohibido, preparar, puntaje, ya_contada
 from .fuentes import leer_fuentes
 from .imagen import armar_placa, armar_promo, buscar_foto, generar_con_ia, logo_guardado, tal_cual
-from .publicar import ErrorPublicacion, claves_x, telegram_chats, telegram_mensaje, telegram_publicar, telegram_puede_publicar, x_publicar, x_quien_soy
+from .publicar import ErrorPublicacion, claves_x, telegram_bajar, telegram_chats, telegram_novedades, telegram_mensaje, telegram_publicar, telegram_puede_publicar, x_publicar, x_quien_soy
 from .texto import (
     anio_actual, armar_llamado, enlaces_extra, faltantes, faltantes_promo, fuente_limpia, idea_de_imagen, normalizar_post, normalizar_promo,
     numeros_inventados, promesas, promo_telegram, promo_x, texto_revisable, texto_revisable_promo,
@@ -564,11 +564,15 @@ class Corrida:
                 self.estado.guardar()
                 return self.cerrar(1 if salio else 0)
             self.tal_vez_grok()              # no publica nada: busca temas del día y te manda los virales
-            self.ocupado = self.tal_vez_calendario()
+            self.ocupado = self.tal_vez_material()      # lo que vos pedís por privado sale primero
+            if not self.ocupado:
+                self.ocupado = self.tal_vez_calendario()
             if not self.ocupado:
                 self.ocupado = self.tal_vez_hilo()
             if not self.ocupado:
                 self.ocupado = self.tal_vez_charla()
+            if not self.ocupado:
+                self.ocupado = self.tal_vez_idea()
             hoy = self.estado.publicadas_hoy(cfg, self.ahora)
             promos_hoy = self.estado.publicadas_hoy(cfg, self.ahora, tipo="promo")
             if hoy >= tope + EXTRAS_URGENTES:
@@ -986,9 +990,10 @@ class Corrida:
         hechas = int(g.get("temas_tandas", 0)) if g.get("temas_dia") == hoy else 0
         if tandas > hechas:
             try:
-                temas = grok.temas_del_dia(self.cfg, self.ahora)
+                temas, ganchos = grok.temas_del_dia(self.cfg, self.ahora)
                 usados = g.get("usados", []) if g.get("temas_dia") == hoy else []
-                g.update({"temas": temas, "temas_dia": hoy, "temas_tandas": tandas, "usados": usados})
+                g.update({"temas": temas, "temas_dia": hoy, "temas_tandas": tandas, "usados": usados,
+                          "ganchos": ganchos or g.get("ganchos", [])})
                 log.info("Grok: temas de hoy en X: %s", " | ".join(t["tema"] for t in temas))
             except grok.SinGrok as error:
                 g.update({"temas_dia": hoy, "temas_tandas": tandas})      # no se insiste hasta la próxima tanda
@@ -1045,11 +1050,15 @@ class Corrida:
         if not lista or not (self.token and self.chat_prueba):
             return 0
         e = lambda s: html.escape(str(s or ""), quote=False)
-        partes = ["📊 <b>Informe semanal: qué hacen en X las cuentas que más crecen</b>", ""]
+        partes = ["📊 <b>Estrategias de la semana: qué hacen en X las cuentas que más crecen</b>",
+                  "Las que puedo hacer solo, las hago. Las que necesitan algo tuyo, te lo pido abajo de cada una.", ""]
         for i, x in enumerate(lista, start=1):
             partes.append(f"<b>{i}. {e(x.get('nombre'))}</b>" + (f" ({e(x.get('quien'))})" if x.get("quien") else ""))
             partes.append(e(x.get("que_hacen")))
-            partes.append(f"👉 <i>Para vos:</i> {e(x.get('como_aplicarlo'))}")
+            partes.append(f"👉 <i>Cómo lo aplicamos:</i> {e(x.get('como_aplicarlo'))}")
+            if x.get("material") and x.get("pedido"):
+                partes.append(f"📸 <b>Necesito de vos:</b> {e(x.get('material'))}")
+                partes.append(f"Mandámelo acá con este texto: <code>{e(x.get('pedido'))}</code>")
             url = str(x.get("ejemplo_url") or "")
             if url.startswith("https://x.com/") or url.startswith("https://twitter.com/"):
                 partes.append(f'<a href="{html.escape(url, quote=True)}">Ver ejemplo</a>')
@@ -1062,7 +1071,7 @@ class Corrida:
         return len(lista)
 
     def mandar_inspiracion(self) -> None:
-        """1 o 2 posts que se hicieron virales por su formato, con un borrador tuyo listo para adaptar y publicar."""
+        """Busca posts que pegaron por su formato y guarda los borradores propios: los publica el bot en sus horarios."""
         c = self.cfg.get("grok") or {}
         cantidad = int(c.get("inspiracion_cantidad", 2) or 0)
         if cantidad <= 0:
@@ -1072,19 +1081,127 @@ class Corrida:
         except grok.SinGrok as error:
             log.warning("Grok no encontró inspiración: %s", error)
             return
-        e = lambda s: html.escape(s, quote=False)
-        for i, idea in enumerate(ideas, start=1):
-            if re.search(r"(?i)\bplata\b", idea["borrador"]) or promesas_charla(idea["borrador"]):
-                continue                                        # un borrador con promesas o "plata" no se manda
-            mensaje = (f"✍️ <b>Idea para un post tuyo ({i}/{len(ideas)})</b>\n"
-                       f'Se hizo viral <a href="{html.escape(idea["url"], quote=True)}">este post de {e(idea["cuenta"] or "X")}</a>. '
-                       f"{e(idea['por_que_funciono'])}\n\n"
-                       "Tu versión (tocala para copiarla, cambiá lo que quieras y publicala):\n\n"
-                       f"<code>{e(idea['borrador'])}</code>")
+        buenas = [i for i in ideas if not re.search(r"(?i)\bplata\b", i["borrador"]) and not promesas_charla(i["borrador"])]
+        g = self.estado.datos["grok"]
+        g["ideas"] = buenas
+        g["ideas_dia"] = self.ahora.astimezone(zona(self.cfg)).date().isoformat()
+        log.info("Grok: %d ideas de posts para hoy", len(buenas))
+        if not self.real and self.token and self.chat_prueba:
+            for idea in buenas:
+                telegram_mensaje(self.token, self.chat_prueba, f"✍️ Idea que publicaría hoy (inspirada en {idea['url']}):\n\n{idea['borrador']}")
+
+    def tal_vez_idea(self) -> bool:
+        """Publica en X la próxima idea del día (inspirada en un post que pegó por su formato)."""
+        c = self.cfg.get("grok") or {}
+        if "x" not in self.canales or en_silencio(self.cfg, self.ahora):
+            return False
+        g = self.estado.datos["grok"]
+        hoy = self.ahora.astimezone(zona(self.cfg)).date().isoformat()
+        local = self.ahora.astimezone(zona(self.cfg)).time()
+        horarios = [h for h in (a_hora(x) for x in (c.get("ideas_horarios") or [])) if h is not None]
+        if g.get("ideas_dia") != hoy or self.estado.formato_hoy(self.cfg, self.ahora, "idea") >= sum(1 for h in horarios if h <= local):
+            return False
+        pendientes = [i for i in g.get("ideas") or [] if not i.get("usada")]
+        anteriores = self.estado.charlas_recientes()
+        premium = x_premium(self.cfg["x"])
+        for idea in pendientes:
+            idea["usada"] = True
+            texto, problemas = revisar_charla({"texto": idea["borrador"]}, anteriores, 1000 if premium else 280)
+            if problemas:
+                log.info("  idea descartada: %s", problemas)
+                continue
+            tags = hashtags_para({"titular": texto, "resumen": "", "categoria": ""}, self.cfg.get("hashtags") or [])
+            texto = sumar_hashtags(texto, tags, None if premium else LIMITE_X)
             try:
-                telegram_mensaje(self.token, self.chat_prueba, mensaje, html=True)
+                id_post = x_publicar(self.claves_x, None, texto)
             except ErrorPublicacion as error:
-                log.warning("no pude mandar la idea: %s", error)
+                self.fallas += 1
+                self.avisar(error.clave, str(error))
+                return False
+            self.estado.agregar_charla({"fecha": self.ahora.isoformat(), "formato": "idea", "tema": idea.get("url", ""), "texto": texto, "x": id_post})
+            opciones = (self.cfg.get("x_charla") or {}).get("respuestas") or []
+            if id_post and opciones:
+                try:
+                    x_publicar(self.claves_x, None, str(opciones[len(self.estado.datos["charlas"]) % len(opciones)]), en_respuesta_a=id_post)
+                except ErrorPublicacion as error:
+                    log.warning("  no pude dejar la respuesta: %s", error)
+            if id_post:
+                self.avisar_etiquetar(id_post, texto, cuentas_para(texto, self.cfg.get("hashtags") or []))
+            log.info("Idea publicada en X: %s", texto.replace("\n", " / ")[:100])
+            self.estado.guardar()
+            return True
+        self.estado.guardar()
+        return False
+
+    # ------------------------------------------------- material que manda Eze al privado
+    def tal_vez_material(self) -> bool:
+        """Lee lo que Eze le mandó al robot por privado. 'post: …' o 'hilo: …' (con o sin captura) = el bot lo
+        escribe con sus datos y lo publica en X. Le responde con el link."""
+        if not (self.token and self.chat_prueba) or "x" not in self.canales:
+            return False
+        memoria = self.estado.datos["material"]
+        try:
+            novedades = telegram_novedades(self.token, int(memoria.get("offset", 0) or 0))
+        except ErrorPublicacion as error:
+            log.warning("no pude leer el privado: %s", error)
+            return False
+        pedidos: dict[str, dict] = {}
+        for n in novedades:
+            memoria["offset"] = int(n.get("update_id", 0)) + 1
+            m = n.get("message") or {}
+            if str((m.get("chat") or {}).get("id")) != str(self.chat_prueba):
+                continue                                     # solo Eze puede pedir publicaciones
+            clave = str(m.get("media_group_id") or m.get("message_id"))
+            p = pedidos.setdefault(clave, {"texto": "", "fotos": []})
+            texto = str(m.get("caption") or m.get("text") or "").strip()
+            if texto:
+                p["texto"] = texto
+            if m.get("photo"):
+                p["fotos"].append(max(m["photo"], key=lambda f: int(f.get("file_size") or 0))["file_id"])
+        publicado = False
+        for p in pedidos.values():
+            match = re.match(r"(?is)^\s*(post|hilo)\s*:\s*(.+)$", p["texto"])
+            if not match:
+                continue
+            publicado = self.publicar_material(match.group(1).lower(), match.group(2), p["fotos"]) or publicado
+        self.estado.guardar()
+        return publicado
+
+    def publicar_material(self, tipo: str, notas: str, fotos: list[str]) -> bool:
+        partes, correccion = None, ""
+        for _ in range(2):
+            crudo = ia.redactar_material(self.cerebro, tipo, notas, bool(fotos), correccion)
+            candidatas = [sin_links(str(x)).strip() for x in (crudo.get("partes") or []) if str(x).strip()]
+            inventados = numeros_inventados(" ".join(candidatas), notas + " " + " ".join(str(i) for i in range(1, 10)), anio_actual(self.ahora))
+            plata = any(re.search(r"(?i)\bplata\b", x) for x in candidatas)
+            malas = [m for x in candidatas for m in promesas_charla(x)]
+            limite = 1000 if tipo == "post" and x_premium(self.cfg["x"]) else 280
+            largas = [x for x in candidatas if peso_x(x) > limite]
+            if candidatas and not (inventados or plata or malas or largas):
+                partes = candidatas if tipo == "hilo" else candidatas[:1]
+                break
+            correccion = "tu intento anterior no sirve: " + "; ".join(filter(None, [
+                f"cifras que no están en las notas ({', '.join(inventados)})" if inventados else "",
+                'dice "plata"' if plata else "", f"suena a promesa ({', '.join(malas)})" if malas else "",
+                "alguna parte es demasiado larga" if largas else ""])) + "."
+        if partes is None:
+            telegram_mensaje(self.token, self.chat_prueba, f"❌ No pude armar el {tipo} con lo que me mandaste (la IA no lo escribió bien dos veces). Probá con más detalle en las notas.")
+            return False
+        imagenes = [telegram_bajar(self.token, f) for f in fotos[:4]]
+        imagenes = [i for i in imagenes if i]
+        anterior, primero = "", ""
+        for i, parte in enumerate(partes):
+            jpg = imagenes[i] if i < len(imagenes) else None
+            try:
+                anterior = x_publicar(self.claves_x, jpg, parte, en_respuesta_a=anterior)
+            except ErrorPublicacion as error:
+                telegram_mensaje(self.token, self.chat_prueba, f"❌ Se cortó al publicar la parte {i + 1}: {error}")
+                break
+            primero = primero or anterior
+        if primero:
+            self.estado.agregar_charla({"fecha": self.ahora.isoformat(), "formato": "material", "tema": notas[:80], "texto": "\n\n".join(partes), "x": primero})
+            telegram_mensaje(self.token, self.chat_prueba, f"✅ Publiqué tu {tipo} en X: https://x.com/i/status/{primero}")
+        return bool(primero)
 
     def muestra_grok(self) -> int:
         """Modo prueba: los temas de hoy y los virales, a tu privado."""
@@ -1092,7 +1209,7 @@ class Corrida:
             self.avisar("grok", "Falta la llave de Grok (XAI_API_KEY) en GitHub.")
             return self.cerrar(0)
         try:
-            temas = grok.temas_del_dia(self.cfg, self.ahora)
+            temas, ganchos = grok.temas_del_dia(self.cfg, self.ahora)
         except grok.SinGrok as error:
             self.avisar("grok", f"Grok {error}.")
             return self.cerrar(0)
@@ -1215,7 +1332,8 @@ class Corrida:
                 formato = "pregunta"
         texto, correccion, problemas, encuesta = "", "", [], []
         for _ in range(2):
-            crudo = ia.redactar_charla(self.cerebro, formato, tema, anteriores, correccion, datos)
+            ganchos = [] if formato in ("venta", "ensenanza") else list(self.estado.datos["grok"].get("ganchos") or [])
+            crudo = ia.redactar_charla(self.cerebro, formato, tema, anteriores, correccion, datos, ganchos)
             texto, problemas = revisar_charla(crudo, anteriores, limite)
             if formato == "encuesta":
                 encuesta = [sin_links(str(o)).strip() for o in (crudo.get("opciones") or []) if str(o).strip()][:4]

@@ -23,6 +23,7 @@ VACIO = {
     "calendario": {},     # "agenda": día de la última agenda · "avisos": evento -> cuándo se avisó
     "grok": {},           # temas del día en X (de Grok) y cuándo se mandaron los posts virales
     "hilo": {},           # "ultimo": día del último hilo semanal
+    "material": {},       # lo que Eze manda al privado del robot ("post:" / "hilo:"): hasta dónde se leyó
 }
 
 
@@ -148,7 +149,13 @@ class Estado:
         return sum(1 for c in self.datos["charlas"]
                    if isinstance(c, dict) and _fecha_o_nada(c.get("fecha")) and
                    _fecha_o_nada(c.get("fecha")).astimezone(zona(cfg)).date() == hoy
-                   and (c.get("formato") == "ensenanza") == ensenanza)
+                   and (c.get("formato") == "ensenanza") == ensenanza and c.get("formato") not in ("idea", "material"))
+
+    def formato_hoy(self, cfg: dict, momento: datetime, formato: str) -> int:
+        hoy = momento.astimezone(zona(cfg)).date()
+        return sum(1 for c in self.datos["charlas"]
+                   if isinstance(c, dict) and c.get("formato") == formato and _fecha_o_nada(c.get("fecha"))
+                   and _fecha_o_nada(c.get("fecha")).astimezone(zona(cfg)).date() == hoy)
 
     def charlas_recientes(self, cantidad: int = 30) -> list[str]:
         return [str(c.get("texto", "")) for c in self.datos["charlas"][-cantidad:] if isinstance(c, dict) and c.get("texto")]

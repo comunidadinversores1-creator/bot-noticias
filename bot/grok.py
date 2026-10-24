@@ -84,7 +84,8 @@ def temas_del_dia(cfg: dict, momento: datetime) -> list[dict]:
         "Nada de fútbol ni farándula. En el contexto nombrá a las personas, empresas y causas involucradas, con hechos verificables y en potencial si hay acusaciones. "
         "Respondé SOLO con JSON: {\"temas\": [{\"tema\": \"en 5 a 10 palabras\", \"contexto\": \"qué pasó, en 1 o 2 oraciones, solo hechos\", "
         "\"hashtag\": \"el hashtag que más se usa para ese tema, sin #, o vacío\", "
-        "\"cuentas\": [\"usuarios oficiales de X de las personas o empresas involucradas, sin @, solo si estás seguro\"]}]}"
+        "\"cuentas\": [\"usuarios oficiales de X de las personas o empresas involucradas, sin @, solo si estás seguro\"]}], "
+        "\"ganchos\": [\"6 primeras líneas (ganchos) de posts de este nicho que se hicieron virales en los últimos días, tal cual, en su idioma\"]}"
     )
     datos = preguntar(cfg, consigna, momento - timedelta(days=1))
     temas = []
@@ -93,7 +94,8 @@ def temas_del_dia(cfg: dict, momento: datetime) -> list[dict]:
             item = {k: str(t.get(k) or "").strip()[:300] for k in ("tema", "contexto", "hashtag")}
             item["cuentas"] = [re.sub(r"[^\w]", "", str(c)) for c in (t.get("cuentas") or []) if re.sub(r"[^\w]", "", str(c))][:3]
             temas.append(item)
-    return temas[:8]
+    ganchos = [str(x).strip()[:200] for x in (datos.get("ganchos") or []) if str(x).strip()][:8]
+    return temas[:8], ganchos
 
 
 def virales(cfg: dict, momento: datetime, cantidad: int = 5) -> list[dict]:
@@ -184,6 +186,8 @@ def estrategias(cfg: dict, momento: datetime) -> dict:
         "Nada que rompa las reglas de X (nada de seguir/dejar de seguir masivo, menciones automáticas o comprar seguidores). "
         "Respondé SOLO con JSON: {\"estrategias\": [{\"nombre\": \"en 3 a 6 palabras\", \"quien\": \"@cuenta que lo hace (1 o 2)\", "
         "\"ejemplo_url\": \"https://x.com/... de un post que lo muestra\", \"que_hacen\": \"1 o 2 oraciones\", "
-        "\"como_aplicarlo\": \"1 o 2 oraciones concretas para Ezequiel\"}]}"
+        "\"como_aplicarlo\": \"1 o 2 oraciones concretas para Ezequiel\", "
+        "\"material\": \"si para hacerlo hace falta algo que solo tiene Ezequiel (una captura de resultados, una foto, un dato propio), qué tiene que mandar, en 1 oración; si no, vacío\", "
+        "\"pedido\": \"el mensaje que Ezequiel le tiene que mandar al bot para que lo publique, empezando con 'post:' o 'hilo:' y el tema, ej. 'hilo: resultados de mi bot esta semana' (vacío si no hace falta material)\"}]}"
     )
     return preguntar(cfg, consigna, momento - timedelta(days=7), max_turnos=5)

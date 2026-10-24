@@ -114,7 +114,7 @@ class InternetFalso:
             consigna = cuerpo["input"][0]["content"]
             datos = getattr(self, "grok", {})
             if "temas con más conversación" in consigna:
-                contenido = {"temas": datos.get("temas", [])}
+                contenido = {"temas": datos.get("temas", []), "ganchos": datos.get("ganchos", ["te pagan 1.500 usd por mes pero..."])}
             elif "borrador ORIGINAL" in consigna:
                 contenido = {"posts": [{"url": "https://x.com/chica/status/5", "cuenta": "@chica", "por_que_funciono": "un dilema con números",
                                         "borrador": "imaginá un trader que gana 10 operaciones seguidas\n\n¿sube el lote o lo deja igual?"},
@@ -179,6 +179,10 @@ class InternetFalso:
             campos = {k: v[0] for k, v in parse_qs(cuerpo.decode("utf-8")).items()}
             self.telegram_mensajes.append(campos)
             return self._r(pedido, 200, {"ok": True, "result": {"message_id": 1}})
+        if metodo == "getUpdates" and "offset" in parse_qs(cuerpo.decode("utf-8")):
+            datos = {k: v[0] for k, v in parse_qs(cuerpo.decode("utf-8")).items()}
+            desde = int(datos.get("offset", 0))
+            return self._r(pedido, 200, {"ok": True, "result": [u for u in getattr(self, "actualizaciones", []) if u["update_id"] >= desde]})
         if metodo == "getUpdates":
             return self._r(pedido, 200, {"ok": True, "result": [
                 {"update_id": 1, "message": {"chat": {"id": 555, "type": "private", "first_name": "Eze"}}},
@@ -221,6 +225,11 @@ class InternetFalso:
         else:
             sistema, usuario = datos["messages"][0]["content"], datos["messages"][1]["content"]
 
+        if "Eze te manda notas" in sistema:
+            contenido = json.dumps(getattr(self, "material", {}), ensure_ascii=False)
+            if host == "api.anthropic.com":
+                return self._r(pedido, 200, {"content": [{"type": "text", "text": contenido}]})
+            return self._r(pedido, 200, {"choices": [{"message": {"role": "assistant", "content": contenido}}]})
         if "hilo semanal de X" in sistema:
             contenido = json.dumps(getattr(self, "hilo", {}), ensure_ascii=False)
             if host == "api.anthropic.com":

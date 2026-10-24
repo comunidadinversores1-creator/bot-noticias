@@ -1876,8 +1876,9 @@ def test_grok_temas_del_dia_y_virales(corrida, red, tmp_path, monkeypatch):
     assert memoria["grok"]["temas"][0]["tema"] == "bitcoin cae 8% tras datos de empleo"
     pedido_charla = [l for l in red.llamadas_ia if "cuenta de X de Ezequiel" in json.dumps(l, ensure_ascii=False)][-1]
     assert "TEMA DE HOY EN X: bitcoin cae 8%" in json.dumps(pedido_charla, ensure_ascii=False)
-    ideas = [m["text"] for m in _al_privado(red) if "Idea para un post tuyo" in m["text"]]
-    assert len(ideas) == 1 and "<code>imaginá un trader" in ideas[0]
+    ideas = memoria["grok"]["ideas"]
+    assert len(ideas) == 1 and ideas[0]["borrador"].startswith("imaginá un trader")       # la que prometía ganancias, afuera
+    assert "GANCHOS QUE ESTÁN PEGANDO" in json.dumps(pedido_charla, ensure_ascii=False)
     virales = [m["text"] for m in _al_privado(red) if "Posts virales" in m["text"]]
     assert len(virales) == 1 and "https://x.com/cuenta/status/1" in virales[0] and "💡 Idea" in virales[0]
     assert memoria["grok"]["usados"] == ["bitcoin cae 8% tras datos de empleo"]
@@ -1971,3 +1972,28 @@ def test_aviso_para_etiquetar(corrida, red, tmp_path):
     assert charla["text"].endswith("#Milei") and "@" not in charla["text"]
     avisos = [m["text"] for m in _al_privado(red) if "Para etiquetar" in m["text"]]
     assert len(avisos) == 1 and "@JMilei" in avisos[0] and "x.com/i/status/" in avisos[0]
+
+
+
+def test_el_bot_publica_las_ideas_del_dia(corrida, red, tmp_path, monkeypatch):
+    _sin_la_fed(red)
+    (tmp_path / "estado.json").write_text(json.dumps({"grok": {"ideas_dia": "2026-10-09", "ideas": [
+        {"url": "https://x.com/a/status/1", "borrador": "imaginá un trader que gana 10 operaciones seguidas\n\n¿sube el lote o lo deja igual?"}]}}), encoding="utf-8")
+    c = corrida(imagen="ninguna", ahora=_hora(12, 40))
+    c.cfg["grok"]["ideas_horarios"] = ["12:00"]
+    assert c.correr() == 0
+    assert any(p["text"].startswith("imaginá un trader que gana 10") for p in red.x_posts)
+    assert _memoria(tmp_path)["charlas"][-1]["formato"] == "idea"
+
+
+def test_eze_pide_un_hilo_por_privado(corrida, red, tmp_path):
+    _sin_la_fed(red)
+    red.actualizaciones = [{"update_id": 7, "message": {"message_id": 1, "chat": {"id": 555, "type": "private"},
+                            "text": "hilo: mi bot esta semana hizo 12 operaciones, 8 ganadoras y 4 perdedoras, terminó +3%"}}]
+    red.material = {"partes": ["mi bot esta semana: 12 operaciones.\n\nte cuento cómo le fue 👇", "1/ 8 ganadoras y 4 perdedoras.",
+                               "2/ terminó +3%, con semanas malas en el medio.", "¿vos dejarías operar a un bot?"]}
+    assert corrida(imagen="ninguna").correr() == 0
+    hilo = [p for p in red.x_posts if "12 operaciones" in p["text"] or p["text"].startswith(("1/", "2/")) or "dejarías" in p["text"]]
+    assert len(hilo) == 4 and all("reply" in p for p in hilo[1:])
+    assert any("Publiqué tu hilo" in m["text"] for m in _al_privado(red))
+    assert _memoria(tmp_path)["material"]["offset"] == 8

@@ -98,6 +98,7 @@ grok:
   temas_horas: ["08:00", "15:00"]
   virales_hora: "10:00"
   virales_cantidad: 5
+  ideas_horarios: ["12:00", "16:00", "21:00"]   # el bot publica en X las ideas del día (posts que pegaron por su formato, con tu voz)
   inspiracion_cantidad: 3         # junto con los virales: posts que pegaron por su formato + un borrador tuyo para adaptar
   estrategias_dia: 0               # informe semanal de estrategias de las cuentas que más crecen: 0 = lunes
   estrategias_hora: "09:00"

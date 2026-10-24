@@ -164,6 +164,23 @@ def telegram_mensaje(token: str, destino: str, texto: str, html: bool = False) -
     _telegram(token, "sendMessage", datos)
 
 
+def telegram_novedades(token: str, desde: int) -> list[dict]:
+    """Los mensajes nuevos que le llegaron al robot (para leer lo que Eze le manda por privado)."""
+    resultado = _telegram(token, "getUpdates", {"offset": desde, "limit": 100, "timeout": 0,
+                                                "allowed_updates": json.dumps(["message"])})
+    return resultado if isinstance(resultado, list) else []
+
+
+def telegram_bajar(token: str, file_id: str) -> bytes | None:
+    """Baja una foto que le mandaron al robot."""
+    try:
+        info = _telegram(token, "getFile", {"file_id": file_id})
+        r = requests.get(f"{TELEGRAM}/file/bot{token}/{info['file_path']}", timeout=60)
+        return r.content if r.status_code == 200 else None
+    except (ErrorPublicacion, KeyError, TypeError, requests.RequestException):
+        return None
+
+
 def telegram_chats(token: str) -> list[dict]:
     """Chats donde el bot fue agregado o le escribieron hace poco (para averiguar el destino)."""
     try:

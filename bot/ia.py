@@ -476,13 +476,18 @@ TEMAS_CHARLA = [
 ]
 
 
-def redactar_charla(cerebro: Cerebro, formato: str, tema: str, anteriores: list[str], correccion: str = "", datos: str = "") -> dict:
+def redactar_charla(cerebro: Cerebro, formato: str, tema: str, anteriores: list[str], correccion: str = "", datos: str = "",
+                    ganchos: list[str] | None = None) -> dict:
     if datos.startswith("CONTEXTO:"):
         usuario = f"FORMATO: {formato}\nTEMA DE HOY EN X: {tema}\n{datos.strip()}\n"
     else:
         usuario = f"FORMATO: {formato}\n{'PRODUCTO' if formato == 'venta' else 'TEMA'}: {tema}\n"
         if datos:
             usuario += f"DATOS:\n{datos.strip()}\n"
+    if ganchos:
+        # Lo que ya funciona: se reinventa, no se inventa de cero (y nunca se copia palabra por palabra).
+        usuario += ("\nGANCHOS QUE ESTÁN PEGANDO ESTOS DÍAS EN X (tomá la ESTRUCTURA de uno que encaje con el tema y adaptala "
+                    "a la voz de Eze y en español rioplatense; nunca copies las frases):\n- " + "\n- ".join(ganchos[:6]) + "\n")
     usuario += "\nPUBLICACIONES ANTERIORES (no repetir):\n" + (
         "\n---\n".join(a[:200] for a in anteriores[-25:]) or "(ninguna)")
     if correccion:
@@ -512,3 +517,24 @@ def redactar_hilo(cerebro: Cerebro, noticias: list[dict], cantidad: int = 5, cor
     if correccion:
         usuario += f"\n\nATENCIÓN: {correccion}"
     return cerebro.pedir_json(SISTEMA_HILO.replace("CANTIDAD", str(cantidad)), usuario, max_tokens=1500, temperatura=0.5)
+
+
+# ------------------------------------------------- 6) material que manda Eze (post: / hilo:)
+
+SISTEMA_MATERIAL = """Escribís para la cuenta de X de Ezequiel Bagnato (trader, bots de trading, IA, cripto). Eze te manda notas (y a veces una captura) y vos armás el post o el hilo con SUS datos.
+
+- Usá solo los hechos y números de sus notas: no inventes cifras ni resultados.
+- Español rioplatense con voseo, en minúscula, frases cortas, renglón en blanco entre ideas. Decí siempre "dinero", nunca "plata".
+- Si son resultados de un bot o de una operación, mostrá lo bueno y lo malo, sin prometer que se va a repetir ni decir que no hay riesgo.
+- Primera línea: un gancho que haga frenar el scroll (un número, una pregunta, una advertencia).
+- Sin links ni @menciones. Podés sumar 1 o 2 hashtags al final si tienen que ver.
+- TIPO post: un solo post de hasta 900 caracteres. TIPO hilo: "partes" con un gancho, de 3 a 6 posts numerados ("1/") de hasta 270 caracteres cada uno y un cierre con una pregunta.
+
+Respondé SOLO con JSON: {"partes": ["...", "..."]} (en un post, una sola parte)"""
+
+
+def redactar_material(cerebro: Cerebro, tipo: str, notas: str, con_foto: bool, correccion: str = "") -> dict:
+    usuario = f"TIPO: {tipo}\n{'(Eze mandó una captura que va en el primer post.)' if con_foto else ''}\n\nNOTAS DE EZE:\n{notas.strip()}"
+    if correccion:
+        usuario += f"\n\nATENCIÓN: {correccion}"
+    return cerebro.pedir_json(SISTEMA_MATERIAL, usuario, max_tokens=1500, temperatura=0.6)
