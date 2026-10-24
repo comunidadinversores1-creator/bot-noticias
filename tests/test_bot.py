@@ -1949,3 +1949,25 @@ def test_noticia_grande_te_llega_para_citar(corrida, red, tmp_path, monkeypatch)
 def test_hashtags_de_tema_caliente_sin_acusar():
     assert texto.hashtags_de_charla({"hashtags": ["#Libra", "Milei", "CriptoEstafa"]}) == ["#Libra", "#Milei"]
     assert texto.hashtags_de_charla({"hashtags": ["fraude", "estafaLibra"]}) == []
+
+
+
+def test_cuentas_y_hashtags_de_lo_que_nombra(cfg):
+    reglas = cfg["hashtags"]
+    t = "el juez sobreseyó a javier milei en la causa libra. ¿qué opinás?"
+    assert texto.cuentas_para(t, reglas) == ["@JMilei"]
+    assert texto.hashtags_para({"titular": t, "resumen": "", "categoria": ""}, reglas) == ["#Milei", "#Libra"]
+    assert texto.hashtags_para({"titular": "mi meta es ahorrar una libra de oro", "resumen": "", "categoria": ""}, reglas) == ["#Oro"]
+    assert texto.unir_hashtags(["#LIBRA"], ["#Milei", "#Libra"]) == ["#LIBRA", "#Milei"]
+
+
+def test_aviso_para_etiquetar(corrida, red, tmp_path):
+    _sin_la_fed(red)
+    red.charlas = ["el juez sobreseyó a javier milei en la causa libra\n\n¿qué opinás?"]
+    c = corrida(imagen="ninguna", charla=True, ahora=_hora(9, 40))
+    c.cfg["hashtags"] = [{"hashtag": "Milei", "si_dice": ["milei"], "cuenta": "JMilei"}]
+    assert c.correr() == 0
+    charla = [p for p in red.x_posts if "milei" in p["text"] and "reply" not in p][0]
+    assert charla["text"].endswith("#Milei") and "@" not in charla["text"]
+    avisos = [m["text"] for m in _al_privado(red) if "Para etiquetar" in m["text"]]
+    assert len(avisos) == 1 and "@JMilei" in avisos[0] and "x.com/i/status/" in avisos[0]

@@ -860,3 +860,28 @@ def hashtags_de_charla(crudo: dict) -> list[str]:
         if 2 <= len(tag) <= 30 and not _ACUSA.search(tag) and tag.lower() not in (t.lower() for t in salida):
             salida.append(tag)
     return ["#" + t for t in salida[:2]]
+
+
+
+def cuentas_para(texto: str, reglas: list) -> list[str]:
+    """Los usuarios oficiales de X de las personas o empresas que nombra el texto (para etiquetar a mano)."""
+    plano = normalizar(texto)
+    salida = []
+    for regla in reglas or []:
+        if not isinstance(regla, dict) or not str(regla.get("cuenta") or "").strip():
+            continue
+        palabras = [normalizar(str(p)) for p in (regla.get("si_dice") or []) if str(p).strip()]
+        if any(re.search(r"(?<!\w)" + re.escape(p) + r"(?!\w)", plano) for p in palabras):
+            cuenta = "@" + re.sub(r"[^\w]", "", str(regla["cuenta"]))
+            if cuenta not in salida:
+                salida.append(cuenta)
+    return salida
+
+
+def unir_hashtags(*listas: list[str], maximo: int = 2) -> list[str]:
+    salida = []
+    for lista in listas:
+        for t in lista or []:
+            if t.lower() not in (x.lower() for x in salida):
+                salida.append(t)
+    return salida[:maximo]

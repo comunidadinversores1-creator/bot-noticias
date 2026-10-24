@@ -41,24 +41,50 @@ x:
 #  Para sumar uno: copiá un renglón y cambiá el hashtag y las palabras.
 # ------------------------------------------------------------
 hashtags:
+  # Van primero los nombres propios (personas, empresas, monedas): son los que más se buscan.
+  # "cuenta" = su usuario oficial de X: el bot no lo etiqueta solo (X lo prohíbe en posts automáticos),
+  # pero te avisa por privado para que lo etiquetes vos.
+  - {hashtag: "Milei",       si_dice: ["milei"], cuenta: "JMilei"}
+  - {hashtag: "Libra",       si_dice: ["$libra", "causa libra", "criptomoneda libra", "token libra", "caso libra"]}
+  - {hashtag: "Caputo",      si_dice: ["caputo"]}
+  - {hashtag: "Trump",       si_dice: ["trump"], cuenta: "realDonaldTrump"}
+  - {hashtag: "Musk",        si_dice: ["musk", "elon"], cuenta: "elonmusk"}
+  - {hashtag: "Tesla",       si_dice: ["tesla"], cuenta: "Tesla"}
+  - {hashtag: "Nvidia",      si_dice: ["nvidia"], cuenta: "nvidia"}
+  - {hashtag: "OpenAI",      si_dice: ["openai", "chatgpt", "altman"], cuenta: "OpenAI"}
+  - {hashtag: "Apple",       si_dice: ["apple", "iphone"], cuenta: "Apple"}
+  - {hashtag: "Microsoft",   si_dice: ["microsoft"], cuenta: "Microsoft"}
+  - {hashtag: "Google",      si_dice: ["google", "alphabet", "gemini"], cuenta: "Google"}
+  - {hashtag: "Meta",        si_dice: ["meta platforms", "zuckerberg", "facebook"], cuenta: "Meta"}
+  - {hashtag: "Amazon",      si_dice: ["amazon"], cuenta: "amazon"}
+  - {hashtag: "Binance",     si_dice: ["binance"], cuenta: "binance"}
+  - {hashtag: "Coinbase",    si_dice: ["coinbase"], cuenta: "coinbase"}
+  - {hashtag: "BlackRock",   si_dice: ["blackrock"], cuenta: "BlackRock"}
+  - {hashtag: "Exness",      si_dice: ["exness"]}
   - {hashtag: "Bitcoin",     si_dice: ["bitcoin", "btc"]}
   - {hashtag: "Ethereum",    si_dice: ["ethereum", "ether", "eth"]}
-  - {hashtag: "Binance",     si_dice: ["binance"]}
-  - {hashtag: "Exness",      si_dice: ["exness"]}
-  - {hashtag: "IA",          si_dice: ["inteligencia artificial", "ia", "openai", "chatgpt", "nvidia", "ai"]}
-  - {hashtag: "ETF",         si_dice: ["etf", "etfs"]}
-  - {hashtag: "Stablecoins", si_dice: ["stablecoin", "stablecoins", "usdt", "usdc", "tether"]}
-  - {hashtag: "Fed",         si_dice: ["fed", "reserva federal", "powell", "fomc"]}
+  - {hashtag: "Solana",      si_dice: ["solana"], cuenta: "solana"}
+  - {hashtag: "XRP",         si_dice: ["xrp", "ripple"]}
+  - {hashtag: "SP500",       si_dice: ["s&p 500", "s&p", "sp500"]}
+  - {hashtag: "Nasdaq",      si_dice: ["nasdaq"]}
+  - {hashtag: "WallStreet",  si_dice: ["wall street", "dow jones"]}
+  - {hashtag: "Fed",         si_dice: ["fed", "reserva federal", "powell", "fomc"], cuenta: "federalreserve"}
+  - {hashtag: "BCRA",        si_dice: ["bcra", "banco central de la republica argentina"]}
   - {hashtag: "Inflación",   si_dice: ["inflacion", "ipc", "cpi"]}
   - {hashtag: "Dólar",       si_dice: ["dolar", "dolares", "blue", "mep"]}
+  - {hashtag: "RiesgoPaís",  si_dice: ["riesgo pais"]}
+  - {hashtag: "Merval",      si_dice: ["merval", "acciones argentinas", "adr"]}
   - {hashtag: "Oro",         si_dice: ["oro", "gold"]}
   - {hashtag: "Petróleo",    si_dice: ["petroleo", "crudo", "brent", "opep"]}
-  - {hashtag: "WallStreet",  si_dice: ["wall street", "s&p 500", "nasdaq", "dow jones"]}
-  - {hashtag: "Merval",      si_dice: ["merval", "acciones argentinas", "adr"]}
-  - {hashtag: "Argentina",   si_dice: ["bcra", "milei", "caputo", "indec", "riesgo pais"]}
-  - {hashtag: "Forex",       si_dice: ["forex", "divisas", "eur/usd", "euro"]}
-  - {hashtag: "Cripto",      si_dice: ["cripto", "criptomonedas", "crypto"]}
+  - {hashtag: "ETF",         si_dice: ["etf", "etfs"]}
+  - {hashtag: "Stablecoins", si_dice: ["stablecoin", "stablecoins", "usdt", "usdc", "tether"]}
+  - {hashtag: "IA",          si_dice: ["inteligencia artificial", "ia", "ai"]}
+  - {hashtag: "Forex",       si_dice: ["forex", "divisas", "eur/usd", "eur/aud", "aud/cad"]}
+  - {hashtag: "Cripto",      si_dice: ["cripto", "criptomonedas", "crypto", "criptomoneda"]}
   - {hashtag: "Trading",     si_dice: ["trading", "traders", "trader"]}
+
+# Cuántos avisos "para etiquetar" te pueden llegar por día (0 = ninguno)
+avisos_etiquetar_por_dia: 6
 
 # ------------------------------------------------------------
 #  GROK (la IA de X, lee X en tiempo real). Necesita la llave XAI_API_KEY en GitHub.

@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 from datetime import datetime, timedelta
 
 import requests
@@ -82,13 +83,16 @@ def temas_del_dia(cfg: dict, momento: datetime) -> list[dict]:
         "Quiero los 6 temas con más conversación y que muevan o puedan mover los mercados o el dinero de la gente. "
         "Nada de fútbol ni farándula. En el contexto nombrá a las personas, empresas y causas involucradas, con hechos verificables y en potencial si hay acusaciones. "
         "Respondé SOLO con JSON: {\"temas\": [{\"tema\": \"en 5 a 10 palabras\", \"contexto\": \"qué pasó, en 1 o 2 oraciones, solo hechos\", "
-        "\"hashtag\": \"el hashtag que más se usa para ese tema, sin #, o vacío\"}]}"
+        "\"hashtag\": \"el hashtag que más se usa para ese tema, sin #, o vacío\", "
+        "\"cuentas\": [\"usuarios oficiales de X de las personas o empresas involucradas, sin @, solo si estás seguro\"]}]}"
     )
     datos = preguntar(cfg, consigna, momento - timedelta(days=1))
     temas = []
     for t in datos.get("temas") or []:
         if isinstance(t, dict) and str(t.get("tema") or "").strip():
-            temas.append({k: str(t.get(k) or "").strip()[:300] for k in ("tema", "contexto", "hashtag")})
+            item = {k: str(t.get(k) or "").strip()[:300] for k in ("tema", "contexto", "hashtag")}
+            item["cuentas"] = [re.sub(r"[^\w]", "", str(c)) for c in (t.get("cuentas") or []) if re.sub(r"[^\w]", "", str(c))][:3]
+            temas.append(item)
     return temas[:8]
 
 

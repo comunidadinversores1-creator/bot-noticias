@@ -29,7 +29,7 @@ from .publicar import ErrorPublicacion, claves_x, telegram_chats, telegram_mensa
 from .texto import (
     anio_actual, armar_llamado, enlaces_extra, faltantes, faltantes_promo, fuente_limpia, idea_de_imagen, normalizar_post, normalizar_promo,
     numeros_inventados, promesas, promo_telegram, promo_x, texto_revisable, texto_revisable_promo,
-    LIMITE_X, hashtags_de_charla, hashtags_para, peso_x, promesas_charla, recortar_x, sin_links, link_en_x, revisar_charla, sumar_hashtags, texto_propio_telegram, texto_propio_x, texto_telegram, texto_x, x_largo, x_premium,
+    LIMITE_X, cuentas_para, hashtags_de_charla, hashtags_para, unir_hashtags, peso_x, promesas_charla, recortar_x, sin_links, link_en_x, revisar_charla, sumar_hashtags, texto_propio_telegram, texto_propio_x, texto_telegram, texto_x, x_largo, x_premium,
 )
 from .util import (
     RAIZ, a_hora, ahora_utc, cargar_ajustes, configurar_log, cupo_a_esta_hora, en_silencio, log, normalizar, socios_activos,
@@ -167,6 +167,8 @@ class Corrida:
                 largo = self.x_largo(para_telegram, publicidad)
                 registro["x"] = x_publicar(self.claves_x, jpg, largo or para_x, publicidad=avisar_publicidad, hecha_con_ia=con_ia,
                                            texto_corto=para_x if largo else "")
+                if registro["x"] and registro.get("tipo") == "noticia":
+                    self.avisar_etiquetar(registro["x"], para_x, cuentas_para(para_x, self.cfg.get("hashtags") or []))
                 log.info("  publicado en X")
             except ErrorPublicacion as error:
                 errores.append(error)
@@ -289,6 +291,27 @@ class Corrida:
         if resultado == "ok" and self.real:
             self.mandar_cita(post, g)
         return resultado
+
+    def avisar_etiquetar(self, id_post: str, texto: str, cuentas: list[str]) -> None:
+        """Te avisa por privado a quién conviene etiquetar en un post que acaba de salir (X no deja hacerlo solo)."""
+        if not cuentas or not (self.real and self.token and self.chat_prueba):
+            return
+        memoria = self.estado.datos["grok"]
+        hoy = self.ahora.astimezone(zona(self.cfg)).date().isoformat()
+        if memoria.get("etiquetar_dia") != hoy:
+            memoria["etiquetar_dia"], memoria["etiquetar"] = hoy, 0
+        if int(memoria.get("etiquetar", 0)) >= int(self.cfg.get("avisos_etiquetar_por_dia", 6) or 0):
+            return
+        memoria["etiquetar"] = int(memoria.get("etiquetar", 0)) + 1
+        e = lambda s: html.escape(s, quote=False)
+        primera = next((l for l in texto.splitlines() if l.strip()), "")[:120]
+        mensaje = (f"🏷 <b>Para etiquetar</b>\n«{e(primera)}»\n\n"
+                   f'<a href="https://x.com/i/status/{html.escape(str(id_post), quote=True)}">Abrí el post</a>, respondete a vos mismo o citalo con:\n'
+                   f"<code>{e(' '.join(cuentas[:4]))} ¿qué opinan?</code>")
+        try:
+            telegram_mensaje(self.token, self.chat_prueba, mensaje, html=True)
+        except ErrorPublicacion as error:
+            log.warning("  no pude mandar el aviso para etiquetar: %s", error)
 
     def mandar_cita(self, post: dict, g: Grupo) -> None:
         """Noticia grande: Grok busca el post más fuerte sobre ella en X y te lo manda para que lo cites."""
@@ -1121,7 +1144,7 @@ class Corrida:
         formatos = [str(f) for f in (ch.get("formatos") or ia.FORMATOS_CHARLA)]
         temas = [str(t) for t in (ch.get("temas") or ia.TEMAS_CHARLA)]
         formato, tema = forzado or formatos[numero % len(formatos)], temas[(numero * 7 + 3) % len(temas)]
-        datos, publicidad = "", False
+        datos, publicidad, caliente = "", False, None
         if formato not in ("venta", "ensenanza"):
             # Si Grok encontró de qué se habla hoy en X, la pregunta va sobre eso.
             caliente = self.tema_caliente()
@@ -1176,9 +1199,13 @@ class Corrida:
         opciones = ch.get("respuestas") or ch.get("respuesta") or []
         opciones = [opciones] if isinstance(opciones, str) else [str(o).strip() for o in opciones if str(o).strip()]
         respuesta = opciones[numero % len(opciones)] if opciones else ""        # va rotando: la misma siempre cansa
-        if datos.startswith("CONTEXTO:"):
-            # Tema caliente: 1 o 2 hashtags de los que se usan para ese tema (nunca uno que acuse a alguien).
-            texto = sumar_hashtags(texto, hashtags_de_charla(crudo), None if premium else LIMITE_X)
+        # Hashtags: los del tema caliente (Grok) y los de las personas, empresas y monedas que nombra. Como mucho 2.
+        tags = unir_hashtags(hashtags_de_charla(crudo) if datos.startswith("CONTEXTO:") else [],
+                             hashtags_para({"titular": texto, "resumen": "", "categoria": ""}, self.cfg.get("hashtags") or []))
+        texto = sumar_hashtags(texto, tags, None if premium else LIMITE_X)
+        etiquetar = cuentas_para(texto + " " + tema, self.cfg.get("hashtags") or [])
+        if datos.startswith("CONTEXTO:") and caliente:
+            etiquetar += [f"@{c}" for c in caliente.get("cuentas") or [] if f"@{c}" not in etiquetar]
         if formato == "venta":
             # Abajo de una pregunta de venta, la respuesta lleva al producto (es publicidad: X lo marca).
             elegido = next((p for p in (ch.get("ventas") or []) if isinstance(p, dict) and str(p.get("producto")) == tema), {})
@@ -1224,6 +1251,8 @@ class Corrida:
                 self.avisar(error.clave, str(error))
         if not id_post and id_telegram is None:
             return False
+        if id_post:
+            self.avisar_etiquetar(id_post, texto, etiquetar)
         self.estado.agregar_charla({"fecha": self.ahora.isoformat(), "formato": formato, "tema": tema, "texto": texto,
                                     "x": id_post, "telegram": id_telegram})
         if respuesta and id_post:
