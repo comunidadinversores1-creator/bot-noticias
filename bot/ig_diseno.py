@@ -195,7 +195,7 @@ def carrusel(contenido: dict, usuario: str = "@ezebagnato", etiqueta: str = "APR
     return salida
 
 
-def resumen_semanal(noticias: list[dict], desde: datetime, hasta: datetime, usuario: str = "@comunidad_inversores") -> list[bytes]:
+def resumen_semanal(noticias: list[dict], desde: datetime, hasta: datetime, usuario: str = "@comunidad_inversores_ok") -> list[bytes]:
     """Carrusel 'Las N noticias que movieron el mercado': noticias = [{"titulo", "texto", "categoria"}]."""
     n = len(noticias)
     meses = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"]

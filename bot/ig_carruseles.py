@@ -338,7 +338,7 @@ def partida(laminas: list[dict], usuario: str = "@ezebagnato") -> list[bytes]:
 
 # ============================================================= 4) NOTICIA (estilo @bitcoin_argentina)
 
-def noticia(laminas: list[dict], usuario: str = "@comunidad_inversores") -> list[bytes]:
+def noticia(laminas: list[dict], usuario: str = "@comunidad_inversores_ok") -> list[bytes]:
     """laminas: [{'foto': PIL|None, 'categoria': 'INSTITUCIONES · EE.UU.', 'titular': 'JPMorgan ...',
                   'fecha': '20 oct 2026', 'fuente': 'Reuters'}, ...]"""
     total, salida = len(laminas), []
