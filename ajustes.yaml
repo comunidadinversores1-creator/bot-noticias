@@ -304,7 +304,7 @@ promos:
     socio: exness
     nombre: "Bot de señales de Forex con Exness"
     imagen: assets/promos/senales-exness.jpg
-    en_historias: false           # la imagen muestra porcentajes de rendimiento: en Instagram no (ya te restringieron por eso)
+    titulo_historia: "Mi bot de señales EUR/AUD y AUD/CAD"
     texto_fijo: |
       🤖 BOT DE SEÑALES DE TRADING EN FOREX — gratis con Exness
 

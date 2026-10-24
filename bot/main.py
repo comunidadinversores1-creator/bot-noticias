@@ -1498,6 +1498,18 @@ class Corrida:
             if promo:
                 fotos.append(historias.sacar_foto(historias.html_promo((RAIZ / str(promo["imagen"])).read_bytes(),
                                                                        str(promo.get("titulo_historia") or promo.get("nombre")), "@ezebagnato")))
+            # Una noticia de ejemplo con foto real (la Fed), para ver el diseño.
+            from .imagen import buscar_foto
+            foto = buscar_foto(["Federal Reserve Eccles Building", "Federal Reserve Board"], "La Fed bajó la tasa", lambda t: False)
+            datos, es_logo, credito = None, False, ""
+            if foto is not None and foto.imagen is not None:
+                es_logo = bool(foto.es_logo or foto.origen == "marca")
+                b = io.BytesIO()
+                (foto.imagen.convert("RGBA").save(b, "PNG") if es_logo else foto.imagen.convert("RGB").save(b, "JPEG", quality=90))
+                datos, credito = b.getvalue(), ("" if es_logo else foto.credito())
+            fotos.append(historias.sacar_foto(historias.html_noticia(
+                "EJEMPLO: La Fed bajó la tasa 25 puntos básicos", "La Reserva Federal recortó su tasa de referencia por tercera vez en el año.",
+                datos, es_logo, credito, "Economía", True, "Reserva Federal", "@comunidad_inversores_ok")))
         except Exception as error:
             self.avisar("historias_prueba", f"No pude armar las historias de prueba: {type(error).__name__}: {error}")
             self.fallas += 1
@@ -1520,15 +1532,27 @@ class Corrida:
             return False
 
     def historia_de_noticia(self, g, post: dict, foto, jpg: bytes | None) -> None:
-        """La noticia recién publicada, como historia en @comunidad_inversores_ok."""
+        """La noticia recién publicada, como historia en @comunidad_inversores_ok, con foto real o logo oficial."""
         cfg_h = (self.cfg.get("instagram") or {}).get("historias") or {}
         if not (self.historias_activas() and verdadero(cfg_h.get("noticias_comunidad", True))) or en_silencio(self.cfg, self.ahora):
             return
         try:
-            if jpg is None:
-                foto = foto or self.imagen_para(g, post)
-                jpg = armar_placa(post, foto, self.cfg, self.ahora, self.estado.proxima_variante(), g.urgente)
-            self.subir_historia("comunidad", historias.html_noticia(jpg, g.urgente, post.get("fuente", ""), "@comunidad_inversores_ok"), "noticia")
+            foto = foto or self.imagen_para(g, post)
+            datos, es_logo, credito = None, False, ""
+            if foto is not None and foto.imagen is not None:
+                es_logo = bool(foto.es_logo or foto.origen == "marca")
+                b = io.BytesIO()
+                if es_logo:
+                    foto.imagen.convert("RGBA").save(b, "PNG")
+                else:
+                    foto.imagen.convert("RGB").save(b, "JPEG", quality=90)
+                    credito = foto.credito()
+                datos = b.getvalue()
+            resumen = str(post.get("resumen") or "")
+            bajada = re.split(r"(?<=[.!?])\s", resumen)[0][:170] if resumen else ""
+            pagina = historias.html_noticia(post.get("titular", ""), bajada, datos, es_logo, credito, g.categoria,
+                                            g.urgente, post.get("fuente", ""), "@comunidad_inversores_ok")
+            self.subir_historia("comunidad", pagina, "noticia")
         except Exception as error:
             log.warning("historia de la noticia: %s", error)
 

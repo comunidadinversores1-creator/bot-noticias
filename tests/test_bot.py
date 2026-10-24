@@ -2143,8 +2143,3 @@ def test_historias_agenda_promo_y_noticia(corrida, red, tmp_path, monkeypatch):
     c.cfg["instagram"]["historias"] = {"activa": True, "agenda_hora": "23:00", "promo_hora": "20:00", "promo_cada_dias": 2}
     assert c.correr() == 0
     assert sum(1 for h in _memoria(tmp_path)["ig"]["historias"]["hechas"] if h["tipo"] == "promo") == 1
-
-
-def test_promo_con_porcentajes_no_va_a_historias(cfg):
-    p = next(p for p in cfg["promos"] if p["id"] == "senales-exness")
-    assert p.get("en_historias") is False

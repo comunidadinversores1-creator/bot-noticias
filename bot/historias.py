@@ -145,20 +145,36 @@ def html_carrusel(portada: bytes, tema: str, usuario: str) -> str:
 
 def html_promo(imagen: bytes, titulo: str, usuario: str) -> str:
     return _pagina(f'''<section class="h"><div class="c">
-      <span class="tag" style="background:#f0b90b">Publicidad</span>
       <h1 style="font-size:92px">{e(titulo)}</h1>
       <div class="marco" style="width:720px"><img src="{_datos(imagen)}"></div>
       <div class="cta">El link está en mi perfil ↑</div>
     {_firma(usuario)}</div></section>''')
 
 
-def html_noticia(placa: bytes, urgente: bool, fuente: str, usuario: str) -> str:
-    etiqueta = '<span class="tag r">Última hora</span>' if urgente else '<span class="tag">Noticia</span>'
-    return _pagina(f'''<section class="h"><div class="c">
+def html_noticia(titular: str, bajada: str, foto: bytes | None, es_logo: bool, credito: str, categoria: str,
+                 urgente: bool, fuente: str, usuario: str) -> str:
+    """Foto real arriba (o el logo oficial), el titular grande abajo. Sin foto: solo texto, nunca un fondo de colores."""
+    etiqueta = '<span class="tag r">Última hora</span>' if urgente else f'<span class="tag">{e(categoria or "Noticia")}</span>'
+    if foto and not es_logo:
+        arriba = (f'<div style="position:absolute; left:0; right:0; top:0; height:1080px; z-index:1">'
+                  f'<img src="{_datos(foto)}" style="width:100%; height:100%; object-fit:cover">'
+                  f'<div style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(9,9,11,.35) 0%, rgba(9,9,11,.05) 30%, rgba(9,9,11,.6) 70%, #09090b 100%)"></div>'
+                  f'{f"<div style=position:absolute;right:30px;bottom:20px;font-size:18px;color:rgba(255,255,255,.55)>{e(credito)}</div>" if credito else ""}</div>')
+        espacio = '<div style="flex:1"></div>'
+    elif foto:
+        arriba = ""
+        espacio = (f'<div style="flex:1; display:flex; align-items:center; justify-content:center; position:relative">'
+                   f'<div style="position:absolute; width:620px; height:620px; border-radius:50%; background:radial-gradient(circle, rgba(34,197,94,.28), transparent 65%)"></div>'
+                   f'<img src="{_datos(foto, "image/png")}" style="position:relative; max-width:440px; max-height:440px"></div>')
+    else:
+        arriba, espacio = "", '<div style="flex:1"></div>'
+    return _pagina(f'''<section class="h">{arriba}<div class="c">
       {etiqueta}
-      <div class="marco" style="width:912px; margin-top:44px"><img src="{_datos(placa)}"></div>
-      {f'<div class="fuente">Fuente: {e(fuente)}</div>' if fuente else ""}
-      <div class="cta">Toda la info en Telegram: comunidad_inversores_anuncios</div>
+      {espacio}
+      <h1 style="font-family:Inter; font-weight:700; text-transform:none; font-size:{86 if len(titular) < 70 else 70}px; line-height:1.12">{e(titular)}</h1>
+      {f'<div style="font-size:36px; line-height:1.4; color:#d4d4d8; margin-top:22px">{e(bajada)}</div>' if bajada else ""}
+      <div class="fuente">Fuente: {e(fuente)}</div>
+      <div class="cta" style="align-self:flex-start">Toda la info en Telegram: comunidad_inversores_anuncios</div>
     {_firma(usuario)}</div></section>''')
 
 
