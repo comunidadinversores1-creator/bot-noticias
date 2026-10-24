@@ -790,3 +790,10 @@ instagram:
   carruseles: true
   dias_carrusel: [0, 2, 4, 6]
   hora_carrusel: "18:00"
+  # Guías que se mandan por DM a quien comenta la palabra del carrusel (la palabra va en mayúsculas).
+  guias:
+    BITCOIN:
+      link: "https://github.com/comunidadinversores1-creator/bot-noticias/blob/main/guias/que-es-bitcoin.pdf"
+      mensaje: "¡Hola! 🙌 Acá tenés la guía «¿Qué es Bitcoin?»: 23 páginas con todo explicado + el whitepaper original de Satoshi.\n\n👉 {link}\n\nSi te sirve, seguime acá y en mis otras redes para más: https://linktr.ee/comunidadinversores"
+      respuesta: "¡Listo! Te mandé la guía por DM 📩"
+      respuesta_sin_dm: "¡Gracias! En un rato te la mando por DM 📩"

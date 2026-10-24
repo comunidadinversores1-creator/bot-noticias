@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<style>
+@font-face { font-family: "Anton"; src: url("file:///home/claude/bot-noticias/assets/fuentes_letra/Anton-Regular.ttf"); }
+@font-face { font-family: "Inter"; font-weight: 500; src: url("file:///home/claude/bot-noticias/assets/fuentes_letra/Inter-Medium.otf"); }
+@font-face { font-family: "Inter"; font-weight: 600; src: url("file:///home/claude/bot-noticias/assets/fuentes_letra/Inter-SemiBold.otf"); }
+@font-face { font-family: "Inter"; font-weight: 700; src: url("file:///home/claude/bot-noticias/assets/fuentes_letra/Inter-Bold.otf"); }
+@font-face { font-family: "Inter"; font-weight: 900; src: url("file:///home/claude/bot-noticias/assets/fuentes_letra/InterDisplay-Black.otf"); }
+:root { --verde:#22c55e; --naranja:#f7931a; --rojo:#ef4444; --negro:#09090b; --texto:#e4e4e7; --gris:#a1a1aa; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #333; font-family: "Inter"; font-weight: 500; }
+.l { width: 1080px; height: 1440px; position: relative; overflow: hidden; background: var(--negro); color: var(--texto); margin-bottom: 20px; }
+.l::before { content:""; position:absolute; inset:0; background-image: linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px); background-size: 72px 72px; z-index: 0; }
+.l::after { content:""; position:absolute; inset:0; background: radial-gradient(900px 700px at 85% -10%, rgba(34,197,94,.16), transparent 60%), radial-gradient(800px 600px at -10% 110%, rgba(247,147,26,.10), transparent 60%); z-index: 0; }
+.z { position: relative; z-index: 2; }
+.pad { position: absolute; inset: 0; padding: 110px 84px 150px; z-index: 2; }
+.tag { display: inline-flex; align-items: center; gap: 12px; font-weight: 700; font-size: 26px; letter-spacing: .16em; text-transform: uppercase; color: var(--negro); background: var(--verde); padding: 10px 22px; border-radius: 99px; }
+.tag.n { background: var(--naranja); } .tag.r { background: var(--rojo); color: #fff; }
+h1, h2 { font-family: "Anton"; font-weight: 400; text-transform: uppercase; line-height: 1.13; color: #fff; }
+h1 { font-size: 150px; }
+h2 { font-size: 104px; margin-top: 34px; }
+em { font-style: normal; color: var(--verde); }
+.band { background: var(--verde); color: var(--negro); padding: 2px 14px 0; border-radius: 8px; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+p { font-size: 40px; line-height: 1.42; margin-top: 30px; color: var(--texto); }
+p b { color: #fff; font-weight: 700; }
+.ghost { position: absolute; right: 50px; top: 40px; font-family: "Anton"; font-size: 300px; line-height: 1; color: rgba(255,255,255,.05); z-index: 1; }
+.pie { position: absolute; left: 84px; right: 84px; bottom: 56px; display: flex; align-items: center; justify-content: space-between; z-index: 3; }
+.yo { display: flex; align-items: center; gap: 16px; font-weight: 700; font-size: 28px; color: #fff; }
+.yo img { width: 58px; height: 58px; border-radius: 50%; border: 3px solid var(--verde); }
+.yo small { display: block; font-weight: 600; font-size: 22px; color: var(--gris); }
+.prog { display: flex; gap: 8px; }
+.prog i { width: 34px; height: 8px; border-radius: 9px; background: rgba(255,255,255,.18); }
+.prog i.on { background: var(--verde); }
+.dato { margin-top: 44px; background: rgba(24,24,27,.92); border: 2px solid #27272a; border-left: 8px solid var(--naranja); border-radius: 26px; padding: 34px 40px; }
+.dato .t { font-weight: 700; font-size: 24px; letter-spacing: .16em; color: var(--naranja); margin-bottom: 10px; }
+.dato .c { font-size: 36px; line-height: 1.4; color: #fff; font-weight: 600; }
+.foto { position: absolute; left: 0; right: 0; top: 0; height: 640px; z-index: 1; }
+.foto img { width: 100%; height: 100%; object-fit: cover; }
+.foto::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(9,9,11,.1) 0%, rgba(9,9,11,.55) 55%, var(--negro) 100%); }
+.desl { font-weight: 700; font-size: 26px; color: var(--verde); letter-spacing: .1em; }
+/* portada */
+.portada .bg { position: absolute; inset: 0; z-index: 1; }
+.portada .bg img { width: 100%; height: 100%; object-fit: cover; }
+.portada .bg::after { content:""; position:absolute; inset:0; background: linear-gradient(180deg, rgba(9,9,11,.05) 0%, rgba(9,9,11,.25) 35%, rgba(9,9,11,.92) 62%, var(--negro) 100%); }
+.portada .cont { position: absolute; left: 84px; right: 84px; bottom: 190px; z-index: 2; }
+.portada .sub { font-size: 44px; font-weight: 600; color: #e4e4e7; margin-top: 30px; line-height: 1.3; }
+/* líneas de tiempo */
+.hito { display: grid; grid-template-columns: 230px 1fr; gap: 30px; margin-top: 40px; align-items: start; }
+.hito .a { font-family: "Anton"; font-size: 96px; line-height: .95; color: var(--naranja); }
+.hito .d { font-size: 36px; line-height: 1.42; padding-top: 6px; }
+.hito .d b { color: #fff; }
+/* cadena */
+.cadena { display: flex; align-items: center; gap: 0; margin-top: 40px; }
+.bloque { width: 210px; height: 180px; border-radius: 28px; background: #18181b; border: 3px solid #3f3f46; padding: 24px; display: flex; flex-direction: column; justify-content: space-between; }
+.bloque .h { font-weight: 700; font-size: 22px; color: var(--gris); letter-spacing: .08em; }
+.bloque .num { font-family: "Anton"; font-size: 58px; color: #fff; }
+.bloque .hash { font-size: 20px; color: var(--verde); font-weight: 700; }
+.bloque.nuevo { border-color: var(--verde); box-shadow: 0 0 60px rgba(34,197,94,.35); }
+.eslabon { width: 46px; height: 10px; background: #52525b; border-radius: 9px; }
+/* números grandes */
+.gigante { font-family: "Anton"; font-size: 210px; line-height: 1; color: var(--verde); margin-top: 30px; letter-spacing: -.01em; }
+.halv { display: flex; gap: 18px; align-items: flex-end; height: 300px; margin-top: 40px; }
+.halv div { flex: 1; background: linear-gradient(180deg, var(--naranja), #b45309); border-radius: 18px 18px 6px 6px; position: relative; }
+.halv div span { position: absolute; top: -52px; left: 0; right: 0; text-align: center; font-weight: 700; font-size: 30px; color: #fff; }
+.halv div small { position: absolute; bottom: -50px; left: 0; right: 0; text-align: center; font-weight: 700; font-size: 26px; color: var(--gris); }
+/* riesgos */
+.riesgo { margin-top: 28px; background: rgba(24,24,27,.95); border: 2px solid #27272a; border-left: 8px solid var(--rojo); border-radius: 24px; padding: 28px 34px; }
+.riesgo .t { font-weight: 700; font-size: 36px; color: #fff; }
+.riesgo .c { font-size: 30px; color: #d4d4d8; margin-top: 8px; line-height: 1.4; }
+/* cierre */
+.palabra { display: inline-block; font-family: "Anton"; font-size: 180px; line-height: 1; background: var(--verde); color: var(--negro); padding: 18px 44px 8px; border-radius: 34px; margin-top: 20px; box-shadow: 0 0 90px rgba(34,197,94,.35); }
+.libro { position: absolute; right: 64px; bottom: 150px; width: 320px; transform: rotate(6deg); border-radius: 14px; box-shadow: 0 40px 80px rgba(0,0,0,.6), 0 0 0 2px #27272a; z-index: 2; }
+</style></head><body>
+
+<!-- 1 PORTADA -->
+<section class="l portada">
+  <div class="bg"><img src="../fotos/btc_monedas.jpg"></div>
+  <div class="cont">
+    <span class="tag">Guía desde cero</span>
+    <h1 style="margin-top:34px">¿Qué es<br><em>Bitcoin</em>?</h1>
+    <div class="sub">Explicado de verdad, en 7 láminas.<br>Guardalo para tenerlo a mano.</div>
+  </div>
+  <div class="pie"><div class="yo"><img src="file:///home/claude/bot-noticias/assets/logo.png"><div>Ezequiel Bagnato<small>@ezebagnato</small></div></div><div class="desl">DESLIZÁ →</div></div>
+</section>
+
+<!-- 2 DINERO SIN DUEÑO -->
+<section class="l">
+  <div class="foto" style="height:560px"><img src="../fotos/btc_placa.jpg"></div>
+  <div class="ghost">01</div>
+  <div class="pad" style="padding-top: 400px">
+    <span class="tag">Qué es</span>
+    <h2>Dinero digital <span class="band">sin dueño</span></h2>
+    <p>Bitcoin es dinero que existe solo en internet. <b>No lo emite ningún banco ni gobierno</b>: lo sostienen miles de computadoras en el mundo que llevan la misma cuenta y se controlan entre ellas.</p>
+    <div class="dato"><div class="t">EN LA PRÁCTICA</div><div class="c">Podés mandarlo a otro país en minutos, un domingo a las 3 de la mañana, sin pedirle permiso a nadie.</div></div>
+  </div>
+  <div class="pie"><div class="yo"><img src="file:///home/claude/bot-noticias/assets/logo.png"><div>@ezebagnato</div></div><div class="prog"><i></i><i class="on"></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+</section>
+
+<!-- 3 HISTORIA -->
+<section class="l">
+  <div class="ghost">02</div>
+  <div class="pad">
+    <span class="tag n">Cómo nació</span>
+    <h2>Nadie sabe <span class="band" style="background:var(--naranja)">quién lo creó</span></h2>
+    <div class="hito"><div class="a">2008</div><div class="d"><b>31 de octubre.</b> Alguien que firma como <b>Satoshi Nakamoto</b> publica un documento de 9 páginas: el <i>whitepaper</i>. Plena crisis financiera mundial.</div></div>
+    <div class="hito"><div class="a">2009</div><div class="d"><b>3 de enero.</b> Nace el primer bloque. Satoshi le deja escondido el titular de un diario sobre <b>un nuevo rescate a los bancos</b>.</div></div>
+    <div class="hito"><div class="a">2010</div><div class="d">La primera compra conocida: <b>2 pizzas por 10.000 BTC</b>. Satoshi desaparece en 2011 y nunca se supo más.</div></div>
+  </div>
+  <div class="pie"><div class="yo"><img src="file:///home/claude/bot-noticias/assets/logo.png"><div>@ezebagnato</div></div><div class="prog"><i></i><i></i><i class="on"></i><i></i><i></i><i></i><i></i><i></i></div></div>
+</section>
+
+<!-- 4 BLOCKCHAIN -->
+<section class="l">
+  <div class="ghost">03</div>
+  <div class="pad">
+    <span class="tag">Cómo funciona</span>
+    <h2>La <em>blockchain</em>: un cuaderno que nadie puede borrar</h2>
+    <p>Cada movimiento queda anotado en un registro <b>público</b>, copiado en miles de computadoras. Cada ~10 minutos se agrega un bloque nuevo que lleva la "huella" del anterior.</p>
+    <div class="cadena">
+      <div class="bloque"><div class="h">BLOQUE</div><div class="num">#1</div><div class="hash">huella: 7a3f…</div></div><div class="eslabon"></div>
+      <div class="bloque"><div class="h">BLOQUE</div><div class="num">#2</div><div class="hash">usa 7a3f…</div></div><div class="eslabon"></div>
+      <div class="bloque"><div class="h">BLOQUE</div><div class="num">#3</div><div class="hash">usa c91e…</div></div><div class="eslabon"></div>
+      <div class="bloque nuevo"><div class="h">NUEVO</div><div class="num">#4</div><div class="hash">usa 2b8d…</div></div>
+    </div>
+    <div class="dato"><div class="t">POR QUÉ ES SEGURO</div><div class="c">Cambiar un dato viejo rompería todas las huellas que siguen. La red lo nota al instante y lo rechaza.</div></div>
+  </div>
+  <div class="pie"><div class="yo"><img src="file:///home/claude/bot-noticias/assets/logo.png"><div>@ezebagnato</div></div><div class="prog"><i></i><i></i><i></i><i class="on"></i><i></i><i></i><i></i><i></i></div></div>
+</section>
+
+<!-- 5 21 MILLONES -->
+<section class="l">
+  <div class="ghost">04</div>
+  <div class="pad">
+    <span class="tag n">Escasez</span>
+    <h2>Nunca va a haber más de</h2>
+    <div class="gigante">21.000.000</div>
+    <p style="margin-top:14px">Está escrito en su código. Ya se creó <b>más del 94%</b>, y cada 4 años los bitcoins nuevos que salen se cortan a la mitad (el <b>halving</b>):</p>
+    <div class="halv" style="margin-top:90px">
+      <div style="height:100%"><span>50</span><small>2009</small></div>
+      <div style="height:50%"><span>25</span><small>2012</small></div>
+      <div style="height:25%"><span>12,5</span><small>2016</small></div>
+      <div style="height:12.5%"><span>6,25</span><small>2020</small></div>
+      <div style="height:6.25%"><span>3,125</span><small>2024</small></div>
+    </div>
+  </div>
+  <div class="pie"><div class="yo"><img src="file:///home/claude/bot-noticias/assets/logo.png"><div>@ezebagnato</div></div><div class="prog"><i></i><i></i><i></i><i></i><i class="on"></i><i></i><i></i><i></i></div></div>
+</section>
+
+<!-- 6 SATOSHIS -->
+<section class="l">
+  <div class="foto" style="height:560px"><img src="../fotos/btc_oro.jpg" style="object-position:center 62%"></div>
+  <div class="ghost">05</div>
+  <div class="pad" style="padding-top: 400px">
+    <span class="tag">El error más común</span>
+    <h2>No tenés que comprar <span class="band">uno entero</span></h2>
+    <p>Cada bitcoin se divide en <b>100 millones de partes</b>, llamadas satoshis. Se puede comprar el equivalente a unos pocos dólares.</p>
+    <div class="dato" style="border-left-color: var(--verde)"><div class="t" style="color:var(--verde)">LA CUENTA</div><div class="c" style="font-family:'Anton'; font-weight:400; font-size:64px; letter-spacing:.01em">1 BTC = 100.000.000 SATS</div></div>
+  </div>
+  <div class="pie"><div class="yo"><img src="file:///home/claude/bot-noticias/assets/logo.png"><div>@ezebagnato</div></div><div class="prog"><i></i><i></i><i></i><i></i><i></i><i class="on"></i><i></i><i></i></div></div>
+</section>
+
+<!-- 7 RIESGOS -->
+<section class="l">
+  <div class="ghost">06</div>
+  <div class="pad">
+    <span class="tag r">Lo que nadie te dice</span>
+    <h2>4 riesgos que <span class="band" style="background:var(--rojo); color:#fff">tenés que saber</span></h2>
+    <div class="riesgo"><div class="t">Sube y baja muchísimo</div><div class="c">En 2022 cayó más de 70% desde su máximo. Puede volver a pasar.</div></div>
+    <div class="riesgo"><div class="t">Si perdés tus 12 o 24 palabras, lo perdés todo</div><div class="c">No existe "olvidé mi contraseña". Y nunca se las des a nadie.</div></div>
+    <div class="riesgo"><div class="t">Los envíos no se pueden deshacer</div><div class="c">Si le errás a la dirección, ese dinero no vuelve.</div></div>
+    <div class="riesgo"><div class="t">Si te prometen ganancias, es estafa</div><div class="c">Nadie serio te escribe por privado para "duplicar" tus bitcoins.</div></div>
+  </div>
+  <div class="pie"><div class="yo"><img src="file:///home/claude/bot-noticias/assets/logo.png"><div>@ezebagnato</div></div><div class="prog"><i></i><i></i><i></i><i></i><i></i><i></i><i class="on"></i><i></i></div></div>
+</section>
+
+<!-- 8 CIERRE -->
+<section class="l">
+  <div class="pad">
+    <span class="tag">Guía gratis</span>
+    <h2 style="font-size:96px">¿Querés la guía completa?</h2>
+    <div style="margin-top:46px; font-family:'Anton'; font-size:90px; color:#fff">COMENTÁ</div>
+    <div class="palabra">BITCOIN</div>
+    <p style="max-width:520px">y te la mando por privado: <b>23 páginas</b> con todo explicado + el <b>whitepaper original</b> de Satoshi.</p>
+    <p style="font-size:30px; color:var(--gris); margin-top:36px; max-width:520px">Seguime para más contenido de trading, bots de IA y cripto, sin vender humo.</p>
+  </div>
+  <img class="libro" src="../guia/tapa-01.png">
+  <div class="pie"><div class="yo"><img src="file:///home/claude/bot-noticias/assets/logo.png"><div>@ezebagnato</div></div><div class="prog"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="on"></i></div></div>
+</section>
+
+</body></html>

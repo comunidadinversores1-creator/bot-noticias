@@ -76,6 +76,11 @@ Cada lámina: titular -> {"tipo": "portada"|"paso", "titulo", "bajada"?, "texto"
 No incluyas la lámina de cierre: la agrega el sistema."""
 
 
+def sin_tildes(texto: str) -> str:
+    import unicodedata
+    return "".join(c for c in unicodedata.normalize("NFD", texto) if unicodedata.category(c) != "Mn")
+
+
 def que_toca(memoria: dict) -> tuple[str, str, str]:
     """(tipo, estilo, tema) del próximo carrusel, sin repetir tema hasta agotar la lista."""
     vuelta = int(memoria.get("vuelta", 0) or 0)

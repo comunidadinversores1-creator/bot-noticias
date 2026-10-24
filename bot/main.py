@@ -569,6 +569,7 @@ class Corrida:
             self.tal_vez_grok()              # no publica nada: busca temas del día y te manda los virales
             self.tal_vez_carrusel()          # Instagram: arma y publica el carrusel del día (y te avisa)
             self.tal_vez_numeros_ig()        # Instagram: lee cómo le fue a cada carrusel y los domingos te manda el ranking
+            self.tal_vez_comentarios_ig()    # Instagram: a quien comenta la palabra le responde y le manda la guía por DM
             self.ocupado = self.tal_vez_material()      # lo que vos pedís por privado sale primero
             if not self.ocupado:
                 self.ocupado = self.tal_vez_calendario()
@@ -1230,7 +1231,19 @@ class Corrida:
                 tema = ig_plan.que_toca({"vuelta": ig_plan.RUEDA.index(par), "temas_usados": g.get("temas_usados")})[2]
         # Si ya se dejó armado (y revisado por Eze) el que toca, sale ese mismo, sin reescribirlo.
         proximo = g.get("proximo") or {}
-        if not estilo_pedido and not preparar and proximo.get("tema") == tema and proximo.get("estilo") == estilo:
+        listas = None
+        if not estilo_pedido and not preparar and proximo.get("archivos"):
+            # Láminas diseñadas a mano y guardadas en el repo: salen tal cual.
+            try:
+                listas = [(RAIZ / a).read_bytes() for a in proximo["archivos"]]
+                tipo, estilo, tema = proximo.get("tipo", tipo), proximo.get("estilo", estilo), proximo.get("tema", tema)
+                contenido = {"texto_post": proximo["texto_post"], "palabra": proximo.get("palabra", "")}
+            except (OSError, KeyError) as error:
+                log.warning("no pude leer el carrusel armado: %s", error)
+                listas = None
+        if listas is not None:
+            pass
+        elif not estilo_pedido and not preparar and proximo.get("tema") == tema and proximo.get("estilo") == estilo:
             contenido = proximo["contenido"]
         else:
             contenido = ig_plan.redactar(self.cerebro, tipo, estilo, tema)
@@ -1238,7 +1251,7 @@ class Corrida:
             self.avisar("carrusel", f"No pude armar el carrusel de Instagram ({tema}): la IA no lo escribió bien.")
             return False
         fotos = []
-        if estilo == "partida":
+        if estilo == "partida" and listas is None:
             for f in (g.get("fotos") or [])[-8:]:
                 b = telegram_bajar(self.token, f)
                 if b:
@@ -1246,9 +1259,9 @@ class Corrida:
                         fotos.append(Image.open(io.BytesIO(b)).convert("RGB"))
                     except OSError:
                         continue
-        laminas = ig_plan.armar(contenido, estilo, fotos, tema=tema)
+        laminas = listas if listas is not None else ig_plan.armar(contenido, estilo, fotos, tema=tema)
         aviso = ""
-        if estilo == "partida" and not fotos:
+        if estilo == "partida" and not fotos and listas is None:
             aviso = "\n\n📸 <b>Necesito fotos tuyas</b> para este estilo (operando, en tu escritorio, de viaje). Mandámelas acá con el texto <code>ig</code> y las uso en los próximos."
         if preparar:
             g["proximo"] = {"tipo": tipo, "estilo": estilo, "tema": tema, "contenido": contenido}
@@ -1352,6 +1365,65 @@ class Corrida:
             g["ranking_dia"] = hoy
             self.estado.guardar()
             self.mandar_ranking_ig()
+
+    def tal_vez_comentarios_ig(self) -> None:
+        """A quien comenta la palabra de un carrusel (ej. BITCOIN) le manda la guía por DM y le responde el comentario."""
+        g = self.estado.datos["ig"]
+        guias = {ig_plan.sin_tildes(k).upper(): v for k, v in ((self.cfg.get("instagram") or {}).get("guias") or {}).items()}
+        t = instagram.llave("ezebagnato", g)
+        if not (guias and t):
+            return
+        recientes = []
+        for h in g.get("historial") or []:
+            try:
+                if h.get("media_id") and (self.ahora - datetime.fromisoformat(h["fecha"])).days <= 7:
+                    recientes.append(h)
+            except (KeyError, ValueError):
+                continue
+        if not recientes:
+            return
+        try:
+            yo = instagram.quien_soy(t)
+        except instagram.ErrorInstagram as error:
+            log.warning("Instagram: %s", error)
+            return
+        hechos = set(g.get("respondidos") or [])
+        pendientes_a_mano, enviados = [], 0
+        for h in recientes:
+            palabra = ig_plan.sin_tildes(str(h.get("palabra") or "")).upper()
+            guia = guias.get(palabra)
+            if not guia:
+                continue
+            try:
+                lista = instagram.comentarios(t, h["media_id"])
+            except instagram.ErrorInstagram as error:
+                log.warning("Instagram: no pude leer comentarios: %s", error)
+                continue
+            for c in lista:
+                if c["id"] in hechos or c.get("username") == yo.get("username") or enviados >= 25:
+                    continue
+                if not re.search(rf"\b{re.escape(palabra)}\b", ig_plan.sin_tildes(str(c.get("text") or "")).upper()):
+                    continue
+                hechos.add(c["id"])
+                texto_dm = str(guia.get("mensaje") or "¡Hola! Acá tenés la guía 👇\n\n{link}").format(link=guia.get("link", ""))
+                try:
+                    instagram.mensaje_privado(t, yo["user_id"], c["id"], texto_dm)
+                    respuesta = str(guia.get("respuesta") or "¡Listo! Te mandé la guía por DM 📩")
+                    enviados += 1
+                except instagram.ErrorInstagram as error:
+                    log.warning("Instagram DM a @%s: %s", c.get("username"), error)
+                    pendientes_a_mano.append(c.get("username", "?"))
+                    respuesta = str(guia.get("respuesta_sin_dm") or "¡Gracias! En un rato te la mando por DM 📩")
+                try:
+                    instagram.responder_comentario(t, c["id"], respuesta)
+                except instagram.ErrorInstagram as error:
+                    log.warning("Instagram: no pude responder el comentario: %s", error)
+        g["respondidos"] = list(hechos)[-2000:]
+        self.estado.guardar()
+        if pendientes_a_mano:
+            self.avisar("ig_dm", "Instagram no me dejó mandar la guía por DM (seguramente falta que Meta apruebe la app). "
+                        "Mandásela vos a: " + ", ".join("@" + u for u in pendientes_a_mano[:30])
+                        + f"\n\nLink: {next(iter(guias.values())).get('link', '')}", cada_horas=3)
 
     def mandar_ranking_ig(self) -> None:
         con = [h for h in (self.estado.datos["ig"].get("historial") or []) if h.get("numeros")]

@@ -150,6 +150,28 @@ def publicar_historia(token: str, url: str) -> str:
     return _pedir("POST", f"{yo}/media_publish", token, creation_id=c)["id"]
 
 
+def comentarios(token: str, media_id: str) -> list[dict]:
+    datos = _pedir("GET", f"{media_id}/comments", token, fields="id,text,username,timestamp", limit="50")
+    return [c for c in (datos.get("data") or []) if isinstance(c, dict)]
+
+
+def responder_comentario(token: str, comentario_id: str, texto: str) -> str:
+    return _pedir("POST", f"{comentario_id}/replies", token, message=texto[:300])["id"]
+
+
+def mensaje_privado(token: str, yo: str, comentario_id: str, texto: str) -> None:
+    """Respuesta privada (DM) a quien comentó. Instagram la permite una vez por comentario, hasta 7 días después."""
+    try:
+        r = requests.post(f"{API}/{yo}/messages", params={"access_token": token}, timeout=60,
+                          json={"recipient": {"comment_id": comentario_id}, "message": {"text": texto[:1000]}})
+        cuerpo = r.json()
+    except (requests.RequestException, ValueError) as error:
+        raise ErrorInstagram(f"Instagram no respondió ({type(error).__name__}).")
+    if r.status_code != 200 or "error" in cuerpo:
+        e = cuerpo.get("error") or {}
+        raise ErrorInstagram(f"no me dejó mandar el DM: {e.get('message') or r.status_code}")
+
+
 def numeros(token: str, media_id: str) -> dict:
     """Me gusta, comentarios, guardados, compartidos y alcance de una publicación."""
     datos = _pedir("GET", f"{media_id}/insights", token, metric="reach,likes,comments,saved,shares,total_interactions")

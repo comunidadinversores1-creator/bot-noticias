@@ -2067,3 +2067,43 @@ def test_llave_de_instagram_renovada_va_cifrada(monkeypatch):
     memoria = {"llaves": {"ezebagnato": {"cifrada": cifrada}}}
     assert instagram.llave("ezebagnato", memoria) == "IGAAnueva"
     assert instagram.llave("ezebagnato", {"llaves": {"ezebagnato": {"cifrada": "basura"}}}) == "IGAAvieja"
+
+
+def test_comentario_con_la_palabra_recibe_la_guia_por_dm(corrida, red, tmp_path, monkeypatch):
+    from bot import instagram
+    _sin_la_fed(red)
+    monkeypatch.setenv("IG_TOKEN_EZEBAGNATO", "IGAAx")
+    hecho = {"dm": [], "resp": []}
+    monkeypatch.setattr(instagram, "quien_soy", lambda t: {"user_id": "1", "username": "ezebagnato"})
+    monkeypatch.setattr(instagram, "comentarios", lambda t, m: [
+        {"id": "c1", "text": "Bitcóin!!", "username": "ana"}, {"id": "c2", "text": "genial", "username": "juan"},
+        {"id": "c3", "text": "BITCOIN", "username": "ezebagnato"}])
+    monkeypatch.setattr(instagram, "mensaje_privado", lambda t, yo, c, texto: hecho["dm"].append((c, texto)))
+    monkeypatch.setattr(instagram, "responder_comentario", lambda t, c, texto: hecho["resp"].append((c, texto)) or "r1")
+    monkeypatch.setattr(instagram, "renovar", lambda c, m: False)
+    (tmp_path / "estado.json").write_text(json.dumps({"ig": {"historial": [
+        {"fecha": _hora(9, 0).isoformat(), "media_id": "m1", "palabra": "BITCOIN", "tema": "¿Qué es Bitcoin?"}]}}), encoding="utf-8")
+    c = corrida(imagen="ninguna", ahora=_hora(9, 40))
+    c.cfg["instagram"] = {"carruseles": False, "guias": {"BITCOIN": {"link": "https://x.y/guia.pdf"}}}
+    assert c.correr() == 0
+    assert [d[0] for d in hecho["dm"]] == ["c1"] and "https://x.y/guia.pdf" in hecho["dm"][0][1]
+    assert hecho["resp"] == [("c1", "¡Listo! Te mandé la guía por DM 📩")]
+    # En la corrida siguiente no le vuelve a mandar.
+    c = corrida(imagen="ninguna", ahora=_hora(10, 40))
+    c.cfg["instagram"] = {"carruseles": False, "guias": {"BITCOIN": {"link": "https://x.y/guia.pdf"}}}
+    assert c.correr() == 0
+    assert len(hecho["dm"]) == 1
+
+
+def test_carrusel_armado_a_mano_sale_tal_cual(corrida, red, tmp_path):
+    _sin_la_fed(red)
+    (tmp_path / "estado.json").write_text(json.dumps({"ig": {"proximo": {
+        "tipo": "ensenanza", "estilo": "titular", "tema": "¿Qué es Bitcoin?", "palabra": "BITCOIN", "texto_post": "post armado",
+        "archivos": [f"assets/ig_listo/2026-10-25/0{i}.jpg" for i in range(1, 9)]}}}), encoding="utf-8")
+    domingo = datetime(2026, 10, 25, 21, 10, tzinfo=timezone.utc)
+    c = corrida(imagen="ninguna", ahora=domingo)
+    c.cfg["instagram"] = {"carruseles": True, "dias_carrusel": [6], "hora_carrusel": "18:00"}
+    assert c.correr() == 0
+    assert red.telegram_albumes[0]["fotos"] == 8
+    ig = _memoria(tmp_path)["ig"]
+    assert "proximo" not in ig and ig["historial"][-1]["palabra"] == "BITCOIN" and ig["temas_usados"] == ["¿Qué es Bitcoin?"]
