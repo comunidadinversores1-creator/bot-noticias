@@ -306,7 +306,7 @@ promos:
     imagen: assets/promos/senales-exness.jpg
     titulo_historia: "Mi bot de señales EUR/AUD y AUD/CAD"
     texto_fijo: |
-      🤖 BOT DE SEÑALES DE TRADING EN FOREX — gratis con Exness
+      🤖 MIENTRAS DORMÍS, MI BOT ANALIZA EL MERCADO POR VOS — y las señales son GRATIS con Exness
 
       Recibís en Telegram las señales del sistema para EUR/AUD y AUD/CAD: entrada, Stop Loss, Take Profit y cuándo pasar a Break Even (seguro).
 
@@ -328,6 +328,8 @@ promos:
       2) Verificá tu cuenta y depositá al menos US$100
       3) Escribime por Telegram (@ezequiel_comunidad_inversores) y te doy el acceso al canal
 
+      🔥 Cada día que esperás, te perdés las señales de ese día. Entrá hoy.
+
       👉 [Registrate en Exness con mi link](https://one.exnessonelink.com/a/ptf6lzlrc8)
       📎 [Dossier completo: resultados, metodología y riesgos](https://drive.google.com/file/d/1mzqNl57Hj3rjzvWKR_6IoVOQ7xSbbf_C/view)
       🎥 [Tutorial paso a paso](https://youtu.be/WGP222nUgvA)
@@ -348,9 +350,9 @@ promos:
     imagen: assets/promos/exness-un-clic.jpg
     titulo_historia: "Operá con un solo clic en Exness"
     texto_fijo: |
-      ⚡️ EXNESS: ahora podés operar con un solo clic
+      ⚡️ UN CLIC Y ESTÁS ADENTRO: Exness acaba de sacar el trading con un solo clic
 
-      Exness acaba de incorporar One-Click Trading en su Terminal: una modalidad que permite abrir y cerrar operaciones de mercado con un solo clic, sin una ventana adicional de confirmación. (Fuente: [blog oficial de Exness](https://www.exness.com/blog/product/one-click-trading-exness-terminal/))
+      Cuando el precio se mueve, cada segundo cuenta. Exness acaba de incorporar One-Click Trading en su Terminal: una modalidad que permite abrir y cerrar operaciones de mercado con un solo clic, sin una ventana adicional de confirmación. (Fuente: [blog oficial de Exness](https://www.exness.com/blog/product/one-click-trading-exness-terminal/))
 
       Esto puede ser especialmente útil para quienes hacen scalping o trading de noticias, donde la velocidad de ejecución forma parte del proceso operativo.
 
@@ -391,7 +393,7 @@ promos:
     imagen: assets/promos/video-senales.jpg
     titulo_historia: "Probé 9.300 combinaciones: solo 2 pares sirvieron"
     texto_fijo: |
-      📊 Probé más de 9.300 combinaciones de trading. Solo 2 pares pasaron.
+      📊 Probé más de 9.300 combinaciones de trading. 9.298 FALLARON. Solo 2 pares pasaron.
 
       ¿Puede una estrategia funcionar durante años y seguir siendo rentable en el futuro? Esa es la pregunta que intento responder en este video.
 
@@ -471,6 +473,31 @@ promos:
     imagen: assets/promos/binance-tarjeta.jpg
     aviso: "Promoción de Binance: tiene cupos limitados y condiciones propias."
     vence: "2026-10-28"           # la campaña termina el 29/10 a las 20:59 de Argentina: el último día entero es el 28
+    texto_fijo: |
+      🔥 TERMINA EL 29 DE OCTUBRE: Binance te devuelve la MITAD de tus compras
+
+      Hasta el 29 de octubre, si pedís la Binance Card (o todavía no la usaste), tus primeras 2 compras del día a día tienen 50% de cashback al instante: hasta 2,5 USDC por compra. 🛒💸
+
+      ⏳ Es solo para los primeros 110.000 usuarios y los cupos se van por orden de uso. Cuando se llenan, se terminó.
+
+      ¿Ya tenés la tarjeta? Gastando 50 USD en total durante la campaña te llevás 5 USDC (primeros 20.000; hay que confirmar la participación en la página).
+
+      Así de simple:
+      1️⃣ Abrí tu cuenta en Binance con mi link → [Registrate acá](https://www.binance.com/es-AR/join?ref=202718448) (te da descuento en comisiones)
+      🎥 ¿No sabés cómo? [Mirá cómo crear tu cuenta gratis](https://youtu.be/KEereJgA36U)
+      2️⃣ Verificá tu identidad
+      3️⃣ Pedí tu Binance Card → 🎥 [Mirá cómo pedir la tarjeta](https://www.instagram.com/p/Dd77w_stfdZ/)
+      4️⃣ [Confirmá tu participación en la campaña](https://www.binance.com/es-AR/events/binance-october-card-campaign)
+
+      No lo dejes para el último día: los cupos se agotan antes. 🏃‍♂️
+
+      Promoción de Binance: cupos limitados y condiciones propias. Participan usuarios verificados que recibieron el aviso de la campaña.
+    texto_x: |
+      🔥 Termina el 29/10: Binance te devuelve el 50% de tus primeras 2 compras con la Binance Card (hasta 2,5 USDC cada una).
+
+      ⏳ Solo para los primeros 110.000 usuarios.
+
+      👉 Link para abrir tu cuenta y videos de cómo pedir la tarjeta: en mi perfil
     datos: |
       Campaña de Binance en Argentina para la Binance Card: "Tus compras del día a día ahora con cashback". Va del 29 de septiembre al 29 de octubre de 2026.
       Para quienes piden la tarjeta ahora o todavía no la usaron: 50% de cashback instantáneo en las primeras 2 compras cotidianas, hasta 2,5 USDC en cada compra. Es para los primeros 110.000 usuarios.
@@ -490,6 +517,32 @@ promos:
     imagen: assets/promos/binance-tarjeta.jpg
     aviso: "Promoción de Binance: tiene cupos limitados y condiciones propias."
     vence: "2026-10-30"           # el envío es gratis si se pide antes del 31/10; en noviembre hay que actualizar los datos
+    texto_fijo: |
+      💳 LLEGÓ LA BINANCE CARD FÍSICA A ARGENTINA (y el envío gratis se termina el 31/10)
+
+      Pagás en cualquier comercio con tus cripto y tenés 3% de cashback al instante en tus compras, hasta 100 USDC por mes, hasta el 31 de diciembre. 🛒
+
+      ⏳ Lo que no te podés perder:
+      📦 Envío GRATIS solo si la pedís antes del 31 de octubre
+      ⚡ Para tener el 3%, tu primera compra con la tarjeta física tiene que ser antes del 30 de noviembre
+      📬 Te llega por correo en hasta 12 días y la activás con el código del sobre
+
+      Así de simple:
+      1️⃣ Abrí tu cuenta en Binance con mi link → [Registrate acá](https://www.binance.com/es-AR/join?ref=202718448) (te da descuento en comisiones)
+      🎥 ¿No sabés cómo? [Mirá cómo crear tu cuenta gratis](https://youtu.be/KEereJgA36U)
+      2️⃣ Verificá tu identidad
+      3️⃣ Pedí la tarjeta desde el panel de Tarjeta → 🎥 [Mirá cómo pedirla paso a paso](https://www.instagram.com/p/Dd77w_stfdZ/)
+      4️⃣ [Sumate al lanzamiento acá](https://www.binance.com/es-AR/events/binance-physical-card-launch)
+
+      Pedila ahora y que llegue con envío gratis. 🚀
+
+      Promoción de Binance con condiciones propias. Participan usuarios verificados que recibieron el aviso de la promoción.
+    texto_x: |
+      💳 Llegó la Binance Card física a Argentina: 3% de cashback en tus compras (hasta 100 USDC por mes).
+
+      📦 Envío gratis solo si la pedís antes del 31/10.
+
+      👉 Link para abrir tu cuenta y video de cómo pedirla: en mi perfil
     datos: |
       Llegó a la Argentina la Binance Card física.
       Se pide desde el panel de Tarjeta, en la app o en la web de Binance. Llega por correo en hasta 12 días y se activa con el código que viene en el sobre.

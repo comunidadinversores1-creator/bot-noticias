@@ -1551,7 +1551,10 @@ class Corrida:
             resumen = str(post.get("resumen") or "")
             bajada = re.split(r"(?<=[.!?])\s", resumen)[0][:170] if resumen else ""
             pagina = historias.html_noticia(post.get("titular", ""), bajada, datos, es_logo, credito, g.categoria,
-                                            g.urgente, post.get("fuente", ""), "@comunidad_inversores_ok")
+                                            g.urgente, post.get("fuente", ""), "@comunidad_inversores_ok",
+                                            # Un solo llamado por historia, rotando: una lleva a Telegram, la siguiente a X.
+                                            red=("telegram", "x")[int(self.estado.datos["ig"].get("historias", {}).get("vuelta_red", 0)) % 2])
+            self.estado.datos["ig"].setdefault("historias", {})["vuelta_red"] = int(self.estado.datos["ig"]["historias"].get("vuelta_red", 0)) + 1
             self.subir_historia("comunidad", pagina, "noticia")
         except Exception as error:
             log.warning("historia de la noticia: %s", error)

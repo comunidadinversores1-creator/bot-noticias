@@ -75,6 +75,10 @@ def corrida(monkeypatch, tmp_path, red):
         c.cfg["hilo_semanal"]["activa"] = False
         c.cfg.setdefault("instagram", {})["carruseles"] = False   # los carruseles, solo en sus pruebas
         c.cfg["instagram"]["historias"] = {"activa": False}       # las historias, solo en sus pruebas
+        for p in c.cfg["promos"]:
+            if str(p.get("id", "")).startswith("binance"):
+                p.pop("texto_fijo", None)            # las pruebas de ventas escritas por la IA usan las campañas de Binance
+                p.pop("texto_x", None)
         c.chat_prueba = "555"
         return c
 
@@ -1513,7 +1517,7 @@ def test_promo_de_labitconf_con_el_texto_de_eze(corrida, red, tmp_path):
 def test_promo_de_senales_con_el_texto_de_eze(corrida, red, tmp_path):
     _sin_la_fed(red)
     assert _solo_promo(corrida(), "senales-exness").correr() == 0
-    pie = red.telegram_fotos[0]["caption"]
+    pie = red.telegram_fotos[0].get("caption") or _al_canal(red)[0]["text"]   # si es largo, va en un mensaje aparte
     assert "77,8% cierran en ganancia o en cero" in pie and "no garantizan resultados futuros" in pie
     assert '👉 <a href="https://one.exnessonelink.com/a/ptf6lzlrc8">Registrate en Exness con mi link</a>' in pie
     assert '📎 <a href="https://drive.google.com/file/d/1mzqNl57Hj3rjzvWKR_6IoVOQ7xSbbf_C/view">' in pie
@@ -2143,3 +2147,11 @@ def test_historias_agenda_promo_y_noticia(corrida, red, tmp_path, monkeypatch):
     c.cfg["instagram"]["historias"] = {"activa": True, "agenda_hora": "23:00", "promo_hora": "20:00", "promo_cada_dias": 2}
     assert c.correr() == 0
     assert sum(1 for h in _memoria(tmp_path)["ig"]["historias"]["hechas"] if h["tipo"] == "promo") == 1
+
+
+def test_binance_con_texto_de_eze_tiene_los_links_de_ayuda(cfg):
+    for id_ in ("binance-tarjeta-octubre", "binance-tarjeta"):
+        p = next(p for p in cfg["promos"] if p["id"] == id_)
+        t = p["texto_fijo"]
+        assert "join?ref=202718448" in t and "youtu.be/KEereJgA36U" in t and "Dd77w_stfdZ" in t
+        assert "plata" not in t.lower() and "garantiz" not in t.lower()

@@ -350,6 +350,8 @@ REGLAS QUE NO SE ROMPEN:
 4. Sin links, sin hashtags, sin arrobas: el link lo agrega el sistema.
 5. No nombres a otras empresas ni compares con competidores.
 6. Seguí el ENFOQUE que se te indica, así cada publicación sale distinta de la anterior.
+7. Con EMOCIÓN y FOMO: arrancá con un gancho fuerte (en mayúsculas lo clave) y creá urgencia SOLO con lo que es real en los DATOS: fecha de cierre, cupos limitados, envío gratis hasta tal día. Nada de urgencias inventadas.
+8. Que se entienda qué gana la persona hoy si se suma y qué se pierde si espera.
 
 Respondé ÚNICAMENTE con JSON válido, sin texto extra:
 {
