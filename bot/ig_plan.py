@@ -60,19 +60,21 @@ TEMAS = {
 PALABRAS_CIERRE = {"ensenanza": "GUÍA", "errores": "ERRORES", "habitos": "HÁBITOS", "mentalidad": "PLAN", "bots": "BOT"}
 
 SISTEMA = """Armás carruseles de Instagram para Ezequiel Bagnato (@ezebagnato): trader, bots de trading, IA y cripto, para gente de Argentina y Latinoamérica que recién empieza.
-Español rioplatense con voseo, frases cortas, simple como para alguien de 12 años. Decí siempre "dinero", nunca "plata".
-Nunca prometas ganancias, ni "sin riesgo", ni porcentajes de ganancia, ni recomiendes comprar o vender algo concreto. No inventes cifras ni casos reales.
-Sé preciso: nada de afirmaciones discutibles como si fueran hechos (ej.: "bitcoin frena la inflación", "nadie lo puede hackear"). Los números siempre con cifras: 21 millones, no "veintiún millones".
-Marcá entre *asteriscos* la UNA palabra o frase corta más importante de cada titular (se pinta de color).
+Español rioplatense con voseo, claro y concreto. Decí siempre "dinero", nunca "plata".
+Tienen que ENSEÑAR DE VERDAD: nada de frases vagas. Cada lámina explica una idea con un dato concreto, un ejemplo con números o una comparación de la vida real.
+Nunca prometas ganancias, ni "sin riesgo", ni porcentajes de ganancia, ni recomiendes comprar o vender algo concreto. No inventes casos reales.
+Solo datos ampliamente conocidos y estables (fechas, definiciones, reglas del protocolo). Si no estás seguro de un número, no lo pongas. Nada de afirmaciones discutibles como si fueran hechos.
+Marcá entre *asteriscos* la palabra o frase corta más importante de cada titular y de cada texto (se pinta de color).
 
 ESTILO:
-- titular: portada con titular corto en mayúsculas (máx. 9 palabras) y bajada (máx. 8 palabras). Después láminas "paso" con titular corto numerado ("1. ...") y un texto de 1 o 2 oraciones (máx. 30 palabras).
-- editorial: portada con un número (cuántos puntos), un titular corto y una "banda" (la frase clave). Después láminas "punto": titular corto con punto final, "lista" de 2 o 3 renglones muy cortos, y "banda" (una frase que remata).
-- partida: láminas de contraste, cada una con "arriba" ("El mundo lo llama *X*" / "X es fácil") y "abajo" ("Nosotros lo llamamos *Y*" / "Y es difícil"). Máx. 8 palabras cada mitad.
+- titular: portada {"tipo":"portada","etiqueta":"2-3 palabras","titulo":"máx. 6 palabras, con *clave*","bajada":"máx. 12 palabras","foto":"búsqueda EN INGLÉS de una foto real del tema (ej. 'Bitcoin mining farm', 'New York Stock Exchange')"}.
+  Después 4 a 5 láminas {"tipo":"paso","etiqueta":"1-3 palabras (ej. 'Cómo funciona')","titulo":"máx. 6 palabras, con *clave*","texto":"30 a 45 palabras, con un dato o ejemplo","dato":"opcional: un hecho o número verificable en 1 oración","foto":"opcional: búsqueda en inglés de una foto real (solo en 1 o 2 láminas)"}.
+- editorial: portada {"tipo":"portada","numero":"cuántos puntos","titulo":"máx. 5 palabras","banda":"la frase clave con *resaltado*","foto":"búsqueda en inglés"}.
+  Después 5 láminas {"tipo":"punto","titulo":"máx. 5 palabras con punto final y *clave*","lista":["2 o 3 renglones de máx. 7 palabras, concretos"],"banda":"una frase que remata con *resaltado*"}.
+- partida: 4 láminas {"arriba":"El mundo lo llama *X* / X es fácil (máx. 8 palabras)","abajo":"Nosotros lo llamamos *Y* / Y es difícil (máx. 8 palabras)"}.
 
 Respondé SOLO con JSON:
-{"laminas": [...], "texto_post": "el texto del post: gancho de 2 líneas, la idea en 3 o 4 líneas, y al final: 📌 Guardalo / 💬 Comentá PALABRA y te mando ___ por privado / 🔔 Seguime para más", "palabra": "LA PALABRA DEL CIERRE"}
-Cada lámina: titular -> {"tipo": "portada"|"paso", "titulo", "bajada"?, "texto"?}; editorial -> {"tipo": "portada"|"punto", "numero"?, "titulo", "lista"?, "banda"?}; partida -> {"arriba", "abajo"}.
+{"laminas": [...], "texto_post": "gancho fuerte de 2 líneas, la idea en 3 o 4 líneas con un dato, y al final: 📌 Guardalo / ✈️ Mandáselo a alguien que lo necesite / 🔔 Seguime para más", "palabra": "UNA PALABRA CLAVE DEL TEMA"}
 No incluyas la lámina de cierre: la agrega el sistema."""
 
 
@@ -103,14 +105,14 @@ def _sin_problemas(textos: list[str]) -> list[str]:
 
 def redactar(cerebro, tipo: str, estilo: str, tema: str) -> dict | None:
     """Pide el contenido a la IA (hasta 2 intentos) y lo devuelve listo para ig_carruseles."""
-    cantidad = {"titular": "portada + 4 pasos", "editorial": "portada + 5 puntos", "partida": "4 láminas de contraste"}[estilo]
+    cantidad = {"titular": "portada + 5 pasos", "editorial": "portada + 5 puntos", "partida": "4 láminas de contraste"}[estilo]
     correccion = ""
     for _ in range(2):
         usuario = f"ESTILO: {estilo}\nTIPO: {tipo}\nTEMA: {tema}\nCANTIDAD: {cantidad}"
         if correccion:
             usuario += f"\n\nATENCIÓN: tu intento anterior no sirve: {correccion}."
         try:
-            crudo = cerebro.pedir_json(SISTEMA, usuario, max_tokens=1800, temperatura=0.6)
+            crudo = cerebro.pedir_json(SISTEMA, usuario, max_tokens=3000, temperatura=0.6)
         except ia.SinCerebro:
             return None
         laminas = [l for l in (crudo.get("laminas") or []) if isinstance(l, dict)]
@@ -162,3 +164,44 @@ def armar(contenido: dict, estilo: str, fotos: list | None = None, usuario: str 
             l["foto_abajo"] = fotos[(2 * i + 1) % len(fotos)]
     laminas.append({"tipo": "cierre", "texto": "El trading no es apostar. Es tener un *plan* y respetarlo.", "palabra": palabra})
     return c.partida(laminas, usuario)
+
+
+def armar_html(contenido: dict, estilo: str, con_guia: bool, buscar=None, fotos_eze: list | None = None,
+               usuario: str = "@ezebagnato", tema: str = "") -> list[bytes]:
+    """El carrusel con el diseño nuevo. 'buscar(consulta) -> (jpg, es_logo, credito) | None' trae fotos reales."""
+    import io as _io
+    from . import carrusel_html as ch
+    laminas = [dict(l) for l in contenido["laminas"]]
+    palabra = contenido["palabra"]
+
+    def traer(consulta):
+        if not (buscar and consulta):
+            return None
+        try:
+            return buscar(consulta)
+        except Exception:
+            return None
+
+    if estilo == "partida":
+        return ch.sacar_fotos(ch.partida(laminas, palabra, con_guia, list(fotos_eze or []), usuario))
+    portada = next((l for l in laminas if l.get("tipo") == "portada"), None)
+    foto, logo, credito = None, None, ""
+    logo_img = logo_del_tema(tema) if tema else None
+    if logo_img is not None:
+        b = _io.BytesIO(); logo_img.save(b, "PNG"); logo = b.getvalue()
+    elif portada is not None:
+        r = traer(portada.get("foto") or tema)
+        if r:
+            foto, es_logo, credito = r
+            if es_logo:
+                logo, foto, credito = foto, None, ""
+    if estilo == "editorial":
+        return ch.sacar_fotos(ch.editorial(laminas, palabra, con_guia, usuario, foto=foto))
+    puestas = 0
+    for l in laminas:
+        if l.get("tipo") == "paso" and l.get("foto") and puestas < 2:
+            r = traer(l["foto"])
+            if r and not r[1]:
+                l["_foto"], l["_credito"] = r[0], r[2]
+                puestas += 1
+    return ch.sacar_fotos(ch.titular(laminas, palabra, con_guia, usuario, foto=foto, logo=logo, credito=credito))

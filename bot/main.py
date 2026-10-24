@@ -1279,10 +1279,33 @@ class Corrida:
                         fotos.append(Image.open(io.BytesIO(b)).convert("RGB"))
                     except OSError:
                         continue
-        laminas = listas if listas is not None else ig_plan.armar(contenido, estilo, fotos, tema=tema)
+        if listas is not None:
+            laminas = listas
+        else:
+            laminas = None
+            if historias.disponible():
+                guias = {ig_plan.sin_tildes(k).upper() for k in ((self.cfg.get("instagram") or {}).get("guias") or {})}
+                con_guia = ig_plan.sin_tildes(contenido["palabra"]).upper() in guias
+                fotos_eze = []
+                for f in fotos:
+                    b = io.BytesIO(); f.save(b, "JPEG", quality=90); fotos_eze.append(b.getvalue())
+                try:
+                    laminas = ig_plan.armar_html(contenido, estilo, con_guia, buscar=self.foto_para_carrusel,
+                                                 fotos_eze=fotos_eze, tema=tema)
+                except Exception as error:      # si el diseño nuevo falla, sale con el diseño simple
+                    log.warning("carrusel con diseño nuevo: %s", error)
+            if not laminas:
+                laminas = ig_plan.armar(contenido, estilo, fotos, tema=tema)
         aviso = ""
         if estilo == "partida" and not fotos and listas is None:
             aviso = "\n\n📸 <b>Necesito fotos tuyas</b> para este estilo (operando, en tu escritorio, de viaje). Mandámelas acá con el texto <code>ig</code> y las uso en los próximos."
+        if not self.real and os.environ.get("GITHUB_TOKEN"):
+            # En las pruebas, las láminas quedan un rato en el repo para poder revisarlas.
+            try:
+                urls = instagram.subir_imagenes(laminas, f"muestras/{self.ahora:%Y%m%d-%H%M%S}-{estilo}")
+                log.warning("Muestra de carrusel (%s, %s): %s", estilo, tema, " ".join(urls))
+            except Exception as error:
+                log.warning("no pude guardar la muestra: %s", error)
         if preparar:
             g["proximo"] = {"tipo": tipo, "estilo": estilo, "tema": tema, "contenido": contenido}
             self.estado.guardar()
@@ -1324,6 +1347,20 @@ class Corrida:
                                                               "tema": tema, "palabra": contenido["palabra"], "media_id": media_id}])[-200:]
             self.estado.guardar()
         return True
+
+    def foto_para_carrusel(self, consulta: str):
+        """Foto real (Wikimedia) o logo oficial para una lámina: (jpg/png, es_logo, crédito) o None."""
+        from .imagen import buscar_foto
+        foto = buscar_foto([consulta], consulta, self.estado.foto_usada)
+        if foto is None or foto.imagen is None:
+            return None
+        es_logo = bool(foto.es_logo or foto.origen == "marca")
+        b = io.BytesIO()
+        if es_logo:
+            foto.imagen.convert("RGBA").save(b, "PNG")
+        else:
+            foto.imagen.convert("RGB").save(b, "JPEG", quality=90)
+        return b.getvalue(), es_logo, ("" if es_logo else foto.credito())
 
     def subir_a_instagram(self, cuenta: str, laminas: list[bytes], texto: str) -> str:
         g = self.estado.datos["ig"]
