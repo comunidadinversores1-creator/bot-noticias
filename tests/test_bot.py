@@ -2050,7 +2050,7 @@ def test_fotos_para_ig_con_texto_aparte_o_como_archivo(corrida, red, tmp_path):
         {"update_id": 10, "message": {"message_id": 1, "chat": {"id": 555}, "media_group_id": "g1", "photo": [{"file_id": "A", "file_size": 9}]}},
         {"update_id": 11, "message": {"message_id": 2, "chat": {"id": 555}, "media_group_id": "g1", "photo": [{"file_id": "B", "file_size": 9}]}},
         {"update_id": 12, "message": {"message_id": 3, "chat": {"id": 555}, "document": {"file_id": "C", "mime_type": "image/jpeg"}}},
-        {"update_id": 13, "message": {"message_id": 4, "chat": {"id": 555}, "text": "ig"}},
+        {"update_id": 13, "message": {"message_id": 4, "chat": {"id": 555}, "text": "hola"}},
     ]
     c = corrida(imagen="ninguna", ahora=_hora(9, 40))
     assert c.correr() == 0

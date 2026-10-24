@@ -1175,12 +1175,12 @@ class Corrida:
         publicado = False
         es_ig = lambda t: bool(re.match(r"(?i)^\s*(ig|fotos?|fotos? ig|para ig)\b", t or ""))
         # Si "ig" vino en un mensaje aparte (antes o después de las fotos), se lleva las fotos sin texto.
-        ig_suelto = any(es_ig(p["texto"]) and not p["fotos"] for p in pedidos.values())
-        sueltas = [f for p in pedidos.values() if p["fotos"] and (es_ig(p["texto"]) or (ig_suelto and not p["texto"])) for f in p["fotos"]]
+        # Fotos sin texto (o con "ig") = para los carruseles de Instagram.
+        sueltas = [f for p in pedidos.values() if p["fotos"] and (es_ig(p["texto"]) or not p["texto"]) for f in p["fotos"]]
         if sueltas:
             self.guardar_fotos_ig(sueltas)
         for p in pedidos.values():
-            if es_ig(p["texto"]) or (ig_suelto and p["fotos"] and not p["texto"]):
+            if es_ig(p["texto"]) or (p["fotos"] and not p["texto"]):
                 continue
             match = re.match(r"(?is)^\s*(post|hilo)\s*:\s*(.+)$", p["texto"])
             if not match or "x" not in self.canales:
