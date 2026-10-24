@@ -80,7 +80,7 @@ def temas_del_dia(cfg: dict, momento: datetime) -> list[dict]:
     consigna = (
         f"Buscá en X qué se está hablando HOY (últimas 24 horas) en español, sobre: {areas}. "
         "Quiero los 6 temas con más conversación y que muevan o puedan mover los mercados o el dinero de la gente. "
-        "Nada de fútbol, farándula ni política partidaria (salvo que mueva los mercados). "
+        "Nada de fútbol ni farándula. Si un tema es político o judicial, describilo por su efecto en los mercados o en el dinero de la gente, no por la persona. "
         "Respondé SOLO con JSON: {\"temas\": [{\"tema\": \"en 5 a 10 palabras\", \"contexto\": \"qué pasó, en 1 o 2 oraciones, solo hechos\", "
         "\"hashtag\": \"el hashtag que más se usa para ese tema, sin #, o vacío\"}]}"
     )
