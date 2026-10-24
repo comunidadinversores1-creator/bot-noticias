@@ -71,7 +71,7 @@ ESTILO:
   Después 4 a 5 láminas {"tipo":"paso","etiqueta":"1-3 palabras (ej. 'Cómo funciona')","titulo":"máx. 6 palabras, con *clave*","texto":"30 a 45 palabras, con un dato o ejemplo","dato":"opcional: un hecho o número verificable en 1 oración","foto":"opcional: búsqueda en inglés de una foto real (solo en 1 o 2 láminas)"}.
 - editorial: portada {"tipo":"portada","numero":"cuántos puntos","titulo":"máx. 5 palabras","banda":"la frase clave con *resaltado*","foto":"búsqueda en inglés"}.
   Después 5 láminas {"tipo":"punto","titulo":"máx. 5 palabras con punto final y *clave*","lista":["2 o 3 renglones de máx. 7 palabras, concretos"],"banda":"una frase que remata con *resaltado*"}.
-- partida: 4 láminas {"arriba":"El mundo lo llama *X* / X es fácil (máx. 8 palabras)","abajo":"Nosotros lo llamamos *Y* / Y es difícil (máx. 8 palabras)"}.
+- partida: 4 láminas de contraste {"arriba":"lo que hace la mayoría (máx. 8 palabras, con *clave*)","abajo":"lo que hace el trader que dura (máx. 8 palabras, con *clave*)"}. Ej.: arriba "Culpar al *mercado* cuando perdés", abajo "Revisar *qué hiciste vos* mal".
 
 Respondé SOLO con JSON:
 {"laminas": [...], "texto_post": "gancho fuerte de 2 líneas, la idea en 3 o 4 líneas con un dato, y al final: 📌 Guardalo / ✈️ Mandáselo a alguien que lo necesite / 🔔 Seguime para más", "palabra": "UNA PALABRA CLAVE DEL TEMA"}

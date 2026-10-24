@@ -71,8 +71,12 @@ p b { color: #fff; }
 .remate { margin-top: 40px; font-size: 46px; font-weight: 700; line-height: 1.35; color: #111; }
 /* partida */
 .mitad { position: absolute; left: 0; right: 0; height: 720px; overflow: hidden; z-index: 1; }
-.mitad img { width: 100%; height: 100%; object-fit: cover; filter: brightness(.62); }
-.mitad .mt { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; padding: 0 80px; font-weight: 700; font-size: 66px; line-height: 1.2; color: #fff; text-shadow: 0 4px 24px rgba(0,0,0,.8); }
+.mitad img { width: 100%; height: 100%; object-fit: cover; object-position: center 30%; filter: brightness(.8); }
+.mitad::after { content:""; position:absolute; inset:0; background: linear-gradient(180deg, rgba(0,0,0,0) 35%, rgba(0,0,0,.85) 100%); }
+.mitad .mt { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; padding: 0 70px 50px; font-weight: 700; font-size: 60px; line-height: 1.2; color: #fff; text-shadow: 0 4px 24px rgba(0,0,0,.8); }
+.naranja { color: #fbbf24; }
+.mitad.abajo .mt { padding-bottom: 150px; }
+.mitad .chip { position: absolute; left: 70px; top: 50px; z-index: 2; font-weight: 700; font-size: 26px; letter-spacing: .14em; padding: 10px 22px; border-radius: 99px; }
 .mitad .t .naranja { color: var(--naranja); }
 """
 
@@ -192,8 +196,10 @@ def partida(laminas: list[dict], palabra: str, con_guia: bool, fotos: list[bytes
     for i, l in enumerate(laminas):
         def mitad(texto: str, k: int, arriba: bool) -> str:
             img = f'<img src="{_datos(fotos[k % len(fotos)])}">' if fotos else '<div style="width:100%;height:100%;background:#18181b"></div>'
-            return (f'<div class="mitad" style="{"top:0" if arriba else "bottom:0"}">{img}'
-                    f'<div class="mt"><div>{resaltar(texto, "naranja")}</div></div></div>')
+            chip = ('<div class="chip" style="background:#ef4444; color:#fff">✕ LO QUE HACE LA MAYORÍA</div>' if arriba
+                    else '<div class="chip" style="background:#22c55e; color:#09090b">✓ LO QUE HACE EL QUE DURA</div>')
+            return (f'<div class="mitad{"" if arriba else " abajo"}" style="{"top:0" if arriba else "bottom:0"}">{img}{chip}'
+                    f'<div class="mt">{resaltar(texto, "naranja")}</div></div>')
         secciones.append(f'<section class="l">{mitad(l.get("arriba"), 2 * i, True)}{mitad(l.get("abajo"), 2 * i + 1, False)}'
                          f'<div style="position:absolute; left:0; right:0; top:716px; height:8px; background:#000; z-index:2"></div>'
                          f'{_pie(i, total, usuario, i == 0)}</section>')

@@ -1351,7 +1351,9 @@ class Corrida:
     def foto_para_carrusel(self, consulta: str):
         """Foto real (Wikimedia) o logo oficial para una lámina: (jpg/png, es_logo, crédito) o None."""
         from .imagen import buscar_foto
-        foto = buscar_foto([consulta], consulta, self.estado.foto_usada)
+        # La IA mira las candidatas y descarta las que no tienen que ver (si no, aparecen fotos cualquiera).
+        foto = buscar_foto([consulta], consulta, self.estado.foto_usada,
+                           elegir=lambda titular, opciones: ia.elegir_foto(self.cerebro, titular, opciones))
         if foto is None or foto.imagen is None:
             return None
         es_logo = bool(foto.es_logo or foto.origen == "marca")
