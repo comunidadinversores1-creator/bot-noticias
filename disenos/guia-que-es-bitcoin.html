@@ -70,7 +70,7 @@ b { color: #fff; font-weight: 700; }
   <div class="cont">
     <span class="etiqueta">Guía gratuita</span>
     <h1>¿Qué es<br><em>Bitcoin</em>?</h1>
-    <p class="baj">Todo lo que necesitás saber para entenderlo de verdad: quién lo creó, cómo funciona, cómo se compra, cómo se guarda y qué riesgos tiene. Incluye el whitepaper original.</p>
+    <p class="baj">Todo lo que necesitás saber para entenderlo de verdad: quién lo creó, cómo funciona, cómo se compra, dónde guardarlo y qué riesgos tiene.</p>
     <div class="firma">
       <img src="file:///home/claude/bot-noticias/assets/logo.png" alt="">
       <div><div class="nom">Ezequiel Bagnato</div><div class="us">Comunidad Inversores · @ezebagnato</div></div>
@@ -89,10 +89,10 @@ b { color: #fff; font-weight: 700; }
     <li><span>04</span>La minería y el halving</li>
     <li><span>05</span>Por qué solo habrá 21 millones</li>
     <li><span>06</span>Cómo se compra (y se puede comprar poquito)</li>
-    <li><span>07</span>Cómo se guarda: billeteras y frase semilla</li>
+    <li><span>07</span>Dónde guardarlo: exchange o billetera propia</li>
     <li><span>08</span>Los riesgos que nadie te cuenta</li>
     <li><span>09</span>Glosario rápido</li>
-    <li><span>10</span>El whitepaper explicado + el original completo</li>
+    <li><span>10</span>El whitepaper de Satoshi, explicado</li>
   </ul>
   <div class="dato" style="margin-top:7mm"><div class="t">ANTES DE EMPEZAR</div>Esta guía es educativa. No es una recomendación de inversión: Bitcoin puede subir y bajar mucho. Informate, entendé lo que comprás y nunca pongas dinero que no podés perder.</div>
   <div class="pie"><span>¿Qué es Bitcoin? · Guía inicial</span><span>2</span></div>
@@ -191,28 +191,39 @@ b { color: #fff; font-weight: 700; }
     <div class="a">1</div><div class="d"><b>Creá tu cuenta con mi link</b> y verificá tu identidad: te piden DNI y una selfie. Es normal, lo exige la ley.</div>
     <div class="a">2</div><div class="d"><b>Activá la verificación en dos pasos (2FA)</b> con una app como Google Authenticator. Es lo que más protege tu cuenta.</div>
     <div class="a">3</div><div class="d"><b>Cargá pesos</b> por transferencia o comprá USDT (un dólar digital) por P2P, de persona a persona dentro del exchange.</div>
-    <div class="a">4</div><div class="d"><b>Activá la compra recurrente de BTC (DCA).</b> Binance te deja comprar todos los días desde <b>1 dólar</b>: con unos <b>$1.600 pesos</b> ya podés empezar a juntar bitcoin de a poco, sin depender del precio de un solo día.<br><a href="https://youtu.be/Ya3X-7Gd8KU" style="display:inline-block; margin-top:1.6mm; background:#ef4444; color:#fff; font-weight:700; text-decoration:none; padding:1mm 3mm; border-radius:99px; font-size:8.4pt">▶ Mirá en mi video cómo activarla paso a paso</a></div>
-    <div class="a">5</div><div class="d"><b>Decidí dónde guardarlo.</b> Si juntaste un monto que te importa, pasalo a tu propia billetera (siguiente página).</div>
+    <div class="a">4</div><div class="d"><b>Activá la compra recurrente de BTC (DCA).</b> Binance te deja comprar todos los días desde <b>1 dólar</b>: con unos <b>$1.600 pesos</b> ya podés empezar a juntar bitcoin de a poco, sin depender del precio de un solo día.<br><div style="display:flex; align-items:center; gap:3mm; margin-top:2mm; background:#1c1012; border:1px solid #3f1d22; border-radius:2.5mm; padding:2mm 2.5mm">
+      <img src="qr_video.svg" style="width:17mm; height:17mm; background:#fff; padding:.8mm; border-radius:1.5mm">
+      <div style="font-size:8.2pt; line-height:1.35"><b style="color:#fff">▶ Video: cómo activar la compra recurrente</b><br>Tocá el link o escaneá el código con la cámara del celu:<br><a href="https://youtu.be/Ya3X-7Gd8KU" style="color:#f87171; font-weight:700; text-decoration:underline">youtu.be/Ya3X-7Gd8KU</a></div>
+    </div></div>
+    <div class="a">5</div><div class="d"><b>Decidí dónde guardarlo.</b> En la página siguiente te explico las dos opciones, con sus ventajas y desventajas.</div>
   </div>
-  <div class="dato ojo" style="margin-top:2mm; padding:3mm 4mm"><div class="t">OJO</div>Si alguien te escribe por privado prometiendo ganancias o pidiéndote bitcoin, es estafa. Siempre.</div>
+  
   <div class="pie"><span>¿Qué es Bitcoin? · Guía inicial</span><span>8</span></div>
 </section>
 
 <!-- 9. BILLETERAS -->
 <section class="pag">
   <div class="n">07</div>
-  <span class="etiqueta">Cómo se guarda</span>
-  <h2>Billeteras y la <em>frase semilla</em></h2>
-  <p>Una billetera (wallet) no guarda las monedas: guarda la <b>llave</b> que te permite moverlas. Quien tiene la llave, tiene los bitcoins.</p>
-  <div class="grilla">
-    <div class="tarjeta"><div class="t">En el exchange</div><span class="chico">Cómodo para empezar, pero la llave la tiene la empresa. Si quiebra o te bloquea la cuenta, no podés mover tu dinero.</span></div>
-    <div class="tarjeta"><div class="t">Billetera en el celu</div><span class="chico">"Caliente": una app donde la llave la tenés vos. Ideal para montos chicos y de uso diario.</span></div>
-    <div class="tarjeta v" style="grid-column: span 2"><div class="t">Billetera física ("fría")</div><span class="chico">Un dispositivo tipo pendrive que guarda la llave sin conexión a internet. Es la opción más segura para ahorros de largo plazo.</span></div>
+  <span class="etiqueta">Dónde guardarlo</span>
+  <h2>¿Exchange o <em>billetera propia</em>?</h2>
+  <p>Las dos sirven. Lo importante es saber qué ganás y qué arriesgás con cada una.</p>
+  <div class="tarjeta" style="border-top:3px solid #f0b90b; margin-bottom:3mm">
+    <div class="t">En un exchange grande (ej. Binance)</div>
+    <span class="chico"><b style="color:#22c55e">✔</b> Si perdés el celu o la contraseña, recuperás tu cuenta con tu identidad.<br>
+    <b style="color:#22c55e">✔</b> Cuando hubo hackeos, los grandes devolvieron el dinero: Binance en 2019 con su fondo de emergencia (SAFU) y Bybit en 2025 cubrió el robo completo a sus clientes.<br>
+    <b style="color:#22c55e">✔</b> Publican sus reservas con árboles de Merkle: podés comprobar que tu saldo está respaldado 1 a 1.<br>
+    <b style="color:#22c55e">✔</b> En Argentina, Binance está registrado como PSAV en la CNV.<br>
+    <b style="color:#ef4444">✘</b> La llave la tiene la empresa: puede pedirte papeles o congelar tu cuenta.<br>
+    <b style="color:#ef4444">✘</b> Si un exchange quiebra, podés quedarte años esperando tu dinero (pasó con FTX en 2022). Por eso, solo los grandes y regulados.</span>
   </div>
-  <img class="foto" src="../fotos/wallet.jpg" alt="" style="height:28mm; margin-top:3mm">
-  <h3>La frase semilla</h3>
-  <p>Al crear tu billetera te da <b>12 o 24 palabras</b>. Con ellas podés recuperar todo si perdés el celu. Por eso:</p>
-  <p class="chico">✔ Escribila en papel y guardala en un lugar seguro.&nbsp;&nbsp; ✘ Nunca le saques foto ni la guardes en la nube.&nbsp;&nbsp; ✘ <b>Nunca se la des a nadie</b>: ningún soporte técnico real te la va a pedir.</p>
+  <div class="tarjeta">
+    <div class="t">En tu propia billetera (app o física "fría")</div>
+    <span class="chico"><b style="color:#22c55e">✔</b> La llave es tuya: nadie te puede congelar ni bloquear el dinero.<br>
+    <b style="color:#22c55e">✔</b> No dependés de que una empresa funcione bien.<br>
+    <b style="color:#ef4444">✘</b> Si te hackean, te estafan o perdés tus 12 o 24 palabras (la frase semilla), <b style="color:#fff">nadie te devuelve el dinero</b>.<br>
+    <b style="color:#ef4444">✘</b> Tenés que saber usarla: un error al copiar una dirección no tiene vuelta atrás.</span>
+  </div>
+  <div class="dato" style="margin-top:3mm"><div class="t">MI CONSEJO</div>Para empezar, un exchange grande y regulado, con verificación en dos pasos, es lo más práctico y seguro. Si usás billetera propia: tu frase semilla en papel, nunca en fotos ni en la nube, y nunca se la des a nadie.</div>
   <div class="pie"><span>¿Qué es Bitcoin? · Guía inicial</span><span>9</span></div>
 </section>
 
@@ -222,7 +233,7 @@ b { color: #fff; font-weight: 700; }
   <span class="etiqueta">Riesgos</span>
   <h2>Lo que <em>nadie</em> te cuenta</h2>
   <div class="tarjeta r" style="margin-bottom:3mm"><div class="t">Sube y baja muchísimo</div><span class="chico">En 2022 bitcoin cayó más de 70% desde su máximo de fines de 2021. Puede pasar de nuevo. Si te desespera ver tu dinero a la mitad, invertí menos.</span></div>
-  <div class="tarjeta r" style="margin-bottom:3mm"><div class="t">Si perdés la llave, lo perdés todo</div><span class="chico">No hay "olvidé mi contraseña". Sin la frase semilla, nadie puede devolverte tus bitcoins.</span></div>
+  <div class="tarjeta r" style="margin-bottom:3mm"><div class="t">En billetera propia, si perdés la llave lo perdés todo</div><span class="chico">No hay "olvidé mi contraseña". Sin la frase semilla, nadie puede devolverte tus bitcoins.</span></div>
   <div class="tarjeta r" style="margin-bottom:3mm"><div class="t">Los envíos no se pueden deshacer</div><span class="chico">Si mandás a una dirección equivocada, ese dinero no vuelve. Revisá siempre la dirección (y probá primero con un monto chico).</span></div>
   <div class="tarjeta r" style="margin-bottom:3mm"><div class="t">Estafas</div><span class="chico">Falsos "asesores", grupos que prometen ganancias fijas, apps truchas que copian a las reales. Si prometen ganar seguro, es mentira.</span></div>
   <div class="tarjeta r"><div class="t">Apalancamiento</div><span class="chico">Algunas plataformas te dejan operar con más dinero del que tenés. Aumenta las ganancias y también las pérdidas: podés perder todo en minutos. No es para empezar.</span></div>
@@ -257,7 +268,7 @@ b { color: #fff; font-weight: 700; }
   <div class="n">10</div>
   <span class="etiqueta">El whitepaper</span>
   <h2>Las 9 páginas que <em>lo empezaron todo</em></h2>
-  <p>El whitepaper se llama <b>"Bitcoin: A Peer-to-Peer Electronic Cash System"</b> ("Bitcoin: un sistema de dinero electrónico de persona a persona"). Está completo, en su idioma original (inglés), en las páginas que siguen. Acá lo tenés resumido:</p>
+  <p>El whitepaper se llama <b>"Bitcoin: A Peer-to-Peer Electronic Cash System"</b> ("Bitcoin: un sistema de dinero electrónico de persona a persona"). Lo encontrás gratis en internet buscando ese título. Acá lo tenés resumido:</p>
   <ul class="wpres">
     <li><span>1</span><b>El problema:</b> los pagos por internet dependen de bancos e intermediarios que cobran, tardan y pueden revertir pagos.</li>
     <li><span>2</span><b>El "doble gasto":</b> el gran desafío del dinero digital es evitar que alguien gaste dos veces la misma moneda sin un banco que lo controle.</li>
@@ -271,12 +282,13 @@ b { color: #fff; font-weight: 700; }
   <div class="pie"><span>¿Qué es Bitcoin? · Guía inicial</span><span>12</span></div>
 </section>
 
-<!-- 13. SEPARADOR WHITEPAPER -->
-<section class="pag" style="display:flex; flex-direction:column; justify-content:center;">
-  <span class="etiqueta" style="align-self:flex-start; background: var(--naranja)">Documento original</span>
-  <h2 style="font-size:34pt">El whitepaper de <em style="color:var(--naranja)">Satoshi Nakamoto</em></h2>
-  <p>Publicado el 31 de octubre de 2008. A continuación, las 9 páginas originales tal cual las escribió su autor, en inglés.</p>
-  <p class="chico">Tip: si no leés inglés, podés pedirle a una IA que te lo traduzca párrafo por párrafo mientras lo leés.</p>
+<!-- 13. PRIMERA PÁGINA DEL WHITEPAPER -->
+<section class="pag">
+  <span class="etiqueta" style="background: var(--naranja)">Documento original</span>
+  <h2 style="font-size:24pt">Así empieza el <em style="color:var(--naranja)">whitepaper</em></h2>
+  <img src="wp1-1.png" style="width:100%; border-radius:2.5mm; margin-top:1mm; box-shadow: 0 6mm 14mm rgba(0,0,0,.5); max-height:118mm; object-fit:cover; object-position:top">
+  <p style="margin-top:4mm">Son 9 páginas en inglés publicadas el 31/10/2008. Para leerlo completo, buscá en Google: <b>"Bitcoin: A Peer-to-Peer Electronic Cash System"</b>.</p>
+  <p class="chico">Tip: si no leés inglés, pedile a una IA que te lo traduzca párrafo por párrafo.</p>
   <div class="pie"><span>¿Qué es Bitcoin? · Guía inicial</span><span>13</span></div>
 </section>
 
