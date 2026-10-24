@@ -169,3 +169,21 @@ def inspiracion(cfg: dict, momento: datetime, cantidad: int = 2) -> list[dict]:
         salida.append({"url": url, "cuenta": str(p.get("cuenta") or "").strip()[:60],
                        "por_que_funciono": str(p.get("por_que_funciono") or "").strip()[:300], "borrador": borrador[:1200]})
     return salida[:cantidad]
+
+
+def estrategias(cfg: dict, momento: datetime) -> dict:
+    """Informe semanal: qué hacen en X las cuentas del nicho que más crecen (en español y en inglés)."""
+    areas = str((cfg.get("grok") or {}).get("areas") or AREAS)
+    consigna = (
+        f"Analizá en X las cuentas de {areas} (en español y en inglés) que más engagement tuvieron en los últimos 7 días, "
+        "sobre todo cuentas chicas y medianas que están creciendo rápido. No me interesan los posts sueltos sino las ESTRATEGIAS "
+        "que repiten: formatos de post, tipos de gancho de la primera línea, uso de hilos, encuestas, imágenes o videos, "
+        "a qué hora publican, cómo piden que las sigan, cómo responden comentarios, colaboraciones, etc. "
+        "Quiero 5 estrategias concretas que pueda copiar Ezequiel Bagnato (trader, bots de trading, IA, cripto; publica noticias, "
+        "preguntas, encuestas y enseñanzas en español rioplatense). Todo en español rioplatense, diciendo 'dinero' y nunca 'plata'. "
+        "Nada que rompa las reglas de X (nada de seguir/dejar de seguir masivo, menciones automáticas o comprar seguidores). "
+        "Respondé SOLO con JSON: {\"estrategias\": [{\"nombre\": \"en 3 a 6 palabras\", \"quien\": \"@cuenta que lo hace (1 o 2)\", "
+        "\"ejemplo_url\": \"https://x.com/... de un post que lo muestra\", \"que_hacen\": \"1 o 2 oraciones\", "
+        "\"como_aplicarlo\": \"1 o 2 oraciones concretas para Ezequiel\"}]}"
+    )
+    return preguntar(cfg, consigna, momento - timedelta(days=7), max_turnos=5)

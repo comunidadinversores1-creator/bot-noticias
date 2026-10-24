@@ -99,6 +99,8 @@ grok:
   virales_hora: "10:00"
   virales_cantidad: 5
   inspiracion_cantidad: 3         # junto con los virales: posts que pegaron por su formato + un borrador tuyo para adaptar
+  estrategias_dia: 0               # informe semanal de estrategias de las cuentas que más crecen: 0 = lunes
+  estrategias_hora: "09:00"
   citar_impacto: 8                # cuando sale una noticia así de grande, te manda el post de X más fuerte sobre ella para citarlo
   citas_por_dia: 3
   areas: "trading, criptomonedas, exchanges, inteligencia artificial, empresas tecnológicas, bolsa, economía, guerras y conflictos que mueven los mercados, dólar, dinero y ahorro"

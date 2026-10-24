@@ -991,6 +991,12 @@ class Corrida:
             except grok.SinGrok as error:
                 g.update({"temas_dia": hoy, "temas_tandas": tandas})      # no se insiste hasta la próxima tanda
                 self.avisar("grok", f"Grok {error}. Las preguntas de X siguen saliendo con temas generales.", cada_horas=24)
+        # Informe semanal de estrategias (qué hacen las cuentas que más crecen), los lunes.
+        hora_est = a_hora(c.get("estrategias_hora") or "09:00")
+        if (local.weekday() == int(c.get("estrategias_dia", 0)) and g.get("estrategias_dia") != hoy
+                and hora_est is not None and local.time() >= hora_est):
+            g["estrategias_dia"] = hoy
+            self.mandar_estrategias()
         # Posts virales para responder: una vez por día, a tu privado.
         hora_virales = a_hora(c.get("virales_hora") or "10:00")
         if g.get("virales_dia") != hoy and hora_virales is not None and local.time() >= hora_virales:
@@ -1026,6 +1032,32 @@ class Corrida:
             return 0
         self.mandar_inspiracion()
         return len(posts)
+
+    def mandar_estrategias(self) -> int:
+        try:
+            datos = grok.estrategias(self.cfg, self.ahora)
+        except grok.SinGrok as error:
+            log.warning("Grok no pudo armar el informe de estrategias: %s", error)
+            return 0
+        lista = [x for x in (datos.get("estrategias") or []) if isinstance(x, dict) and x.get("nombre")][:6]
+        if not lista or not (self.token and self.chat_prueba):
+            return 0
+        e = lambda s: html.escape(str(s or ""), quote=False)
+        partes = ["📊 <b>Informe semanal: qué hacen en X las cuentas que más crecen</b>", ""]
+        for i, x in enumerate(lista, start=1):
+            partes.append(f"<b>{i}. {e(x.get('nombre'))}</b>" + (f" ({e(x.get('quien'))})" if x.get("quien") else ""))
+            partes.append(e(x.get("que_hacen")))
+            partes.append(f"👉 <i>Para vos:</i> {e(x.get('como_aplicarlo'))}")
+            url = str(x.get("ejemplo_url") or "")
+            if url.startswith("https://x.com/") or url.startswith("https://twitter.com/"):
+                partes.append(f'<a href="{html.escape(url, quote=True)}">Ver ejemplo</a>')
+            partes.append("")
+        try:
+            telegram_mensaje(self.token, self.chat_prueba, "\n".join(partes).strip(), html=True)
+        except ErrorPublicacion as error:
+            log.warning("no pude mandar el informe: %s", error)
+            return 0
+        return len(lista)
 
     def mandar_inspiracion(self) -> None:
         """1 o 2 posts que se hicieron virales por su formato, con un borrador tuyo listo para adaptar y publicar."""
@@ -1066,7 +1098,7 @@ class Corrida:
             lineas = ["🧠 <b>De esto se habla hoy en X</b> (las preguntas del día van a salir sobre estos temas):", ""]
             lineas += [f"• <b>{html.escape(t['tema'], quote=False)}</b>: {html.escape(t['contexto'], quote=False)}" for t in temas]
             telegram_mensaje(self.token, self.chat_prueba, "\n".join(lineas), html=True)
-        return self.cerrar(1 + (1 if self.mandar_virales() else 0))
+        return self.cerrar(1 + (1 if self.mandar_virales() else 0) + (1 if self.mandar_estrategias() else 0))
 
     def tal_vez_calendario(self) -> bool:
         """La agenda del día (a la mañana) y el aviso un rato antes de cada dato importante."""
