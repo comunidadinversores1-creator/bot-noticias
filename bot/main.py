@@ -29,7 +29,7 @@ from .publicar import ErrorPublicacion, claves_x, telegram_chats, telegram_mensa
 from .texto import (
     anio_actual, armar_llamado, enlaces_extra, faltantes, faltantes_promo, fuente_limpia, idea_de_imagen, normalizar_post, normalizar_promo,
     numeros_inventados, promesas, promo_telegram, promo_x, texto_revisable, texto_revisable_promo,
-    LIMITE_X, hashtags_para, peso_x, promesas_charla, recortar_x, sin_links, link_en_x, revisar_charla, sumar_hashtags, texto_propio_telegram, texto_propio_x, texto_telegram, texto_x, x_largo, x_premium,
+    LIMITE_X, hashtags_de_charla, hashtags_para, peso_x, promesas_charla, recortar_x, sin_links, link_en_x, revisar_charla, sumar_hashtags, texto_propio_telegram, texto_propio_x, texto_telegram, texto_x, x_largo, x_premium,
 )
 from .util import (
     RAIZ, a_hora, ahora_utc, cargar_ajustes, configurar_log, cupo_a_esta_hora, en_silencio, log, normalizar, socios_activos,
@@ -898,6 +898,10 @@ class Corrida:
                 "algún post pasa los 260 caracteres" if any(peso_x(x) > 280 for x in partes) else "",
                 f"faltan posts (tienen que ser {cantidad})" if len(partes) < cantidad + 1 else "",
             ]))) + "."
+        if hilo is not None:
+            # Los hashtags de los temas de la semana van en el primer post (el que más se ve).
+            tags = hashtags_de_charla(crudo) or hashtags_para({"titular": " ".join(hilo), "resumen": "", "categoria": ""}, self.cfg.get("hashtags") or [])
+            hilo[0] = sumar_hashtags(hilo[0], tags, LIMITE_X)
         if hilo is None:
             self.avisar("hilo", "No pude armar el hilo semanal: la IA no lo escribió bien dos veces. Sale el domingo que viene.")
             return False
@@ -1123,7 +1127,7 @@ class Corrida:
             caliente = self.tema_caliente()
             if caliente:
                 tema = caliente["tema"]
-                datos = f"CONTEXTO: {caliente.get('contexto', '')}"
+                datos = f"CONTEXTO: {caliente.get('contexto', '')}\nHASHTAGS: sí (según X, el más usado para este tema es: {caliente.get('hashtag') or 'ninguno'})"
         hechas = sum(1 for c in self.estado.datos["charlas"] if isinstance(c, dict) and c.get("formato") == formato)
         hechas += 0 if self.real else self._muestras_charla
         if formato == "ensenanza":
@@ -1172,6 +1176,9 @@ class Corrida:
         opciones = ch.get("respuestas") or ch.get("respuesta") or []
         opciones = [opciones] if isinstance(opciones, str) else [str(o).strip() for o in opciones if str(o).strip()]
         respuesta = opciones[numero % len(opciones)] if opciones else ""        # va rotando: la misma siempre cansa
+        if datos.startswith("CONTEXTO:"):
+            # Tema caliente: 1 o 2 hashtags de los que se usan para ese tema (nunca uno que acuse a alguien).
+            texto = sumar_hashtags(texto, hashtags_de_charla(crudo), None if premium else LIMITE_X)
         if formato == "venta":
             # Abajo de una pregunta de venta, la respuesta lleva al producto (es publicidad: X lo marca).
             elegido = next((p for p in (ch.get("ventas") or []) if isinstance(p, dict) and str(p.get("producto")) == tema), {})

@@ -847,3 +847,16 @@ def sumar_hashtags(texto: str, tags: list[str], limite: int | None = None) -> st
         if limite is None or peso_x(candidato) <= limite:
             return candidato
     return texto
+
+
+_ACUSA = re.compile(r"(?i)estaf|fraud|chorr|ladr|corrupt|delinc|mafi|scam|rugpull|robo")
+
+
+def hashtags_de_charla(crudo: dict) -> list[str]:
+    """Los hashtags que propuso la IA para un tema caliente: limpios, como mucho 2 y nunca uno que acuse."""
+    salida = []
+    for h in (crudo.get("hashtags") if isinstance(crudo, dict) else None) or []:
+        tag = re.sub(r"[^\w]", "", str(h).lstrip("#"))
+        if 2 <= len(tag) <= 30 and not _ACUSA.search(tag) and tag.lower() not in (t.lower() for t in salida):
+            salida.append(tag)
+    return ["#" + t for t in salida[:2]]

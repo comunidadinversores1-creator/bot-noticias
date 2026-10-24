@@ -1943,3 +1943,9 @@ def test_noticia_grande_te_llega_para_citar(corrida, red, tmp_path, monkeypatch)
     assert c.correr() == 0
     citas = [m["text"] for m in _al_privado(red) if "para citar" in m["text"]]
     assert len(citas) == 1 and "https://x.com/medio/status/9" in citas[0] and "ojo con el dólar" in citas[0]
+
+
+
+def test_hashtags_de_tema_caliente_sin_acusar():
+    assert texto.hashtags_de_charla({"hashtags": ["#Libra", "Milei", "CriptoEstafa"]}) == ["#Libra", "#Milei"]
+    assert texto.hashtags_de_charla({"hashtags": ["fraude", "estafaLibra"]}) == []
