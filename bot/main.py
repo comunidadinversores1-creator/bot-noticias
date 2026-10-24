@@ -598,6 +598,8 @@ class Corrida:
             return self.muestra_hilo()
         if not self.real and self.promo_pedida.lower() == "instagram":
             return self.cerrar(1 if self.revisar_instagram() else 0)
+        if not self.real and self.promo_pedida.lower() == "proximo":
+            return self.cerrar(1 if self.hacer_carrusel(preparar=True) else 0)
         if not self.real and self.promo_pedida.lower().startswith("carrusel"):
             pedido = self.promo_pedida.lower().split(":", 1)
             hechas = sum(1 if self.hacer_carrusel(pedido[1].strip() if len(pedido) > 1 else "") else 0
@@ -1216,7 +1218,7 @@ class Corrida:
         self.estado.guardar()
         return self.hacer_carrusel()
 
-    def hacer_carrusel(self, estilo_pedido: str = "") -> bool:
+    def hacer_carrusel(self, estilo_pedido: str = "", preparar: bool = False) -> bool:
         """Arma el carrusel que toca en la rueda (todos los estilos y tipos, rotando). Mientras Instagram no esté
         conectado, se lo manda a Eze por privado listo para subir; después se va a publicar solo."""
         g = self.estado.datos["ig"]
@@ -1226,7 +1228,12 @@ class Corrida:
             if par:
                 tipo, estilo = par
                 tema = ig_plan.que_toca({"vuelta": ig_plan.RUEDA.index(par), "temas_usados": g.get("temas_usados")})[2]
-        contenido = ig_plan.redactar(self.cerebro, tipo, estilo, tema)
+        # Si ya se dejó armado (y revisado por Eze) el que toca, sale ese mismo, sin reescribirlo.
+        proximo = g.get("proximo") or {}
+        if not estilo_pedido and not preparar and proximo.get("tema") == tema and proximo.get("estilo") == estilo:
+            contenido = proximo["contenido"]
+        else:
+            contenido = ig_plan.redactar(self.cerebro, tipo, estilo, tema)
         if not contenido:
             self.avisar("carrusel", f"No pude armar el carrusel de Instagram ({tema}): la IA no lo escribió bien.")
             return False
@@ -1243,6 +1250,17 @@ class Corrida:
         aviso = ""
         if estilo == "partida" and not fotos:
             aviso = "\n\n📸 <b>Necesito fotos tuyas</b> para este estilo (operando, en tu escritorio, de viaje). Mandámelas acá con el texto <code>ig</code> y las uso en los próximos."
+        if preparar:
+            g["proximo"] = {"tipo": tipo, "estilo": estilo, "tema": tema, "contenido": contenido}
+            self.estado.guardar()
+            try:
+                telegram_album(self.token, self.chat_prueba, laminas,
+                               f"👀 <b>Así va a salir el próximo carrusel</b> · {html.escape(tema)}\n<i>Estilo {estilo} · {tipo}</i>\n\nSi ves un error, decíselo a Claude antes de que salga.")
+                telegram_mensaje(self.token, self.chat_prueba, "📝 Texto del post:\n\n<code>" + html.escape(contenido["texto_post"]) + "</code>", html=True)
+            except ErrorPublicacion as error:
+                log.warning("no pude mandar la vista previa: %s", error)
+                return False
+            return True
         media_id = ""
         ig_cfg = self.cfg.get("instagram") or {}
         if self.real and verdadero(ig_cfg.get("publicar", True)) and instagram.llave("ezebagnato", g):
@@ -1261,6 +1279,7 @@ class Corrida:
             log.warning("no pude mandar el carrusel: %s", error)
             return False
         if self.real:
+            g.pop("proximo", None)
             g["vuelta"] = int(g.get("vuelta", 0) or 0) + 1
             g["temas_usados"] = ([*(g.get("temas_usados") or []), tema])[-80:]
             g["historial"] = ([*(g.get("historial") or []), {"fecha": self.ahora.isoformat(), "tipo": tipo, "estilo": estilo,
