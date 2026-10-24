@@ -535,6 +535,11 @@ class Corrida:
                 return self.recuperar_memoria()
             # De a una por vez: si en esta corrida sale algo del calendario, una enseñanza o una pregunta,
             # la promo y las noticias comunes esperan a la próxima hora (lo urgente sale igual).
+            if self.promo_pedida.lower() in ("encuesta", "pregunta", "lista", "dilema"):
+                # Publicación a pedido (desde GitHub: modo real + promo = encuesta): sale ya, sin esperar su horario.
+                salio = self.cerebro.disponible and self.publicar_charla(self.promo_pedida.lower())
+                self.estado.guardar()
+                return self.cerrar(1 if salio else 0)
             self.tal_vez_grok()              # no publica nada: busca temas del día y te manda los virales
             self.ocupado = self.tal_vez_calendario()
             if not self.ocupado:
