@@ -10,6 +10,7 @@ Modos (variable MODO):
 from __future__ import annotations
 
 import html
+import io
 import json
 import os
 import re
@@ -20,12 +21,13 @@ from PIL import Image
 
 from . import calendario as cal
 from . import grok
+from . import ig_plan
 from . import ia
 from .estado import Estado
 from .filtro import Grupo, es_mala_noticia, nombra_prohibido, preparar, puntaje, ya_contada
 from .fuentes import leer_fuentes
 from .imagen import armar_placa, armar_promo, buscar_foto, generar_con_ia, logo_guardado, tal_cual
-from .publicar import ErrorPublicacion, claves_x, telegram_bajar, telegram_chats, telegram_novedades, telegram_mensaje, telegram_publicar, telegram_puede_publicar, x_publicar, x_quien_soy
+from .publicar import ErrorPublicacion, claves_x, telegram_album, telegram_bajar, telegram_chats, telegram_novedades, telegram_mensaje, telegram_publicar, telegram_puede_publicar, x_publicar, x_quien_soy
 from .texto import (
     anio_actual, armar_llamado, enlaces_extra, faltantes, faltantes_promo, fuente_limpia, idea_de_imagen, normalizar_post, normalizar_promo,
     numeros_inventados, promesas, promo_telegram, promo_x, texto_revisable, texto_revisable_promo,
@@ -564,6 +566,7 @@ class Corrida:
                 self.estado.guardar()
                 return self.cerrar(1 if salio else 0)
             self.tal_vez_grok()              # no publica nada: busca temas del día y te manda los virales
+            self.tal_vez_carrusel()          # Instagram: arma el carrusel del día (por ahora te lo manda por privado)
             self.ocupado = self.tal_vez_material()      # lo que vos pedís por privado sale primero
             if not self.ocupado:
                 self.ocupado = self.tal_vez_calendario()
@@ -591,6 +594,11 @@ class Corrida:
         # --- muestra de charla para X (solo en modo prueba: promo = charla)
         if not self.real and self.promo_pedida.lower() == "hilo":
             return self.muestra_hilo()
+        if not self.real and self.promo_pedida.lower().startswith("carrusel"):
+            pedido = self.promo_pedida.lower().split(":", 1)
+            hechas = sum(1 if self.hacer_carrusel(pedido[1].strip() if len(pedido) > 1 else "") else 0
+                         for _ in range(max(1, self.cantidad)))
+            return self.cerrar(hechas)
         if not self.real and self.promo_pedida.lower() == "estrategias":
             return self.cerrar(1 if grok.disponible() and self.mandar_estrategias() else 0)
         if not self.real and self.promo_pedida.lower() == "grok":
@@ -1137,7 +1145,7 @@ class Corrida:
     def tal_vez_material(self) -> bool:
         """Lee lo que Eze le mandó al robot por privado. 'post: …' o 'hilo: …' (con o sin captura) = el bot lo
         escribe con sus datos y lo publica en X. Le responde con el link."""
-        if not (self.token and self.chat_prueba) or "x" not in self.canales:
+        if not (self.token and self.chat_prueba):
             return False
         memoria = self.estado.datos["material"]
         try:
@@ -1160,12 +1168,86 @@ class Corrida:
                 p["fotos"].append(max(m["photo"], key=lambda f: int(f.get("file_size") or 0))["file_id"])
         publicado = False
         for p in pedidos.values():
+            if p["fotos"] and re.match(r"(?i)^\s*(ig|fotos?)\b", p["texto"]):
+                self.guardar_fotos_ig(p["fotos"])
+                continue
             match = re.match(r"(?is)^\s*(post|hilo)\s*:\s*(.+)$", p["texto"])
-            if not match:
+            if not match or "x" not in self.canales:
                 continue
             publicado = self.publicar_material(match.group(1).lower(), match.group(2), p["fotos"]) or publicado
         self.estado.guardar()
         return publicado
+
+    # ------------------------------------------------- Instagram: carruseles
+    def guardar_fotos_ig(self, fotos: list[str]) -> None:
+        """Fotos que Eze manda al privado con 'ig' o 'fotos': se usan en los carruseles de pantalla partida."""
+        g = self.estado.datos["ig"]
+        banco = [f for f in (g.get("fotos") or []) if f not in fotos] + fotos
+        g["fotos"] = banco[-40:]
+        try:
+            telegram_mensaje(self.token, self.chat_prueba, f"✅ Guardé {len(fotos)} foto(s) para los carruseles de Instagram. Tengo {len(g['fotos'])} en total.")
+        except ErrorPublicacion:
+            pass
+
+    def tal_vez_carrusel(self) -> bool:
+        c = self.cfg.get("instagram") or {}
+        if not verdadero(c.get("carruseles")) or not (self.token and self.chat_prueba):
+            return False
+        local = self.ahora.astimezone(zona(self.cfg))
+        hora = a_hora(c.get("hora_carrusel") or "18:00")
+        dias = [int(d) for d in (c.get("dias_carrusel") or [0, 2, 4, 6])]
+        if local.weekday() not in dias or hora is None or local.time() < hora:
+            return False
+        g = self.estado.datos["ig"]
+        if g.get("ultimo") == local.date().isoformat():
+            return False
+        g["ultimo"] = local.date().isoformat()
+        self.estado.guardar()
+        return self.hacer_carrusel()
+
+    def hacer_carrusel(self, estilo_pedido: str = "") -> bool:
+        """Arma el carrusel que toca en la rueda (todos los estilos y tipos, rotando). Mientras Instagram no esté
+        conectado, se lo manda a Eze por privado listo para subir; después se va a publicar solo."""
+        g = self.estado.datos["ig"]
+        tipo, estilo, tema = ig_plan.que_toca(g)
+        if estilo_pedido:
+            par = next(((t, e) for t, e in ig_plan.RUEDA if estilo_pedido in (t, e)), None)
+            if par:
+                tipo, estilo = par
+                tema = ig_plan.que_toca({"vuelta": ig_plan.RUEDA.index(par), "temas_usados": g.get("temas_usados")})[2]
+        contenido = ig_plan.redactar(self.cerebro, tipo, estilo, tema)
+        if not contenido:
+            self.avisar("carrusel", f"No pude armar el carrusel de Instagram ({tema}): la IA no lo escribió bien.")
+            return False
+        fotos = []
+        if estilo == "partida":
+            for f in (g.get("fotos") or [])[-8:]:
+                b = telegram_bajar(self.token, f)
+                if b:
+                    try:
+                        fotos.append(Image.open(io.BytesIO(b)).convert("RGB"))
+                    except OSError:
+                        continue
+        laminas = ig_plan.armar(contenido, estilo, fotos)
+        aviso = ""
+        if estilo == "partida" and not fotos:
+            aviso = "\n\n📸 <b>Necesito fotos tuyas</b> para este estilo (operando, en tu escritorio, de viaje). Mandámelas acá con el texto <code>ig</code> y las uso en los próximos."
+        cabeza = (f"🖼 <b>Carrusel para Instagram</b> · {html.escape(tema)}\n<i>Estilo {estilo} · {tipo}</i>\n\n"
+                  "Por ahora te lo mando acá para que lo subas; cuando conectemos Instagram se publica solo.")
+        try:
+            telegram_album(self.token, self.chat_prueba, laminas, cabeza)
+            telegram_mensaje(self.token, self.chat_prueba, "📝 Texto para el post (copialo):\n\n<code>"
+                             + html.escape(contenido["texto_post"]) + "</code>" + aviso, html=True)
+        except ErrorPublicacion as error:
+            log.warning("no pude mandar el carrusel: %s", error)
+            return False
+        if self.real:
+            g["vuelta"] = int(g.get("vuelta", 0) or 0) + 1
+            g["temas_usados"] = ([*(g.get("temas_usados") or []), tema])[-80:]
+            g["historial"] = ([*(g.get("historial") or []), {"fecha": self.ahora.isoformat(), "tipo": tipo, "estilo": estilo,
+                                                              "tema": tema, "palabra": contenido["palabra"]}])[-200:]
+            self.estado.guardar()
+        return True
 
     def publicar_material(self, tipo: str, notas: str, fotos: list[str]) -> bool:
         partes, correccion = None, ""

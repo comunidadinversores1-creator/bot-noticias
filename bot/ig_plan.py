@@ -1,0 +1,142 @@
+"""Qué carrusel de Instagram toca y qué dice cada lámina.
+
+Se rotan TODOS los estilos (titular, editorial, partida) y todos los tipos de contenido (enseñanza,
+errores y hábitos, mentalidad, bots e IA). Ninguno reemplaza a otro: cuando Instagram esté conectado,
+se guardan los me gusta, comentarios y guardados de cada uno para ver cuáles funcionan más."""
+from __future__ import annotations
+
+import random
+import re
+
+from . import ia
+
+# (tipo de contenido, estilo). La rueda pasa por todos antes de repetir.
+RUEDA = [
+    ("ensenanza", "titular"),
+    ("errores", "editorial"),
+    ("mentalidad", "partida"),
+    ("ensenanza", "editorial"),
+    ("bots", "titular"),
+    ("habitos", "editorial"),
+    ("ensenanza", "titular"),
+    ("mentalidad", "partida"),
+]
+
+TEMAS = {
+    "ensenanza": [
+        "¿Qué es Bitcoin?", "¿Qué es la blockchain?", "¿Qué es USDT y para qué sirve una stablecoin?",
+        "¿Qué es una criptomoneda?", "¿Qué es una billetera cripto (wallet) y cuál conviene?",
+        "¿Qué es la frase semilla (seed phrase) y por qué nunca hay que compartirla?",
+        "¿Qué es un exchange y cómo elegir uno?", "¿Qué es el halving de Bitcoin?",
+        "¿Qué es Ethereum y qué es un contrato inteligente?", "¿Qué es DeFi?",
+        "¿Qué es un ETF de Bitcoin?", "¿Qué es una altcoin y qué es una memecoin?",
+        "¿Qué es un airdrop?", "¿Qué es el trading?", "Trading vs. invertir: ¿cuál es la diferencia?",
+        "¿Qué es el stop loss?", "¿Qué es el apalancamiento y por qué es peligroso?",
+        "¿Qué es el spread?", "¿Qué es forex y qué es un par de divisas (EUR/USD, AUD/CAD)?",
+        "¿Qué es un bot de trading?", "¿Cómo se usa la IA en el trading?",
+        "¿Qué es la gestión de riesgo (la regla del 1%)?", "¿Qué es el interés compuesto?",
+        "¿Qué es la inflación y por qué te hace perder dinero?", "¿Qué es una acción y qué es el S&P 500?",
+        "¿Cómo detectar una estafa cripto?", "¿Qué es el análisis técnico?", "¿Qué es una vela japonesa?",
+        "¿Qué es el calendario económico y por qué mueve el mercado?", "¿Qué es una orden límite y una orden a mercado?",
+    ],
+    "errores": [
+        "errores que te hacen perder dinero en trading", "errores al comprar tu primera cripto",
+        "errores al usar un bot de trading", "errores de gestión de riesgo", "errores al elegir un exchange",
+    ],
+    "habitos": [
+        "hábitos de los traders que duran años", "hábitos para ordenar tu dinero",
+        "hábitos para cuidar tus criptos", "hábitos para no operar con la emoción",
+    ],
+    "mentalidad": [
+        "trading vs. apostar", "paciencia vs. impulso", "culpar al mercado vs. hacerse cargo",
+        "aprender vs. buscar atajos", "ganar rápido vs. durar en el mercado",
+    ],
+    "bots": [
+        "cómo decide un bot de trading cuándo entrar", "qué mira un bot antes de operar EUR/AUD y AUD/CAD",
+        "lo que un bot hace mejor que una persona (y lo que no)", "cómo usar la IA para analizar el mercado",
+    ],
+}
+
+PALABRAS_CIERRE = {"ensenanza": "GUÍA", "errores": "ERRORES", "habitos": "HÁBITOS", "mentalidad": "PLAN", "bots": "BOT"}
+
+SISTEMA = """Armás carruseles de Instagram para Ezequiel Bagnato (@ezebagnato): trader, bots de trading, IA y cripto, para gente de Argentina y Latinoamérica que recién empieza.
+Español rioplatense con voseo, frases cortas, simple como para alguien de 12 años. Decí siempre "dinero", nunca "plata".
+Nunca prometas ganancias, ni "sin riesgo", ni porcentajes de ganancia, ni recomiendes comprar o vender algo concreto. No inventes cifras ni casos reales.
+Marcá entre *asteriscos* la UNA palabra o frase corta más importante de cada titular (se pinta de color).
+
+ESTILO:
+- titular: portada con titular corto en mayúsculas (máx. 9 palabras) y bajada (máx. 8 palabras). Después láminas "paso" con titular corto numerado ("1. ...") y un texto de 1 o 2 oraciones (máx. 30 palabras).
+- editorial: portada con un número (cuántos puntos), un titular corto y una "banda" (la frase clave). Después láminas "punto": titular corto con punto final, "lista" de 2 o 3 renglones muy cortos, y "banda" (una frase que remata).
+- partida: láminas de contraste, cada una con "arriba" ("El mundo lo llama *X*" / "X es fácil") y "abajo" ("Nosotros lo llamamos *Y*" / "Y es difícil"). Máx. 8 palabras cada mitad.
+
+Respondé SOLO con JSON:
+{"laminas": [...], "texto_post": "el texto del post: gancho de 2 líneas, la idea en 3 o 4 líneas, y al final: 📌 Guardalo / 💬 Comentá PALABRA y te mando ___ por privado / 🔔 Seguime para más", "palabra": "LA PALABRA DEL CIERRE"}
+Cada lámina: titular -> {"tipo": "portada"|"paso", "titulo", "bajada"?, "texto"?}; editorial -> {"tipo": "portada"|"punto", "numero"?, "titulo", "lista"?, "banda"?}; partida -> {"arriba", "abajo"}.
+No incluyas la lámina de cierre: la agrega el sistema."""
+
+
+def que_toca(memoria: dict) -> tuple[str, str, str]:
+    """(tipo, estilo, tema) del próximo carrusel, sin repetir tema hasta agotar la lista."""
+    vuelta = int(memoria.get("vuelta", 0) or 0)
+    tipo, estilo = RUEDA[vuelta % len(RUEDA)]
+    usados = set(memoria.get("temas_usados") or [])
+    libres = [t for t in TEMAS[tipo] if t not in usados] or TEMAS[tipo]
+    return tipo, estilo, libres[0] if tipo == "ensenanza" else random.choice(libres)
+
+
+def _sin_problemas(textos: list[str]) -> list[str]:
+    from .texto import promesas_charla
+    problemas = []
+    if any(re.search(r"(?i)\bplata\b", t) for t in textos):
+        problemas.append('dice "plata"')
+    malas = [m for t in textos for m in promesas_charla(t)]
+    if malas:
+        problemas.append(f"suena a promesa ({', '.join(malas)})")
+    return problemas
+
+
+def redactar(cerebro, tipo: str, estilo: str, tema: str) -> dict | None:
+    """Pide el contenido a la IA (hasta 2 intentos) y lo devuelve listo para ig_carruseles."""
+    cantidad = {"titular": "portada + 4 pasos", "editorial": "portada + 5 puntos", "partida": "4 láminas de contraste"}[estilo]
+    correccion = ""
+    for _ in range(2):
+        usuario = f"ESTILO: {estilo}\nTIPO: {tipo}\nTEMA: {tema}\nCANTIDAD: {cantidad}"
+        if correccion:
+            usuario += f"\n\nATENCIÓN: tu intento anterior no sirve: {correccion}."
+        try:
+            crudo = cerebro.pedir_json(SISTEMA, usuario, max_tokens=1800, temperatura=0.6)
+        except ia.SinCerebro:
+            return None
+        laminas = [l for l in (crudo.get("laminas") or []) if isinstance(l, dict)]
+        textos = [str(v) for l in laminas for v in l.values() if isinstance(v, str)]
+        textos += [str(x) for l in laminas for x in (l.get("lista") or [])] + [str(crudo.get("texto_post") or "")]
+        problemas = _sin_problemas(textos)
+        if len(laminas) >= 2 and not problemas:
+            palabra = re.sub(r"[^\wÁÉÍÓÚÑáéíóúñ]", "", str(crudo.get("palabra") or PALABRAS_CIERRE[tipo])).upper()[:10] or PALABRAS_CIERRE[tipo]
+            return {"laminas": laminas, "texto_post": str(crudo.get("texto_post") or "").strip(), "palabra": palabra}
+        correccion = "; ".join(problemas) or "faltan láminas"
+    return None
+
+
+def armar(contenido: dict, estilo: str, fotos: list | None = None, usuario: str = "@ezebagnato") -> list[bytes]:
+    """Las imágenes del carrusel (con la lámina de cierre). 'fotos' = fotos de Eze para el estilo partida."""
+    from . import ig_carruseles as c
+    laminas = [dict(l) for l in contenido["laminas"]]
+    palabra = contenido["palabra"]
+    if estilo == "titular":
+        laminas.append({"tipo": "cierre", "palabra": palabra, "texto": "y te mando la guía completa por privado",
+                        "extra": "Operar tiene riesgo. Nada de esto es una recomendación de inversión."})
+        return c.titular(laminas, usuario)
+    if estilo == "editorial":
+        if laminas and laminas[0].get("tipo") != "portada":
+            laminas[0]["tipo"] = "portada"
+        laminas.append({"tipo": "cierre", "titulo": "Guardalo para *tenerlo a mano*",
+                        "texto": f"Y comentá *{palabra}* si querés la guía completa."})
+        return c.editorial(laminas, usuario)
+    fotos = list(fotos or [])
+    for i, l in enumerate(laminas):
+        if fotos:
+            l["foto_arriba"] = fotos[(2 * i) % len(fotos)] if len(fotos) > 1 else None
+            l["foto_abajo"] = fotos[(2 * i + 1) % len(fotos)]
+    laminas.append({"tipo": "cierre", "texto": "El trading no es apostar. Es tener un *plan* y respetarlo.", "palabra": palabra})
+    return c.partida(laminas, usuario)

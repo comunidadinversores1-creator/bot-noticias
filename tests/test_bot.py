@@ -73,6 +73,7 @@ def corrida(monkeypatch, tmp_path, red):
         c.cfg["x_charla"]["horarios"] = ["09:30", "14:00", "21:30"]
         c.cfg["x_charla"]["encuesta_turno"] = 0       # sin encuestas, salvo en su prueba
         c.cfg["hilo_semanal"]["activa"] = False
+        c.cfg.setdefault("instagram", {})["carruseles"] = False   # los carruseles, solo en sus pruebas
         c.chat_prueba = "555"
         return c
 
@@ -1997,3 +1998,47 @@ def test_eze_pide_un_hilo_por_privado(corrida, red, tmp_path):
     assert len(hilo) == 4 and all("reply" in p for p in hilo[1:])
     assert any("Publiqué tu hilo" in m["text"] for m in _al_privado(red))
     assert _memoria(tmp_path)["material"]["offset"] == 8
+
+
+def test_carrusel_rota_estilos_y_te_llega_por_privado(corrida, red, tmp_path):
+    _sin_la_fed(red)
+    red.carrusel = {"laminas": [{"tipo": "portada", "titulo": "¿Qué es *Bitcoin*?", "bajada": "explicado fácil"},
+                                {"tipo": "paso", "titulo": "1. Es *dinero digital*", "texto": "Nadie lo controla y se puede mandar a cualquier parte."}],
+                    "texto_post": "bitcoin explicado en 1 minuto.\n\n📌 Guardalo\n💬 Comentá GUÍA\n🔔 Seguime", "palabra": "GUÍA"}
+    lunes = datetime(2026, 10, 12, 21, 10, tzinfo=timezone.utc)          # lunes 18:10 en Argentina
+    c = corrida(imagen="ninguna", ahora=lunes)
+    c.cfg["instagram"] = {"carruseles": True, "dias_carrusel": [0], "hora_carrusel": "18:00"}
+    assert c.correr() == 0
+    assert len(red.telegram_albumes) == 1 and red.telegram_albumes[0]["fotos"] == 3          # 2 láminas + cierre
+    assert "Carrusel para Instagram" in red.telegram_albumes[0]["texto"]
+    assert any("Texto para el post" in m["text"] for m in _al_privado(red))
+    ig = _memoria(tmp_path)["ig"]
+    assert ig["vuelta"] == 1 and ig["historial"][0]["estilo"] == "titular" and ig["temas_usados"] == ["¿Qué es Bitcoin?"]
+    # El mismo día no se repite.
+    c = corrida(imagen="ninguna", ahora=lunes + timedelta(hours=1))
+    c.cfg["instagram"] = {"carruseles": True, "dias_carrusel": [0], "hora_carrusel": "18:00"}
+    assert c.correr() == 0
+    assert len(red.telegram_albumes) == 1
+
+
+def test_rueda_de_carruseles_pasa_por_todos_los_estilos():
+    from bot import ig_plan
+    estilos = {e for _, e in ig_plan.RUEDA}
+    tipos = {t for t, _ in ig_plan.RUEDA}
+    assert estilos == {"titular", "editorial", "partida"} and {"ensenanza", "errores", "habitos", "mentalidad", "bots"} <= tipos
+    assert ig_plan.que_toca({})[2] == "¿Qué es Bitcoin?"
+    assert ig_plan.que_toca({"temas_usados": ["¿Qué es Bitcoin?"]})[2] == "¿Qué es la blockchain?"
+
+
+def test_carrusel_con_plata_se_reescribe(red):
+    from bot import ig_plan
+    from bot.ia import Cerebro
+    malo = {"laminas": [{"tipo": "portada", "titulo": "cuidá tu *plata*"}, {"tipo": "paso", "titulo": "1. x"}], "palabra": "GUÍA"}
+    bueno = {"laminas": [{"tipo": "portada", "titulo": "cuidá tu *dinero*"}, {"tipo": "paso", "titulo": "1. x"}], "palabra": "GUÍA", "texto_post": "ok"}
+    respuestas = [malo, bueno]
+    class Falso:
+        def pedir_json(self, *a, **k):
+            return respuestas.pop(0)
+    hecho = ig_plan.redactar(Falso(), "ensenanza", "titular", "¿Qué es Bitcoin?")
+    assert hecho["laminas"][0]["titulo"] == "cuidá tu *dinero*"
+    assert len(ig_plan.armar(hecho, "titular")) == 3

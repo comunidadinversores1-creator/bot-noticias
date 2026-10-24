@@ -780,3 +780,13 @@ ia:
     openai: ["gpt-4.1-mini"]
   candidatos_por_corrida: 30
   candidatos_de_socios: 6         # de esos 30, como mucho 6 son noticias de tus socios (para que no tapen al resto)
+
+# ---------------------------------------------------------------- Instagram
+# Carruseles para @ezebagnato: rotan todos los estilos (titular, editorial, partida) y todos los tipos
+# (enseñanza: qué es Bitcoin, blockchain, USDT...; errores; hábitos; mentalidad; bots). Ninguno reemplaza a otro.
+# Mientras Instagram no esté conectado, el bot te manda cada carrusel por privado en Telegram, listo para subir.
+# Días: 0 = lunes ... 6 = domingo.
+instagram:
+  carruseles: true
+  dias_carrusel: [0, 2, 4, 6]
+  hora_carrusel: "18:00"

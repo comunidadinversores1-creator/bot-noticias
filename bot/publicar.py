@@ -164,6 +164,23 @@ def telegram_mensaje(token: str, destino: str, texto: str, html: bool = False) -
     _telegram(token, "sendMessage", datos)
 
 
+def telegram_album(token: str, destino: str, jpgs: list[bytes], texto_html: str = "") -> None:
+    """Varias fotos juntas (un carrusel). Telegram acepta de 2 a 10 por álbum; el texto va en la primera."""
+    for inicio in range(0, len(jpgs), 10):
+        grupo = jpgs[inicio:inicio + 10]
+        if len(grupo) == 1:
+            telegram_foto(token, destino, grupo[0], texto_html if inicio == 0 else "")
+            continue
+        medios = []
+        for i, _ in enumerate(grupo):
+            m = {"type": "photo", "media": f"attach://foto{i}"}
+            if i == 0 and inicio == 0 and texto_html:
+                m.update(caption=texto_html[:1000], parse_mode="HTML")
+            medios.append(m)
+        _telegram(token, "sendMediaGroup", dict(separar_destino(destino), media=json.dumps(medios)),
+                  {f"foto{i}": (f"foto{i}.jpg", b, "image/jpeg") for i, b in enumerate(grupo)})
+
+
 def telegram_novedades(token: str, desde: int) -> list[dict]:
     """Los mensajes nuevos que le llegaron al robot (para leer lo que Eze le manda por privado)."""
     resultado = _telegram(token, "getUpdates", {"offset": desde, "limit": 100, "timeout": 0,

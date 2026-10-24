@@ -24,6 +24,7 @@ VACIO = {
     "grok": {},           # temas del día en X (de Grok) y cuándo se mandaron los posts virales
     "hilo": {},           # "ultimo": día del último hilo semanal
     "material": {},       # lo que Eze manda al privado del robot ("post:" / "hilo:"): hasta dónde se leyó
+    "ig": {},             # carruseles de Instagram: vuelta de la rueda, temas usados, fotos de Eze, historial
 }
 
 

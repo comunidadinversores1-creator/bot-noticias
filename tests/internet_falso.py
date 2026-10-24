@@ -48,6 +48,7 @@ class InternetFalso:
         self.ahora = ahora
         self.pedidos: list[requests.PreparedRequest] = []
         self.telegram_fotos: list[dict] = []
+        self.telegram_albumes: list[dict] = []
         self.telegram_mensajes: list[dict] = []
         self.x_posts: list[dict] = []
         self.x_subidas: list[requests.PreparedRequest] = []
@@ -175,6 +176,10 @@ class InternetFalso:
             assert b'name="photo"; filename="noticia.jpg"' in cuerpo
             self.telegram_fotos.append({k.decode(): v.decode("utf-8") for k, v in campos.items()})
             return self._r(pedido, 200, {"ok": True, "result": {"message_id": 100 + len(self.telegram_fotos)}})
+        if metodo == "sendMediaGroup":
+            medios = json.loads(dict(re.findall(rb'name="(\w+)"\r\n\r\n(.*?)\r\n--', cuerpo, re.S))[b"media"].decode("utf-8"))
+            self.telegram_albumes.append({"fotos": len(medios), "texto": medios[0].get("caption", "")})
+            return self._r(pedido, 200, {"ok": True, "result": [{"message_id": 300}]})
         if metodo == "sendMessage":
             campos = {k: v[0] for k, v in parse_qs(cuerpo.decode("utf-8")).items()}
             self.telegram_mensajes.append(campos)
@@ -225,6 +230,11 @@ class InternetFalso:
         else:
             sistema, usuario = datos["messages"][0]["content"], datos["messages"][1]["content"]
 
+        if "carruseles de Instagram" in sistema:
+            contenido = json.dumps(getattr(self, "carrusel", {}), ensure_ascii=False)
+            if host == "api.anthropic.com":
+                return self._r(pedido, 200, {"content": [{"type": "text", "text": contenido}]})
+            return self._r(pedido, 200, {"choices": [{"message": {"role": "assistant", "content": contenido}}]})
         if "Eze te manda notas" in sistema:
             contenido = json.dumps(getattr(self, "material", {}), ensure_ascii=False)
             if host == "api.anthropic.com":
