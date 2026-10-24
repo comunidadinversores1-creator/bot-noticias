@@ -587,6 +587,8 @@ class Corrida:
         # --- muestra de charla para X (solo en modo prueba: promo = charla)
         if not self.real and self.promo_pedida.lower() == "hilo":
             return self.muestra_hilo()
+        if not self.real and self.promo_pedida.lower() == "estrategias":
+            return self.cerrar(1 if grok.disponible() and self.mandar_estrategias() else 0)
         if not self.real and self.promo_pedida.lower() == "grok":
             return self.muestra_grok()
         if not self.real and self.promo_pedida.lower() == "calendario":
