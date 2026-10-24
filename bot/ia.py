@@ -492,7 +492,7 @@ def redactar_charla(cerebro: Cerebro, formato: str, tema: str, anteriores: list[
         "\n---\n".join(a[:200] for a in anteriores[-25:]) or "(ninguna)")
     if correccion:
         usuario += f"\n\nATENCIÓN: {correccion}"
-    return cerebro.pedir_json(SISTEMA_CHARLA, usuario, max_tokens=400, temperatura=0.9)
+    return cerebro.pedir_json(SISTEMA_CHARLA, usuario, max_tokens=1500, temperatura=0.9)   # los posts largos (Premium) necesitan lugar
 
 
 # ------------------------------------------------- 5) hilo semanal en X

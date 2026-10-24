@@ -1148,6 +1148,15 @@ class Corrida:
                     log.warning("  no pude dejar la respuesta: %s", error)
             if id_post:
                 self.avisar_etiquetar(id_post, texto, cuentas_para(texto, self.cfg.get("hashtags") or []))
+                # Te avisa qué publicó y en qué post viral se inspiró (para que veas el formato).
+                try:
+                    origen = f'\n\n🔎 Inspirada en <a href="{html.escape(idea.get("url", ""))}">este post de {html.escape(idea.get("cuenta", ""))}</a>' if idea.get("url") else ""
+                    por_que = f'\n<i>Por qué pegó: {html.escape(idea.get("por_que_funciono", ""))}</i>' if idea.get("por_que_funciono") else ""
+                    telegram_mensaje(self.token, self.chat_prueba,
+                                     f'💡 <b>Publiqué la idea viral del día en X</b>\n\n{html.escape(texto)}\n\n👉 https://x.com/i/status/{id_post}{origen}{por_que}',
+                                     html=True)
+                except ErrorPublicacion:
+                    pass
             log.info("Idea publicada en X: %s", texto.replace("\n", " / ")[:100])
             self.estado.guardar()
             return True
