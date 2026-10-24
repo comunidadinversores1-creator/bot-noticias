@@ -93,6 +93,27 @@ def _pagina(cuerpo: str) -> str:
     return f'<!doctype html><html lang="es"><head><meta charset="utf-8"><style>{_css()}</style></head><body>{cuerpo}</body></html>'
 
 
+X_SVG = ('<svg viewBox="0 0 24 24" width="44" height="44" fill="#fff"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17'
+         'l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>')
+
+
+def _redes() -> str:
+    """Telegram y X, con su logo, para llevar a la gente de Instagram a los otros canales."""
+    try:
+        tg = _datos((RAIZ / "assets" / "marcas" / "telegram.png").read_bytes(), "image/png")
+    except OSError:
+        tg = ""
+    fila = ('display:flex; align-items:center; gap:22px; background:rgba(24,24,27,.94); border:2px solid #27272a; '
+            'border-radius:26px; padding:20px 28px; margin-top:20px')
+    return (f'<div style="{fila}; margin-top:36px"><img src="{tg}" style="width:64px; height:64px">'
+            f'<div><div style="font-size:26px; color:var(--gris); font-weight:600">Toda la info en Telegram</div>'
+            f'<div style="font-size:38px; color:#fff; font-weight:700">@comunidad_inversores_anuncios</div></div></div>'
+            f'<div style="{fila}"><div style="width:64px; height:64px; border-radius:16px; background:#000; border:2px solid #3f3f46; '
+            f'display:flex; align-items:center; justify-content:center">{X_SVG}</div>'
+            f'<div><div style="font-size:26px; color:var(--gris); font-weight:600">Seguinos en X</div>'
+            f'<div style="font-size:38px; color:#fff; font-weight:700">@C_Inversores</div></div></div>')
+
+
 def _firma(usuario: str) -> str:
     return f'<div class="firma"><img src="{_logo()}"><span>{e(usuario)}</span></div>'
 
@@ -174,7 +195,7 @@ def html_noticia(titular: str, bajada: str, foto: bytes | None, es_logo: bool, c
       <h1 style="font-family:Inter; font-weight:700; text-transform:none; font-size:{86 if len(titular) < 70 else 70}px; line-height:1.12">{e(titular)}</h1>
       {f'<div style="font-size:36px; line-height:1.4; color:#d4d4d8; margin-top:22px">{e(bajada)}</div>' if bajada else ""}
       <div class="fuente">Fuente: {e(fuente)}</div>
-      <div class="cta" style="align-self:flex-start">Toda la info en nuestro Telegram ↑</div>
+      {_redes()}
     {_firma(usuario)}</div></section>''')
 
 
