@@ -62,6 +62,7 @@ PALABRAS_CIERRE = {"ensenanza": "GUÍA", "errores": "ERRORES", "habitos": "HÁBI
 
 SISTEMA = """Armás carruseles de Instagram para Ezequiel Bagnato (@ezebagnato): trader, bots de trading, IA y cripto, para gente de Argentina y Latinoamérica que recién empieza.
 Español rioplatense con voseo, claro y concreto. Decí siempre "dinero", nunca "plata".
+Escribí con ortografía perfecta: tildes, comas y puntos donde van, y oraciones completas que se entiendan solas (nada de frases sueltas o pegadas sin sentido). Antes de responder, releé cada texto como si fueras un corrector.
 Tienen que ENSEÑAR DE VERDAD: nada de frases vagas. Cada lámina explica una idea con un dato concreto, un ejemplo con números o una comparación de la vida real.
 Nunca prometas ganancias, ni "sin riesgo", ni porcentajes de ganancia, ni recomiendes comprar o vender algo concreto. No inventes casos reales.
 Solo datos ampliamente conocidos y estables (fechas, definiciones, reglas del protocolo). Si no estás seguro de un número, no lo pongas. Nada de afirmaciones discutibles como si fueran hechos.
