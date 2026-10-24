@@ -1299,7 +1299,7 @@ class Corrida:
             telegram_mensaje(self.token, self.chat_prueba, "📸 Instagram\n\n" + "\n".join(renglones))
         except ErrorPublicacion:
             pass
-        log.info("Instagram: %s", " | ".join(renglones))
+        log.warning("Instagram: %s", " | ".join(renglones))   # sale como anotación en GitHub
         return all(r.startswith("✅") for r in renglones)
 
     def tal_vez_numeros_ig(self) -> None:
