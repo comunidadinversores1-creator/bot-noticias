@@ -158,8 +158,8 @@ def html_noticia(titular: str, bajada: str, foto: bytes | None, es_logo: bool, c
     if foto and not es_logo:
         arriba = (f'<div style="position:absolute; left:0; right:0; top:0; height:1080px; z-index:1">'
                   f'<img src="{_datos(foto)}" style="width:100%; height:100%; object-fit:cover">'
-                  f'<div style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(9,9,11,.35) 0%, rgba(9,9,11,.05) 30%, rgba(9,9,11,.6) 70%, #09090b 100%)"></div>'
-                  f'{f"<div style=position:absolute;right:30px;bottom:20px;font-size:18px;color:rgba(255,255,255,.55)>{e(credito)}</div>" if credito else ""}</div>')
+                  f'<div style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(9,9,11,.35) 0%, rgba(9,9,11,.05) 30%, rgba(9,9,11,.75) 62%, #09090b 92%)"></div>'
+                  f'{f"<div style=\"position:absolute;right:40px;top:262px;font-size:18px;color:rgba(255,255,255,.75);text-shadow:0 1px 4px #000\">{e(credito)}</div>" if credito else ""}</div>')
         espacio = '<div style="flex:1"></div>'
     elif foto:
         arriba = ""
@@ -174,7 +174,7 @@ def html_noticia(titular: str, bajada: str, foto: bytes | None, es_logo: bool, c
       <h1 style="font-family:Inter; font-weight:700; text-transform:none; font-size:{86 if len(titular) < 70 else 70}px; line-height:1.12">{e(titular)}</h1>
       {f'<div style="font-size:36px; line-height:1.4; color:#d4d4d8; margin-top:22px">{e(bajada)}</div>' if bajada else ""}
       <div class="fuente">Fuente: {e(fuente)}</div>
-      <div class="cta" style="align-self:flex-start">Toda la info en Telegram: comunidad_inversores_anuncios</div>
+      <div class="cta" style="align-self:flex-start">Toda la info en nuestro Telegram ↑</div>
     {_firma(usuario)}</div></section>''')
 
 
