@@ -63,7 +63,7 @@ p b { color: #fff; }
 .papel::before, .papel::after { display: none; }
 .papel h1, .papel h2 { font-family: "Serif"; color: #111; text-transform: uppercase; }
 .papel .band { background: #ffd60a; color: #111; }
-.papel p { color: #3f3f46; }
+.papel p { color: #3f3f46; } .papel p b { color: #111; }
 .papel .yo { color: #111; } .papel .prog i { background: rgba(0,0,0,.15); } .papel .prog i.on { background: #111; }
 .papel .ghost { color: rgba(0,0,0,.06); }
 .check { display: flex; gap: 22px; align-items: flex-start; font-size: 40px; font-weight: 600; color: #18181b; margin-top: 22px; line-height: 1.3; }
@@ -176,7 +176,7 @@ def editorial(laminas: list[dict], palabra: str, con_guia: bool, usuario: str = 
             numero = f'<div style="font-family:Serif; font-size:330px; line-height:.9; color:#111">{e(l.get("numero"))}</div>' if l.get("numero") else ""
             banda = f'<h2 style="font-size:84px; margin-top:30px">{resaltar(l["banda"])}</h2>' if l.get("banda") else ""
             cuerpo = (f'<div style="display:flex; gap:30px; align-items:flex-start">{numero}'
-                      f'<h1 style="font-size:{110 if numero else 140}px; line-height:1.0; margin-top:24px">{resaltar(l.get("titulo"))}</h1></div>{banda}')
+                      f'<h1 style="font-size:{104 if numero else 130}px; line-height:1.14; margin-top:24px">{resaltar(l.get("titulo"))}</h1></div>{banda}')
             secciones.append(f'<section class="l papel">{foto_html}<div class="pad">{cuerpo}</div>{_pie(i, total, usuario, True)}</section>')
             continue
         lista = "".join(f'<div class="check"><i></i><span>{resaltar(x)}</span></div>' for x in (l.get("lista") or [])[:4])
