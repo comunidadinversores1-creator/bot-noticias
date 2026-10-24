@@ -304,6 +304,7 @@ promos:
     socio: exness
     nombre: "Bot de señales de Forex con Exness"
     imagen: assets/promos/senales-exness.jpg
+    en_historias: false           # la imagen muestra porcentajes de rendimiento: en Instagram no (ya te restringieron por eso)
     texto_fijo: |
       🤖 BOT DE SEÑALES DE TRADING EN FOREX — gratis con Exness
 
@@ -345,6 +346,7 @@ promos:
     socio: exness
     nombre: "Exness: operar con un solo clic"
     imagen: assets/promos/exness-un-clic.jpg
+    titulo_historia: "Operá con un solo clic en Exness"
     texto_fijo: |
       ⚡️ EXNESS: ahora podés operar con un solo clic
 
@@ -387,6 +389,7 @@ promos:
     activa: true
     nombre: "Video: probé más de 9.300 combinaciones de trading"
     imagen: assets/promos/video-senales.jpg
+    titulo_historia: "Probé 9.300 combinaciones: solo 2 pares sirvieron"
     texto_fijo: |
       📊 Probé más de 9.300 combinaciones de trading. Solo 2 pares pasaron.
 
@@ -460,6 +463,7 @@ promos:
     socio: binance
     etiqueta: "PROMO"
     nombre: "Cashback de octubre con la Binance Card"
+    titulo_historia: "Cashback de octubre con la Binance Card"
     llamado: "Registrate en Binance con mi link"
     paso_2: {texto: "Participá de la campaña", enlace: "https://www.binance.com/es-AR/events/binance-october-card-campaign"}
     extras:
@@ -478,6 +482,7 @@ promos:
     socio: binance
     etiqueta: "PROMO"
     nombre: "Tarjeta física de Binance"
+    titulo_historia: "La tarjeta física de Binance"
     llamado: "Registrate en Binance con mi link"
     paso_2: {texto: "Participá del lanzamiento de la tarjeta", enlace: "https://www.binance.com/es-AR/events/binance-physical-card-launch"}
     extras:
@@ -799,3 +804,13 @@ instagram:
       mensaje: "¡Hola! 🙌 Acá tenés la guía «¿Qué es Bitcoin?»: 14 páginas con todo explicado, cómo comprar, dónde guardarlo y el whitepaper de Satoshi.\n\n👉 {link}\n\nSi te sirve, seguime acá y en mis otras redes para más: https://linktr.ee/comunidadinversores"
       respuesta: "¡Listo! Te mandé la guía por DM 📩"
       respuesta_sin_dm: "¡Gracias! En un rato te la mando por DM 📩"
+  # Historias. @ezebagnato: agenda económica a la mañana, aviso antes de un dato fuerte, "nuevo carrusel" y
+  # una promo cada 2 días (máximo 3 por día). @comunidad_inversores_ok: cada noticia que sale (máximo 6 por día).
+  historias:
+    activa: true
+    max_ezebagnato: 3
+    max_comunidad: 6
+    agenda_hora: "07:45"
+    promo_hora: "20:00"
+    promo_cada_dias: 2
+    noticias_comunidad: true

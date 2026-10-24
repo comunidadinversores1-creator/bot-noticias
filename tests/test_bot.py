@@ -74,6 +74,7 @@ def corrida(monkeypatch, tmp_path, red):
         c.cfg["x_charla"]["encuesta_turno"] = 0       # sin encuestas, salvo en su prueba
         c.cfg["hilo_semanal"]["activa"] = False
         c.cfg.setdefault("instagram", {})["carruseles"] = False   # los carruseles, solo en sus pruebas
+        c.cfg["instagram"]["historias"] = {"activa": False}       # las historias, solo en sus pruebas
         c.chat_prueba = "555"
         return c
 
@@ -2115,3 +2116,35 @@ def test_carrusel_armado_a_mano_sale_tal_cual(corrida, red, tmp_path):
     assert red.telegram_albumes[0]["fotos"] == 8
     ig = _memoria(tmp_path)["ig"]
     assert "proximo" not in ig and ig["historial"][-1]["palabra"] == "BITCOIN" and ig["temas_usados"] == ["¿Qué es Bitcoin?"]
+
+
+def test_historias_agenda_promo_y_noticia(corrida, red, tmp_path, monkeypatch):
+    from bot import historias, instagram
+    _sin_la_fed(red)
+    monkeypatch.setenv("IG_TOKEN_EZEBAGNATO", "IGAAx")
+    monkeypatch.setenv("IG_TOKEN_COMUNIDAD", "IGAAy")
+    subidas = []
+    monkeypatch.setattr(historias, "sacar_foto", lambda html_: b"jpg")
+    monkeypatch.setattr(instagram, "subir_imagenes", lambda jpgs, carpeta: ["https://x/1.jpg"])
+    monkeypatch.setattr(instagram, "borrar_imagenes", lambda carpeta, n: None)
+    monkeypatch.setattr(instagram, "publicar_historia", lambda token, url: subidas.append(token) or "h1")
+    monkeypatch.setattr(instagram, "renovar", lambda c, m: False)
+    c = corrida(imagen="ninguna", ahora=_local(20, 40))
+    c.cfg["instagram"]["historias"] = {"activa": True, "agenda_hora": "23:00", "promo_hora": "20:00", "promo_cada_dias": 2}
+    for p in c.cfg["promos"]:
+        p["activa"] = p["id"] in ("exness-un-clic",)
+    assert c.correr() == 0
+    hechas = _memoria(tmp_path)["ig"]["historias"]["hechas"]
+    assert [h["tipo"] for h in hechas][0] == "promo" and subidas[0] == "IGAAx"
+    # una noticia publicada también va como historia a la cuenta de la comunidad
+    assert any(h["tipo"] == "noticia" and h["cuenta"] == "comunidad" for h in hechas) or "IGAAy" not in subidas
+    # al otro día no repite la promo (es cada 2 días)
+    c = corrida(imagen="ninguna", ahora=_local(20, 40) + timedelta(days=1))
+    c.cfg["instagram"]["historias"] = {"activa": True, "agenda_hora": "23:00", "promo_hora": "20:00", "promo_cada_dias": 2}
+    assert c.correr() == 0
+    assert sum(1 for h in _memoria(tmp_path)["ig"]["historias"]["hechas"] if h["tipo"] == "promo") == 1
+
+
+def test_promo_con_porcentajes_no_va_a_historias(cfg):
+    p = next(p for p in cfg["promos"] if p["id"] == "senales-exness")
+    assert p.get("en_historias") is False

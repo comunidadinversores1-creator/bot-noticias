@@ -22,6 +22,7 @@ from PIL import Image
 from . import calendario as cal
 from . import grok
 from . import ig_plan
+from . import historias
 from . import instagram
 from . import ia
 from .estado import Estado
@@ -293,6 +294,7 @@ class Corrida:
             self.mandar_idea(post, g, registro)
         if resultado == "ok" and self.real:
             self.mandar_cita(post, g)
+            self.historia_de_noticia(g, post, foto, jpg)
         return resultado
 
     def avisar_etiquetar(self, id_post: str, texto: str, cuentas: list[str]) -> None:
@@ -570,6 +572,7 @@ class Corrida:
             self.tal_vez_carrusel()          # Instagram: arma y publica el carrusel del día (y te avisa)
             self.tal_vez_numeros_ig()        # Instagram: lee cómo le fue a cada carrusel y los domingos te manda el ranking
             self.tal_vez_comentarios_ig()    # Instagram: a quien comenta la palabra le responde y le manda la guía por DM
+            self.tal_vez_historias()         # Instagram: agenda, avisos de datos y promos en historias de @ezebagnato
             self.ocupado = self.tal_vez_material()      # lo que vos pedís por privado sale primero
             if not self.ocupado:
                 self.ocupado = self.tal_vez_calendario()
@@ -597,6 +600,8 @@ class Corrida:
         # --- muestra de charla para X (solo en modo prueba: promo = charla)
         if not self.real and self.promo_pedida.lower() == "hilo":
             return self.muestra_hilo()
+        if not self.real and self.promo_pedida.lower() == "historias":
+            return self.cerrar(1 if self.muestra_historias() else 0)
         if not self.real and self.promo_pedida.lower() == "instagram":
             return self.cerrar(1 if self.revisar_instagram() else 0)
         if not self.real and self.promo_pedida.lower() == "proximo":
@@ -1293,6 +1298,11 @@ class Corrida:
         ig_cfg = self.cfg.get("instagram") or {}
         if self.real and verdadero(ig_cfg.get("publicar", True)) and instagram.llave("ezebagnato", g):
             media_id = self.subir_a_instagram("ezebagnato", laminas, contenido["texto_post"])
+        if media_id and self.historias_activas():
+            try:
+                self.subir_historia("ezebagnato", historias.html_carrusel(laminas[0], tema, "@ezebagnato"), "carrusel")
+            except Exception as error:            # la historia es un extra: nunca frena el carrusel
+                log.warning("historia del carrusel: %s", error)
         if media_id:
             cabeza = (f"✅ <b>Publiqué el carrusel en @ezebagnato</b> · {html.escape(tema)}\n<i>Estilo {estilo} · {tipo}</i>\n\n"
                       "Respondé los comentarios en la primera hora: es lo que más lo empuja.")
@@ -1380,6 +1390,147 @@ class Corrida:
             g["ranking_dia"] = hoy
             self.estado.guardar()
             self.mandar_ranking_ig()
+
+    # ------------------------------------------------- Instagram: historias
+    def historias_activas(self) -> bool:
+        h = (self.cfg.get("instagram") or {}).get("historias") or {}
+        return self.real and verdadero(h.get("activa")) and historias.disponible()
+
+    def subir_historia(self, cuenta: str, pagina_html: str, tipo: str) -> bool:
+        """Saca la foto de la historia, la publica y la anota. Respeta el máximo por día de cada cuenta."""
+        cfg_h = (self.cfg.get("instagram") or {}).get("historias") or {}
+        g = self.estado.datos["ig"]
+        mem = g.setdefault("historias", {})
+        hoy = self.ahora.astimezone(zona(self.cfg)).date().isoformat()
+        if mem.get("dia") != hoy:
+            mem["dia"], mem["conteo"] = hoy, {}
+        tope = int(cfg_h.get("max_ezebagnato" if cuenta == "ezebagnato" else "max_comunidad", 3 if cuenta == "ezebagnato" else 6))
+        if int(mem["conteo"].get(cuenta, 0)) >= tope:
+            log.info("Historias de %s: ya van %d hoy (tope).", cuenta, tope)
+            return False
+        token = instagram.llave(cuenta, g)
+        if not token:
+            return False
+        jpg = historias.sacar_foto(pagina_html)
+        carpeta = f"{self.ahora:%Y%m%d-%H%M%S}-{cuenta}-historia"
+        try:
+            urls = instagram.subir_imagenes([jpg], carpeta)
+            try:
+                instagram.publicar_historia(token, urls[0])
+            finally:
+                instagram.borrar_imagenes(carpeta, 1)
+        except instagram.ErrorInstagram as error:
+            self.avisar("ig_historia", f"No pude subir una historia a Instagram ({cuenta}): {error}")
+            return False
+        mem["conteo"][cuenta] = int(mem["conteo"].get(cuenta, 0)) + 1
+        mem.setdefault("hechas", []).append({"fecha": self.ahora.isoformat(), "cuenta": cuenta, "tipo": tipo})
+        mem["hechas"] = mem["hechas"][-100:]
+        self.estado.guardar()
+        log.info("Historia de %s publicada en %s.", tipo, cuenta)
+        return True
+
+    def tal_vez_historias(self) -> None:
+        """@ezebagnato: la agenda económica a la mañana, el aviso antes de un dato fuerte y una promo cada 2 días."""
+        if not self.historias_activas() or en_silencio(self.cfg, self.ahora):
+            return
+        cfg_h = (self.cfg.get("instagram") or {}).get("historias") or {}
+        mem = self.estado.datos["ig"].setdefault("historias", {})
+        local = self.ahora.astimezone(zona(self.cfg))
+        hoy = local.date().isoformat()
+        try:
+            eventos = cal.leer(self.cfg, self.ahora) if verdadero((self.cfg.get("calendario") or {}).get("activa")) else []
+            # 1) Agenda del día
+            hora_agenda = a_hora(cfg_h.get("agenda_hora") or "07:45")
+            if mem.get("agenda") != hoy and hora_agenda and local.time() >= hora_agenda:
+                mem["agenda"] = hoy
+                de_hoy = [ev for ev in cal.de_hoy(eventos, self.cfg, self.ahora) if ev["fecha"] > self.ahora]
+                if de_hoy:
+                    filas = [{"hora": f"{ev['fecha']:%H:%M}", "pais": ev["pais"], "nombre": ev["nombre"],
+                              "prevision": ev["prevision"], "anterior": ev["anterior"]} for ev in de_hoy]
+                    meses = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"]
+                    dias = ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"]
+                    fecha = f"{dias[local.weekday()]} {local.day} de {meses[local.month - 1]}"
+                    self.subir_historia("ezebagnato", historias.html_agenda(filas, fecha, "@ezebagnato"), "agenda")
+                    return
+            # 2) Aviso antes de un dato fuerte
+            avisados = mem.setdefault("avisos", [])
+            proximos = [ev for ev in cal.proximos(eventos, self.ahora, 20, 75) if ev["clave"] not in avisados]
+            if proximos:
+                ev = proximos[0]
+                avisados.extend(x["clave"] for x in proximos)
+                mem["avisos"] = avisados[-50:]
+                minutos = round((ev["fecha"] - self.ahora).total_seconds() / 60 / 5) * 5
+                cuando = "EN 1 HORA" if minutos >= 55 else f"EN {minutos} MIN"
+                self.subir_historia("ezebagnato", historias.html_aviso(cuando, f"{ev['fecha']:%H:%M}", ev["pais"], ev["nombre"],
+                                                                       ev["prevision"], ev["anterior"], "@ezebagnato"), "aviso")
+                return
+        except Exception as error:                 # las historias son un extra: nunca frenan al resto
+            log.warning("historias (calendario): %s", error)
+        # 3) Promo cada N días
+        try:
+            hora_promo = a_hora(cfg_h.get("promo_hora") or "20:00")
+            ultima = mem.get("promo_dia")
+            cada = int(cfg_h.get("promo_cada_dias", 2))
+            pasaron = (local.date() - date.fromisoformat(ultima)).days if ultima else 99
+            if hora_promo and local.time() >= hora_promo and pasaron >= cada:
+                candidatas = [p for p in self.cfg.get("promos") or [] if verdadero(p.get("activa", True)) and p.get("imagen")
+                              and verdadero(p.get("en_historias", True)) and (RAIZ / str(p["imagen"])).exists()
+                              and not self.promo_vencida(p)]
+                if candidatas:
+                    mem["promo_dia"] = hoy
+                    p = candidatas[int(mem.get("promo_vuelta", 0)) % len(candidatas)]
+                    mem["promo_vuelta"] = int(mem.get("promo_vuelta", 0)) + 1
+                    titulo = str(p.get("titulo_historia") or p.get("nombre") or "")
+                    self.subir_historia("ezebagnato", historias.html_promo((RAIZ / str(p["imagen"])).read_bytes(), titulo, "@ezebagnato"), "promo")
+        except Exception as error:
+            log.warning("historias (promo): %s", error)
+
+    def muestra_historias(self) -> bool:
+        """Prueba: arma las historias con datos de hoy y te las manda por Telegram (no publica nada)."""
+        fotos = []
+        try:
+            eventos = cal.de_hoy(cal.leer(self.cfg, self.ahora), self.cfg, self.ahora)
+            filas = [{"hora": f"{ev['fecha']:%H:%M}", "pais": ev["pais"], "nombre": ev["nombre"], "prevision": ev["prevision"],
+                      "anterior": ev["anterior"]} for ev in eventos] or [{"hora": "--:--", "pais": "USD", "nombre": "Hoy no hay datos fuertes", "prevision": "", "anterior": ""}]
+            fotos.append(historias.sacar_foto(historias.html_agenda(filas, "muestra de hoy", "@ezebagnato")))
+            promo = next((p for p in self.cfg.get("promos") or [] if verdadero(p.get("activa", True)) and p.get("imagen")
+                          and verdadero(p.get("en_historias", True)) and (RAIZ / str(p["imagen"])).exists()), None)
+            if promo:
+                fotos.append(historias.sacar_foto(historias.html_promo((RAIZ / str(promo["imagen"])).read_bytes(),
+                                                                       str(promo.get("titulo_historia") or promo.get("nombre")), "@ezebagnato")))
+        except Exception as error:
+            self.avisar("historias_prueba", f"No pude armar las historias de prueba: {type(error).__name__}: {error}")
+            self.fallas += 1
+            return False
+        try:
+            telegram_album(self.token, self.chat_prueba, fotos, "📱 <b>Muestra de historias</b> (no se publicó nada)")
+        except ErrorPublicacion as error:
+            log.warning("%s", error)
+            return False
+        log.warning("Historias de prueba armadas: %d", len(fotos))
+        return True
+
+    def promo_vencida(self, p: dict) -> bool:
+        vence = str(p.get("vence") or "").strip()
+        if not vence:
+            return False
+        try:
+            return self.ahora.astimezone(zona(self.cfg)).date() > date.fromisoformat(vence)
+        except ValueError:
+            return False
+
+    def historia_de_noticia(self, g, post: dict, foto, jpg: bytes | None) -> None:
+        """La noticia recién publicada, como historia en @comunidad_inversores_ok."""
+        cfg_h = (self.cfg.get("instagram") or {}).get("historias") or {}
+        if not (self.historias_activas() and verdadero(cfg_h.get("noticias_comunidad", True))) or en_silencio(self.cfg, self.ahora):
+            return
+        try:
+            if jpg is None:
+                foto = foto or self.imagen_para(g, post)
+                jpg = armar_placa(post, foto, self.cfg, self.ahora, self.estado.proxima_variante(), g.urgente)
+            self.subir_historia("comunidad", historias.html_noticia(jpg, g.urgente, post.get("fuente", ""), "@comunidad_inversores_ok"), "noticia")
+        except Exception as error:
+            log.warning("historia de la noticia: %s", error)
 
     def tal_vez_comentarios_ig(self) -> None:
         """A quien comenta la palabra de un carrusel (ej. BITCOIN) le manda la guía por DM y le responde el comentario."""
