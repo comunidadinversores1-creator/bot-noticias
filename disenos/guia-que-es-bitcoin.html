@@ -63,20 +63,8 @@ b { color: #fff; font-weight: 700; }
 </head>
 <body>
 
-<!-- 1. PORTADA -->
-<section class="pag portada">
-  <img src="../fotos/btc_negro.jpg" alt="" style="object-position:center 100%; transform: scale(1.25); transform-origin: 40% 95%">
-  <div class="velo"></div>
-  <div class="cont">
-    <span class="etiqueta">Guía gratuita</span>
-    <h1>¿Qué es<br><em>Bitcoin</em>?</h1>
-    <p class="baj">Todo lo que necesitás saber para entenderlo de verdad: quién lo creó, cómo funciona, cómo se compra, dónde guardarlo y qué riesgos tiene.</p>
-    <div class="firma">
-      <img src="file:///home/claude/bot-noticias/assets/logo.png" alt="">
-      <div><div class="nom">Ezequiel Bagnato</div><div class="us">Comunidad Inversores · @ezebagnato</div></div>
-    </div>
-  </div>
-</section>
+<!-- 1. PORTADA (imagen fija, para que se vea igual en todos los visores) -->
+<section class="pag" style="padding:0"><img src="portada.jpg" style="position:absolute; inset:0; width:100%; height:100%"></section>
 
 <!-- 2. ÍNDICE -->
 <section class="pag">
@@ -184,7 +172,7 @@ b { color: #fff; font-weight: 700; }
   <span class="etiqueta">Cómo se compra</span>
   <h2>Tus primeros <em>sats</em>, paso a paso</h2>
   <div style="display:grid; grid-template-columns: 1fr 30mm; gap: 4mm; align-items:center; background: var(--caja); border:1px solid #26262c; border-left: 3px solid #f0b90b; border-radius:3mm; padding: 3.5mm 4mm; margin-bottom: 2mm;">
-    <div><div style="font-weight:700; color:#fff; font-size:10.5pt">Yo uso Binance</div><span class="chico">Es el exchange con el que trabajo. En Argentina está registrado en la CNV como proveedor de servicios de activos virtuales (PSAV). Registrate con mi link: escaneá el código o tocá <a href="https://www.binance.com/es-AR/join?ref=202718448" style="color:#f0b90b; font-weight:700">acá</a>.</span><div style="font-size:6.8pt; color:#71717a; margin-top:1mm">Link de referido.</div></div>
+    <div><div style="font-weight:700; color:#fff; font-size:10.5pt">Yo uso Binance</div><span class="chico">Es el exchange con el que trabajo. En Argentina está registrado en la CNV como proveedor de servicios de activos virtuales (PSAV). Registrate con mi link (te da <b>descuento en comisiones</b>): escaneá el código o tocá <a href="https://www.binance.com/es-AR/join?ref=202718448" style="color:#f0b90b; font-weight:700">acá</a>.</span><div style="margin-top:1.4mm; font-size:8pt"><a href="https://youtu.be/KEereJgA36U" style="color:#f87171; font-weight:700">▶ Video: cómo registrarte gratis</a> <span style="color:#71717a">· youtu.be/KEereJgA36U</span></div><div style="font-size:6.8pt; color:#71717a; margin-top:.8mm">Link de referido.</div></div>
     <img src="qr_binance.svg" style="width:30mm; height:30mm; background:#fff; padding:1.2mm; border-radius:2mm">
   </div>
   <div class="linea">
