@@ -29,7 +29,7 @@ from .publicar import ErrorPublicacion, claves_x, telegram_chats, telegram_mensa
 from .texto import (
     anio_actual, armar_llamado, enlaces_extra, faltantes, faltantes_promo, fuente_limpia, idea_de_imagen, normalizar_post, normalizar_promo,
     numeros_inventados, promesas, promo_telegram, promo_x, texto_revisable, texto_revisable_promo,
-    LIMITE_X, hashtags_para, peso_x, recortar_x, sin_links, link_en_x, revisar_charla, sumar_hashtags, texto_propio_telegram, texto_propio_x, texto_telegram, texto_x, x_largo, x_premium,
+    LIMITE_X, hashtags_para, peso_x, promesas_charla, recortar_x, sin_links, link_en_x, revisar_charla, sumar_hashtags, texto_propio_telegram, texto_propio_x, texto_telegram, texto_x, x_largo, x_premium,
 )
 from .util import (
     RAIZ, a_hora, ahora_utc, cargar_ajustes, configurar_log, cupo_a_esta_hora, en_silencio, log, normalizar, socios_activos,
@@ -992,7 +992,33 @@ class Corrida:
         except ErrorPublicacion as error:
             log.warning("no pude mandar los virales: %s", error)
             return 0
+        self.mandar_inspiracion()
         return len(posts)
+
+    def mandar_inspiracion(self) -> None:
+        """1 o 2 posts que se hicieron virales por su formato, con un borrador tuyo listo para adaptar y publicar."""
+        c = self.cfg.get("grok") or {}
+        cantidad = int(c.get("inspiracion_cantidad", 2) or 0)
+        if cantidad <= 0:
+            return
+        try:
+            ideas = grok.inspiracion(self.cfg, self.ahora, cantidad)
+        except grok.SinGrok as error:
+            log.warning("Grok no encontró inspiración: %s", error)
+            return
+        e = lambda s: html.escape(s, quote=False)
+        for i, idea in enumerate(ideas, start=1):
+            if re.search(r"(?i)\bplata\b", idea["borrador"]) or promesas_charla(idea["borrador"]):
+                continue                                        # un borrador con promesas o "plata" no se manda
+            mensaje = (f"✍️ <b>Idea para un post tuyo ({i}/{len(ideas)})</b>\n"
+                       f'Se hizo viral <a href="{html.escape(idea["url"], quote=True)}">este post de {e(idea["cuenta"] or "X")}</a>. '
+                       f"{e(idea['por_que_funciono'])}\n\n"
+                       "Tu versión (tocala para copiarla, cambiá lo que quieras y publicala):\n\n"
+                       f"<code>{e(idea['borrador'])}</code>")
+            try:
+                telegram_mensaje(self.token, self.chat_prueba, mensaje, html=True)
+            except ErrorPublicacion as error:
+                log.warning("no pude mandar la idea: %s", error)
 
     def muestra_grok(self) -> int:
         """Modo prueba: los temas de hoy y los virales, a tu privado."""

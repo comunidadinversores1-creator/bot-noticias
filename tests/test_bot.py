@@ -1876,6 +1876,8 @@ def test_grok_temas_del_dia_y_virales(corrida, red, tmp_path, monkeypatch):
     assert memoria["grok"]["temas"][0]["tema"] == "bitcoin cae 8% tras datos de empleo"
     pedido_charla = [l for l in red.llamadas_ia if "cuenta de X de Ezequiel" in json.dumps(l, ensure_ascii=False)][-1]
     assert "TEMA DE HOY EN X: bitcoin cae 8%" in json.dumps(pedido_charla, ensure_ascii=False)
+    ideas = [m["text"] for m in _al_privado(red) if "Idea para un post tuyo" in m["text"]]
+    assert len(ideas) == 1 and "<code>imaginá un trader" in ideas[0]
     virales = [m["text"] for m in _al_privado(red) if "Posts virales" in m["text"]]
     assert len(virales) == 1 and "https://x.com/cuenta/status/1" in virales[0] and "💡 Idea" in virales[0]
     assert memoria["grok"]["usados"] == ["bitcoin cae 8% tras datos de empleo"]

@@ -115,6 +115,11 @@ class InternetFalso:
             datos = getattr(self, "grok", {})
             if "temas con más conversación" in consigna:
                 contenido = {"temas": datos.get("temas", [])}
+            elif "borrador ORIGINAL" in consigna:
+                contenido = {"posts": [{"url": "https://x.com/chica/status/5", "cuenta": "@chica", "por_que_funciono": "un dilema con números",
+                                        "borrador": "imaginá un trader que gana 10 operaciones seguidas\n\n¿sube el lote o lo deja igual?"},
+                                       {"url": "https://x.com/otra/status/6", "cuenta": "@otra", "por_que_funciono": "promesa",
+                                        "borrador": "con este bot tenés ganancias aseguradas"}]}
             elif "acaba de salir" in consigna:
                 contenido = getattr(self, "cita", {})
             else:

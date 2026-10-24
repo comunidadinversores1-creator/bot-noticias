@@ -72,6 +72,7 @@ grok:
   temas_horas: ["08:00", "15:00"]
   virales_hora: "10:00"
   virales_cantidad: 5
+  inspiracion_cantidad: 2         # junto con los virales: posts que pegaron por su formato + un borrador tuyo para adaptar
   citar_impacto: 8                # cuando sale una noticia así de grande, te manda el post de X más fuerte sobre ella para citarlo
   citas_por_dia: 3
   areas: "trading, criptomonedas, exchanges, inteligencia artificial, empresas tecnológicas, bolsa, economía, guerras y conflictos que mueven los mercados, dólar, dinero y ahorro"

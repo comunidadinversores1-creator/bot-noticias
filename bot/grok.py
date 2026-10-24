@@ -136,3 +136,32 @@ def para_citar(cfg: dict, momento: datetime, titular: str, resumen: str) -> dict
     if not (url.startswith("https://x.com/") or url.startswith("https://twitter.com/")):
         return None
     return {"url": url, "cuenta": str(datos.get("cuenta") or "").strip()[:60], "cita": str(datos.get("cita") or "").strip()[:300]}
+
+
+def inspiracion(cfg: dict, momento: datetime, cantidad: int = 2) -> list[dict]:
+    """Posts que se hicieron virales por su FORMATO (no por quién los escribió), con un borrador propio
+    de Eze que toma la idea y la estructura, pero con su tema y su voz: nunca una copia."""
+    areas = str((cfg.get("grok") or {}).get("areas") or AREAS)
+    consigna = (
+        f"Buscá en X {cantidad} posts en español de los últimos 3 días sobre {areas} que se hicieron virales por cómo están escritos "
+        "(una pregunta, un dilema, una lista, una cuenta con números, una opinión polémica), de cuentas chicas o medianas: "
+        "que el éxito venga del formato y no de la fama de la cuenta. Nada de estafas, sorteos ni promesas de ganancias. "
+        "Para cada uno escribí un borrador ORIGINAL para la cuenta de Ezequiel Bagnato (trader, bots de trading, IA, cripto): "
+        "que use la misma estructura que lo hizo viral pero con otro tema o ángulo propio, sin copiar frases. Reglas del borrador: "
+        "español rioplatense, en minúscula, frases cortas con renglón en blanco entre ideas, sin emojis ni hashtags ni links, "
+        "decir 'dinero' y nunca 'plata', no prometer ganancias, no contar casos inventados como reales (nada de 'conocí a un pibe'). "
+        "Respondé SOLO con JSON: {\"posts\": [{\"url\": \"https://x.com/...\", \"cuenta\": \"@usuario\", "
+        "\"por_que_funciono\": \"1 oración sobre el formato\", \"borrador\": \"el post para Ezequiel\"}]}"
+    )
+    datos = preguntar(cfg, consigna, momento - timedelta(days=3), max_turnos=4)
+    salida = []
+    for p in datos.get("posts") or []:
+        if not isinstance(p, dict):
+            continue
+        url = str(p.get("url") or "").strip()
+        borrador = str(p.get("borrador") or "").strip()
+        if not (url.startswith("https://x.com/") or url.startswith("https://twitter.com/")) or not borrador:
+            continue
+        salida.append({"url": url, "cuenta": str(p.get("cuenta") or "").strip()[:60],
+                       "por_que_funciono": str(p.get("por_que_funciono") or "").strip()[:300], "borrador": borrador[:1200]})
+    return salida[:cantidad]
