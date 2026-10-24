@@ -12,14 +12,15 @@ from . import ia
 
 # (tipo de contenido, estilo). La rueda pasa por todos antes de repetir.
 RUEDA = [
+    # Por ahora, solo el estilo negro y verde (el del carrusel de Bitcoin): los de papel y los de pantalla
+    # partida con fotos de Eze quedan apagados (no le gustaron, oct-2026).
     ("ensenanza", "titular"),
-    ("errores", "editorial"),
-    ("mentalidad", "partida"),
-    ("ensenanza", "editorial"),
+    ("errores", "titular"),
+    ("ensenanza", "titular"),
     ("bots", "titular"),
-    ("habitos", "editorial"),
+    ("habitos", "titular"),
     ("ensenanza", "titular"),
-    ("mentalidad", "partida"),
+    ("mentalidad", "titular"),
 ]
 
 TEMAS = {

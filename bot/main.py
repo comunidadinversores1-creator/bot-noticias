@@ -17,6 +17,7 @@ import re
 import sys
 from datetime import date, datetime, timedelta
 
+import requests
 from PIL import Image
 
 from . import calendario as cal
@@ -1203,6 +1204,9 @@ class Corrida:
         if sueltas:
             self.guardar_fotos_ig(sueltas)
         for p in pedidos.values():
+            if re.match(r"(?i)^\s*no\s+(publiques\s+el\s+)?carrusel", p["texto"] or ""):
+                self.cancelar_carrusel()
+                continue
             if es_ig(p["texto"]) or (p["fotos"] and not p["texto"]):
                 continue
             match = re.match(r"(?is)^\s*(post|hilo)\s*:\s*(.+)$", p["texto"])
@@ -1213,6 +1217,22 @@ class Corrida:
         return publicado
 
     # ------------------------------------------------- Instagram: carruseles
+    def cancelar_carrusel(self) -> None:
+        """'no carrusel' por privado: el próximo carrusel preparado no se publica."""
+        g = self.estado.datos["ig"]
+        hoy = self.ahora.astimezone(zona(self.cfg)).date().isoformat()
+        futuros = sorted(f for f, p in (g.get("preparados") or {}).items() if f >= hoy and not p.get("cancelado"))
+        if futuros:
+            g["preparados"][futuros[0]]["cancelado"] = True
+            texto = f"🛑 Listo: el carrusel del {futuros[0]} no se publica."
+        else:
+            texto = "No tengo ningún carrusel preparado para cancelar."
+        self.estado.guardar()
+        try:
+            telegram_mensaje(self.token, self.chat_prueba, texto)
+        except ErrorPublicacion:
+            pass
+
     def guardar_fotos_ig(self, fotos: list[str]) -> None:
         """Fotos que Eze manda al privado con 'ig' o 'fotos': se usan en los carruseles de pantalla partida."""
         g = self.estado.datos["ig"]
@@ -1230,16 +1250,25 @@ class Corrida:
         local = self.ahora.astimezone(zona(self.cfg))
         hora = a_hora(c.get("hora_carrusel") or "18:00")
         dias = [int(d) for d in (c.get("dias_carrusel") or [0, 2, 4, 6])]
+        g = self.estado.datos["ig"]
+        # El día anterior (desde las 12) se arma el carrusel y se le manda a Eze para que lo revise.
+        manana = (local + timedelta(days=1)).date()
+        hora_prep = a_hora(c.get("hora_preparar") or "12:00")
+        preparados = g.setdefault("preparados", {})
+        if (manana.weekday() in dias and hora_prep and local.time() >= hora_prep and manana.isoformat() not in preparados
+                and not (g.get("proximo") or {}).get("archivos") and not en_silencio(self.cfg, self.ahora)):
+            preparados[manana.isoformat()] = {"pendiente": True}
+            self.estado.guardar()
+            self.hacer_carrusel(preparar_para=manana.isoformat())
         if local.weekday() not in dias or hora is None or local.time() < hora:
             return False
-        g = self.estado.datos["ig"]
         if g.get("ultimo") == local.date().isoformat():
             return False
         g["ultimo"] = local.date().isoformat()
         self.estado.guardar()
         return self.hacer_carrusel()
 
-    def hacer_carrusel(self, estilo_pedido: str = "", preparar: bool = False) -> bool:
+    def hacer_carrusel(self, estilo_pedido: str = "", preparar: bool = False, preparar_para: str = "") -> bool:
         """Arma el carrusel que toca en la rueda (todos los estilos y tipos, rotando). Mientras Instagram no esté
         conectado, se lo manda a Eze por privado listo para subir; después se va a publicar solo."""
         g = self.estado.datos["ig"]
@@ -1261,6 +1290,26 @@ class Corrida:
             except (OSError, KeyError) as error:
                 log.warning("no pude leer el carrusel armado: %s", error)
                 listas = None
+        hoy_iso = self.ahora.astimezone(zona(self.cfg)).date().isoformat()
+        prep = (g.get("preparados") or {}).get(hoy_iso) or {}
+        if listas is None and not estilo_pedido and not preparar and not preparar_para and prep.get("urls"):
+            if prep.get("cancelado"):
+                log.info("Carrusel de hoy cancelado por Eze.")
+                return False
+            try:
+                listas = []
+                for u in prep["urls"]:
+                    r = requests.get(u, timeout=60)
+                    r.raise_for_status()
+                    listas.append(r.content)
+                tipo, estilo, tema = prep.get("tipo", tipo), prep.get("estilo", estilo), prep.get("tema", tema)
+                contenido = {"texto_post": prep["texto_post"], "palabra": prep.get("palabra", "")}
+            except (requests.RequestException, KeyError) as error:
+                log.warning("no pude bajar el carrusel preparado: %s", error)
+                listas = None
+        elif not preparar_para and prep.get("cancelado"):
+            log.info("Carrusel de hoy cancelado por Eze.")
+            return False
         if listas is not None:
             pass
         elif not estilo_pedido and not preparar and proximo.get("tema") == tema and proximo.get("estilo") == estilo:
@@ -1306,6 +1355,28 @@ class Corrida:
                 log.warning("Muestra de carrusel (%s, %s): %s", estilo, tema, " ".join(urls))
             except Exception as error:
                 log.warning("no pude guardar la muestra: %s", error)
+        if preparar_para:
+            try:
+                urls = instagram.subir_imagenes(laminas, f"preparados/{preparar_para}")
+            except Exception as error:
+                log.warning("no pude guardar el carrusel preparado: %s", error)
+                g["preparados"].pop(preparar_para, None)
+                return False
+            g["preparados"][preparar_para] = {"tipo": tipo, "estilo": estilo, "tema": tema, "urls": urls,
+                                             "texto_post": contenido["texto_post"], "palabra": contenido["palabra"]}
+            # El tema queda reservado para que no se repita.
+            g["temas_usados"] = ([*(g.get("temas_usados") or []), tema])[-80:]
+            self.estado.guardar()
+            dias_es = ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"]
+            cuando = f"{dias_es[date.fromisoformat(preparar_para).weekday()]} a las {(self.cfg.get('instagram') or {}).get('hora_carrusel', '18:00')}"
+            try:
+                telegram_album(self.token, self.chat_prueba, laminas,
+                               f"👀 <b>Carrusel de mañana</b> ({html.escape(cuando)}) · {html.escape(tema)}\n\n"
+                               "Sale solo en @ezebagnato. Si no te gusta, escribime <b>no carrusel</b> y no se publica.")
+                telegram_mensaje(self.token, self.chat_prueba, "📝 Texto del post:\n\n<code>" + html.escape(contenido["texto_post"]) + "</code>", html=True)
+            except ErrorPublicacion as error:
+                log.warning("no pude mandar la vista previa: %s", error)
+            return True
         if preparar:
             g["proximo"] = {"tipo": tipo, "estilo": estilo, "tema": tema, "contenido": contenido}
             self.estado.guardar()

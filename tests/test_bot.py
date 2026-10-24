@@ -2038,7 +2038,7 @@ def test_rueda_de_carruseles_pasa_por_todos_los_estilos():
     from bot import ig_plan
     estilos = {e for _, e in ig_plan.RUEDA}
     tipos = {t for t, _ in ig_plan.RUEDA}
-    assert estilos == {"titular", "editorial", "partida"} and {"ensenanza", "errores", "habitos", "mentalidad", "bots"} <= tipos
+    assert estilos == {"titular"} and {"ensenanza", "errores", "habitos", "mentalidad", "bots"} <= tipos   # por ahora solo negro y verde
     assert ig_plan.que_toca({})[2] == "¿Qué es Bitcoin?"
     assert ig_plan.que_toca({"temas_usados": ["¿Qué es Bitcoin?"]})[2] == "¿Qué es la blockchain?"
 
@@ -2155,3 +2155,25 @@ def test_binance_con_texto_de_eze_tiene_los_links_de_ayuda(cfg):
         t = p["texto_fijo"]
         assert "join?ref=202718448" in t and "youtu.be/KEereJgA36U" in t and "Dd77w_stfdZ" in t
         assert "plata" not in t.lower() and "garantiz" not in t.lower()
+
+
+def test_carrusel_se_prepara_el_dia_anterior_y_se_puede_cancelar(corrida, red, tmp_path, monkeypatch):
+    from bot import instagram
+    _sin_la_fed(red)
+    monkeypatch.setattr(instagram, "subir_imagenes", lambda jpgs, carpeta: [f"https://x/{carpeta}/{i}.jpg" for i in range(len(jpgs))])
+    red.carrusel = {"laminas": [{"tipo": "portada", "titulo": "¿Qué es la *blockchain*?", "bajada": "fácil"},
+                                {"tipo": "paso", "titulo": "Un *registro*", "texto": "Se anota todo."}],
+                    "texto_post": "post", "palabra": "BLOCK"}
+    domingo = datetime(2026, 10, 25, 16, 10, tzinfo=timezone.utc)          # domingo 13:10: se prepara el del lunes
+    c = corrida(imagen="ninguna", ahora=domingo)
+    c.cfg["instagram"] = {"carruseles": True, "dias_carrusel": [0], "hora_carrusel": "18:00", "hora_preparar": "12:00"}
+    assert c.correr() == 0
+    prep = _memoria(tmp_path)["ig"]["preparados"]["2026-10-26"]
+    assert prep["tema"] == "¿Qué es Bitcoin?" or prep["urls"]
+    assert any("Carrusel de mañana" in a["texto"] for a in red.telegram_albumes)
+    # Eze escribe "no carrusel" -> el del lunes queda cancelado
+    red.actualizaciones = [{"update_id": 50, "message": {"message_id": 9, "chat": {"id": 555}, "text": "no carrusel"}}]
+    c = corrida(imagen="ninguna", ahora=domingo + timedelta(hours=1))
+    c.cfg["instagram"] = {"carruseles": True, "dias_carrusel": [0], "hora_carrusel": "18:00", "hora_preparar": "12:00"}
+    assert c.correr() == 0
+    assert _memoria(tmp_path)["ig"]["preparados"]["2026-10-26"]["cancelado"] is True
