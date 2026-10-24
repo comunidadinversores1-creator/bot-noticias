@@ -2056,3 +2056,14 @@ def test_fotos_para_ig_con_texto_aparte_o_como_archivo(corrida, red, tmp_path):
     assert c.correr() == 0
     assert _memoria(tmp_path)["ig"]["fotos"] == ["A", "B", "C"]
     assert any("Guardé 3 foto" in m["text"] for m in _al_privado(red))
+
+
+def test_llave_de_instagram_renovada_va_cifrada(monkeypatch):
+    from bot import instagram
+    monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "123:abc")
+    monkeypatch.setenv("IG_TOKEN_EZEBAGNATO", "IGAAvieja")
+    cifrada = instagram.cifrar("IGAAnueva")
+    assert "IGAAnueva" not in cifrada and instagram.descifrar(cifrada) == "IGAAnueva"
+    memoria = {"llaves": {"ezebagnato": {"cifrada": cifrada}}}
+    assert instagram.llave("ezebagnato", memoria) == "IGAAnueva"
+    assert instagram.llave("ezebagnato", {"llaves": {"ezebagnato": {"cifrada": "basura"}}}) == "IGAAvieja"

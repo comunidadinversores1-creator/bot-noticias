@@ -22,6 +22,7 @@ from PIL import Image
 from . import calendario as cal
 from . import grok
 from . import ig_plan
+from . import instagram
 from . import ia
 from .estado import Estado
 from .filtro import Grupo, es_mala_noticia, nombra_prohibido, preparar, puntaje, ya_contada
@@ -566,7 +567,8 @@ class Corrida:
                 self.estado.guardar()
                 return self.cerrar(1 if salio else 0)
             self.tal_vez_grok()              # no publica nada: busca temas del día y te manda los virales
-            self.tal_vez_carrusel()          # Instagram: arma el carrusel del día (por ahora te lo manda por privado)
+            self.tal_vez_carrusel()          # Instagram: arma y publica el carrusel del día (y te avisa)
+            self.tal_vez_numeros_ig()        # Instagram: lee cómo le fue a cada carrusel y los domingos te manda el ranking
             self.ocupado = self.tal_vez_material()      # lo que vos pedís por privado sale primero
             if not self.ocupado:
                 self.ocupado = self.tal_vez_calendario()
@@ -594,6 +596,8 @@ class Corrida:
         # --- muestra de charla para X (solo en modo prueba: promo = charla)
         if not self.real and self.promo_pedida.lower() == "hilo":
             return self.muestra_hilo()
+        if not self.real and self.promo_pedida.lower() == "instagram":
+            return self.cerrar(1 if self.revisar_instagram() else 0)
         if not self.real and self.promo_pedida.lower().startswith("carrusel"):
             pedido = self.promo_pedida.lower().split(":", 1)
             hechas = sum(1 if self.hacer_carrusel(pedido[1].strip() if len(pedido) > 1 else "") else 0
@@ -1239,8 +1243,16 @@ class Corrida:
         aviso = ""
         if estilo == "partida" and not fotos:
             aviso = "\n\n📸 <b>Necesito fotos tuyas</b> para este estilo (operando, en tu escritorio, de viaje). Mandámelas acá con el texto <code>ig</code> y las uso en los próximos."
-        cabeza = (f"🖼 <b>Carrusel para Instagram</b> · {html.escape(tema)}\n<i>Estilo {estilo} · {tipo}</i>\n\n"
-                  "Por ahora te lo mando acá para que lo subas; cuando conectemos Instagram se publica solo.")
+        media_id = ""
+        ig_cfg = self.cfg.get("instagram") or {}
+        if self.real and verdadero(ig_cfg.get("publicar", True)) and instagram.llave("ezebagnato", g):
+            media_id = self.subir_a_instagram("ezebagnato", laminas, contenido["texto_post"])
+        if media_id:
+            cabeza = (f"✅ <b>Publiqué el carrusel en @ezebagnato</b> · {html.escape(tema)}\n<i>Estilo {estilo} · {tipo}</i>\n\n"
+                      "Respondé los comentarios en la primera hora: es lo que más lo empuja.")
+        else:
+            cabeza = (f"🖼 <b>Carrusel para Instagram</b> · {html.escape(tema)}\n<i>Estilo {estilo} · {tipo}</i>\n\n"
+                      + ("Es una muestra: no se publicó." if not self.real else "No lo pude publicar solo: te lo dejo para que lo subas vos."))
         try:
             telegram_album(self.token, self.chat_prueba, laminas, cabeza)
             telegram_mensaje(self.token, self.chat_prueba, "📝 Texto para el post (copialo):\n\n<code>"
@@ -1252,9 +1264,99 @@ class Corrida:
             g["vuelta"] = int(g.get("vuelta", 0) or 0) + 1
             g["temas_usados"] = ([*(g.get("temas_usados") or []), tema])[-80:]
             g["historial"] = ([*(g.get("historial") or []), {"fecha": self.ahora.isoformat(), "tipo": tipo, "estilo": estilo,
-                                                              "tema": tema, "palabra": contenido["palabra"]}])[-200:]
+                                                              "tema": tema, "palabra": contenido["palabra"], "media_id": media_id}])[-200:]
             self.estado.guardar()
         return True
+
+    def subir_a_instagram(self, cuenta: str, laminas: list[bytes], texto: str) -> str:
+        g = self.estado.datos["ig"]
+        carpeta = f"{self.ahora:%Y%m%d-%H%M}-{cuenta}"
+        try:
+            urls = instagram.subir_imagenes(laminas, carpeta)
+            try:
+                return instagram.publicar_carrusel(instagram.llave(cuenta, g), urls, texto)
+            finally:
+                instagram.borrar_imagenes(carpeta, len(laminas))
+        except instagram.ErrorInstagram as error:
+            self.avisar("instagram", f"No pude publicar en Instagram ({cuenta}): {error}")
+            return ""
+
+    def revisar_instagram(self) -> bool:
+        """Prueba las llaves de Instagram y te cuenta qué cuentas quedaron conectadas."""
+        g = self.estado.datos["ig"]
+        renglones = []
+        for cuenta in instagram.CUENTAS:
+            t = instagram.llave(cuenta, g)
+            if not t:
+                renglones.append(f"❌ {cuenta}: falta la llave {instagram.CUENTAS[cuenta]} en GitHub")
+                continue
+            try:
+                yo = instagram.quien_soy(t)
+                renglones.append(f"✅ @{yo.get('username')}: conectada ({yo.get('followers_count', '?')} seguidores, {yo.get('media_count', '?')} publicaciones)")
+            except instagram.ErrorInstagram as error:
+                renglones.append(f"❌ {cuenta}: {error}")
+        try:
+            telegram_mensaje(self.token, self.chat_prueba, "📸 Instagram\n\n" + "\n".join(renglones))
+        except ErrorPublicacion:
+            pass
+        log.info("Instagram: %s", " | ".join(renglones))
+        return all(r.startswith("✅") for r in renglones)
+
+    def tal_vez_numeros_ig(self) -> None:
+        """Una vez por día: renueva las llaves si toca y lee cómo le fue a cada carrusel (a los 3 y a los 7 días).
+        Los domingos a la noche te manda qué estilo y qué tipo de contenido rinden más."""
+        g = self.estado.datos["ig"]
+        if not instagram.disponibles(g):
+            return
+        local = self.ahora.astimezone(zona(self.cfg))
+        hoy = local.date().isoformat()
+        if g.get("numeros_dia") != hoy:
+            g["numeros_dia"] = hoy
+            for cuenta in instagram.disponibles(g):
+                instagram.renovar(cuenta, g)
+            t = instagram.llave("ezebagnato", g)
+            for h in g.get("historial") or []:
+                if not (t and h.get("media_id")):
+                    continue
+                try:
+                    dias = (self.ahora - datetime.fromisoformat(h["fecha"])).days
+                except (KeyError, ValueError):
+                    continue
+                if 3 <= dias <= 10 and (h.get("numeros_a") or 0) < (7 if dias >= 7 else 3):
+                    try:
+                        h["numeros"] = instagram.numeros(t, h["media_id"])
+                        h["numeros_a"] = 7 if dias >= 7 else 3
+                    except instagram.ErrorInstagram as error:
+                        log.warning("Instagram: no pude leer los números de %s: %s", h.get("tema"), error)
+            self.estado.guardar()
+        if local.weekday() == 6 and local.hour >= 20 and g.get("ranking_dia") != hoy:
+            g["ranking_dia"] = hoy
+            self.estado.guardar()
+            self.mandar_ranking_ig()
+
+    def mandar_ranking_ig(self) -> None:
+        con = [h for h in (self.estado.datos["ig"].get("historial") or []) if h.get("numeros")]
+        if len(con) < 2:
+            return
+        def tabla(campo: str) -> list[str]:
+            grupos: dict[str, list[dict]] = {}
+            for h in con:
+                grupos.setdefault(h.get(campo, "?"), []).append(h["numeros"])
+            filas = []
+            for nombre, ns in grupos.items():
+                inter = sum(n.get("total_interactions", 0) for n in ns) / len(ns)
+                guard = sum(n.get("saved", 0) for n in ns) / len(ns)
+                alc = sum(n.get("reach", 0) for n in ns) / len(ns)
+                filas.append((inter, f"• {nombre}: {inter:.0f} interacciones, {guard:.0f} guardados, {alc:.0f} de alcance (promedio de {len(ns)})"))
+            return [f for _, f in sorted(filas, reverse=True)]
+        mejor = max(con, key=lambda h: h["numeros"].get("total_interactions", 0))
+        texto = ("📊 Instagram: qué funciona más\n\nPor estilo:\n" + "\n".join(tabla("estilo"))
+                 + "\n\nPor tipo de contenido:\n" + "\n".join(tabla("tipo"))
+                 + f"\n\nEl mejor hasta ahora: «{mejor.get('tema')}» ({mejor.get('estilo')}).\nSe siguen rotando todos; esto es para que veas la tendencia.")
+        try:
+            telegram_mensaje(self.token, self.chat_prueba, texto)
+        except ErrorPublicacion:
+            pass
 
     def publicar_material(self, tipo: str, notas: str, fotos: list[str]) -> bool:
         partes, correccion = None, ""
