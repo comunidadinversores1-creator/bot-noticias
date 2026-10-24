@@ -1246,7 +1246,7 @@ class Corrida:
                         fotos.append(Image.open(io.BytesIO(b)).convert("RGB"))
                     except OSError:
                         continue
-        laminas = ig_plan.armar(contenido, estilo, fotos)
+        laminas = ig_plan.armar(contenido, estilo, fotos, tema=tema)
         aviso = ""
         if estilo == "partida" and not fotos:
             aviso = "\n\n📸 <b>Necesito fotos tuyas</b> para este estilo (operando, en tu escritorio, de viaje). Mandámelas acá con el texto <code>ig</code> y las uso en los próximos."

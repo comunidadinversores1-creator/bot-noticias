@@ -62,6 +62,7 @@ PALABRAS_CIERRE = {"ensenanza": "GUÍA", "errores": "ERRORES", "habitos": "HÁBI
 SISTEMA = """Armás carruseles de Instagram para Ezequiel Bagnato (@ezebagnato): trader, bots de trading, IA y cripto, para gente de Argentina y Latinoamérica que recién empieza.
 Español rioplatense con voseo, frases cortas, simple como para alguien de 12 años. Decí siempre "dinero", nunca "plata".
 Nunca prometas ganancias, ni "sin riesgo", ni porcentajes de ganancia, ni recomiendes comprar o vender algo concreto. No inventes cifras ni casos reales.
+Sé preciso: nada de afirmaciones discutibles como si fueran hechos (ej.: "bitcoin frena la inflación", "nadie lo puede hackear"). Los números siempre con cifras: 21 millones, no "veintiún millones".
 Marcá entre *asteriscos* la UNA palabra o frase corta más importante de cada titular (se pinta de color).
 
 ESTILO:
@@ -118,12 +119,28 @@ def redactar(cerebro, tipo: str, estilo: str, tema: str) -> dict | None:
     return None
 
 
-def armar(contenido: dict, estilo: str, fotos: list | None = None, usuario: str = "@ezebagnato") -> list[bytes]:
+def logo_del_tema(tema: str):
+    """El logo oficial si el tema es sobre una moneda o empresa que está guardada (Bitcoin, Ethereum, USDT...)."""
+    from .imagen import logo_guardado
+    from .util import normalizar
+    t = normalizar(tema)
+    for palabra in re.findall(r"[a-z0-9]+", t):
+        if len(palabra) >= 3 and palabra not in ("que", "es", "una", "como", "por", "para", "sirve"):
+            foto = logo_guardado(palabra)
+            if foto is not None:
+                return foto.imagen
+    return None
+
+
+def armar(contenido: dict, estilo: str, fotos: list | None = None, usuario: str = "@ezebagnato", tema: str = "") -> list[bytes]:
     """Las imágenes del carrusel (con la lámina de cierre). 'fotos' = fotos de Eze para el estilo partida."""
     from . import ig_carruseles as c
     laminas = [dict(l) for l in contenido["laminas"]]
     palabra = contenido["palabra"]
+    logo = logo_del_tema(tema) if tema else None
     if estilo == "titular":
+        if laminas and laminas[0].get("tipo") == "portada" and logo is not None:
+            laminas[0]["logo"] = logo
         laminas.append({"tipo": "cierre", "palabra": palabra, "texto": "y te mando la guía completa por privado",
                         "extra": "Operar tiene riesgo. Nada de esto es una recomendación de inversión."})
         return c.titular(laminas, usuario)

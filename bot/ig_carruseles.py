@@ -158,6 +158,20 @@ def _caja_redondeada(base: Image.Image, img: Image.Image, caja: tuple[int, int, 
     ImageDraw.Draw(base, "RGBA").rounded_rectangle(caja, radio, outline=borde, width=2)
 
 
+def _logo_con_brillo(base: Image.Image, logo: Image.Image, caja: tuple[int, int, int, int]) -> None:
+    """El logo oficial grande en el centro, con un brillo verde detrás."""
+    x0, y0, x1, y1 = caja
+    lado = min(x1 - x0, y1 - y0, 560)
+    cx, cy = (x0 + x1) // 2, (y0 + y1) // 2
+    brillo = Image.new("RGBA", base.size, (0, 0, 0, 0))
+    ImageDraw.Draw(brillo).ellipse((cx - lado * 0.7, cy - lado * 0.7, cx + lado * 0.7, cy + lado * 0.7), fill=(34, 197, 94, 70))
+    base.alpha_composite(brillo.filter(ImageFilter.GaussianBlur(90)))
+    l = logo.convert("RGBA")
+    escala = lado * 0.8 / max(l.size)
+    l = l.resize((max(1, round(l.width * escala)), max(1, round(l.height * escala))), Image.LANCZOS)
+    base.alpha_composite(l, (cx - l.width // 2, cy - l.height // 2))
+
+
 def grafico_velas(ancho: int, alto: int, semilla: int = 7, sube: bool = True) -> Image.Image:
     """Un gráfico de velas de ejemplo (sin datos reales) para cuando no hay captura."""
     rnd = random.Random(semilla)
@@ -205,6 +219,16 @@ def titular(laminas: list[dict], usuario: str = "@ezebagnato") -> list[bytes]:
                      ANCHO - 2 * M - 80, BLANCO, VERDE, centrado=True, inter=1.3)
             if l.get("extra"):
                 escribir(d, M + 40, ALTO - 260, l["extra"], "normal", 34, ANCHO - 2 * M - 80, GRIS, VERDE, centrado=True)
+        elif tipo == "paso" and l.get("imagen") is None:
+            # Sin imagen que tenga que ver con el tema, la lámina va solo con texto grande (nada de gráficos de relleno).
+            titulo = str(l.get("titulo", "")).upper()
+            ancho = ANCHO - 2 * M
+            tam_t = _que_entre(titulo, "angosta", ancho, 330, 132, 70, 1.12)
+            alto_total = alto_de(titulo, "angosta", tam_t, ancho, 1.12) + 60 + alto_de(l.get("texto", ""), "media", 56, ancho, 1.35)
+            y = max(140, (ALTO - 120 - alto_total) // 2)
+            d.rectangle((M, y - 50, M + 120, y - 38), fill=VERDE)
+            y = escribir(d, M, y, titulo, "angosta", tam_t, ancho, BLANCO, VERDE, inter=1.12) + 60
+            escribir(d, M, y, l.get("texto", ""), "media", 56, ancho, (225, 225, 225, 255), VERDE, inter=1.35)
         else:
             portada = tipo == "portada"
             titulo = str(l.get("titulo", "")).upper()
@@ -217,10 +241,11 @@ def titular(laminas: list[dict], usuario: str = "@ezebagnato") -> list[bytes]:
             if l.get("texto"):
                 y = escribir(d, M, y + 40, l["texto"], "normal", 42, ANCHO - 2 * M, (215, 215, 215, 255), VERDE,
                              inter=1.35) + 10
-            img = l.get("imagen") or grafico_velas(ANCHO - 2 * M, 600, semilla=i)
             caja = (M, max(y + 40, 560 if portada else y + 40), ANCHO - M, ALTO - 130)
-            if caja[3] - caja[1] > 200:
-                _caja_redondeada(base, img, caja)
+            if l.get("logo") is not None:
+                _logo_con_brillo(base, l["logo"], caja)
+            elif caja[3] - caja[1] > 200:
+                _caja_redondeada(base, l.get("imagen") or grafico_velas(ANCHO - 2 * M, 600, semilla=i), caja)
         _usuario(base, d, usuario)
         _contador(d, i, total)
         if i == 1:
