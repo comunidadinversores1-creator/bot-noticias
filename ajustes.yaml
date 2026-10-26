@@ -832,12 +832,13 @@ fuentes:
 #  No hace falta tocar esto.
 # ------------------------------------------------------------
 ia:
-  orden: [anthropic, gemini, groq, openai]
+  orden: [anthropic, gemini, groq, openai, xai]   # xai = Grok: de respaldo, si Gemini está caído o saturado
   modelos:
     anthropic: ["claude-haiku-4-5-20251001"]
     gemini: ["gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-flash-latest"]
     groq: ["openai/gpt-oss-120b", "qwen/qwen3.8-27b", "openai/gpt-oss-20b"]
     openai: ["gpt-4.1-mini"]
+    xai: ["grok-4.7"]
   candidatos_por_corrida: 30
   candidatos_de_socios: 6         # de esos 30, como mucho 6 son noticias de tus socios (para que no tapen al resto)
 

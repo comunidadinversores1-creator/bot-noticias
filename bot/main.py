@@ -601,6 +601,18 @@ class Corrida:
         # --- muestra de charla para X (solo en modo prueba: promo = charla)
         if not self.real and self.promo_pedida.lower() == "hilo":
             return self.muestra_hilo()
+        if not self.real and self.promo_pedida.lower() == "ia":
+            # Prueba cada IA por separado y deja el resultado en GitHub.
+            resultados = []
+            for prov in self.cerebro.proveedores:
+                for modelo in prov["modelos"]:
+                    try:
+                        texto = self.cerebro._llamar(prov, modelo, "Respondé solo con JSON.", 'Devolvé {"ok": true}', 50, 0)
+                        resultados.append(f"{prov['nombre']}/{modelo}: OK ({texto.strip()[:30]})")
+                    except Exception as error:
+                        resultados.append(f"{prov['nombre']}/{modelo}: FALLA ({str(error)[:80]})")
+            log.warning("Prueba de IA: %s", " | ".join(resultados))
+            return self.cerrar(1)
         if not self.real and self.promo_pedida.lower() == "historias":
             return self.cerrar(1 if self.muestra_historias() else 0)
         if not self.real and self.promo_pedida.lower() == "instagram":

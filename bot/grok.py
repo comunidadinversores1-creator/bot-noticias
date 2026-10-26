@@ -56,8 +56,17 @@ def preguntar(cfg: dict, consigna: str, desde: datetime, max_turnos: int = 3) ->
         "max_turns": max_turnos,
     }
     try:
-        r = requests.post(URL, headers={"Authorization": f"Bearer {clave}", "Content-Type": "application/json"},
-                          json=cuerpo, timeout=(10, 120))
+        r = None
+        for intento in range(2):
+            try:
+                # Buscar en X lleva su tiempo: se le da hasta 4 minutos y, si se corta, un segundo intento.
+                r = requests.post(URL, headers={"Authorization": f"Bearer {clave}", "Content-Type": "application/json"},
+                                  json=cuerpo, timeout=(10, 240))
+                break
+            except requests.Timeout:
+                if intento == 1:
+                    raise
+                log.warning("Grok tardó demasiado: pruebo de nuevo.")
     except requests.RequestException as error:
         raise SinGrok(f"no respondió ({type(error).__name__})")
     if r.status_code == 401:

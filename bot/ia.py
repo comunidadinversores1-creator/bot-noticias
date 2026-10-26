@@ -18,8 +18,10 @@ URL_COMPATIBLE = {
     "gemini": "https://generativelanguage.googleapis.com/v1beta/openai",
     "groq": "https://api.groq.com/openai/v1",
     "openai": "https://api.openai.com/v1",
+    "xai": "https://api.x.ai/v1",
 }
-VARIABLE = {"anthropic": "ANTHROPIC_API_KEY", "gemini": "GEMINI_API_KEY", "groq": "GROQ_API_KEY", "openai": "OPENAI_API_KEY"}
+VARIABLE = {"anthropic": "ANTHROPIC_API_KEY", "gemini": "GEMINI_API_KEY", "groq": "GROQ_API_KEY", "openai": "OPENAI_API_KEY",
+            "xai": "XAI_API_KEY"}
 
 
 class SinCerebro(Exception):
@@ -42,7 +44,7 @@ class Cerebro:
         ia = cfg.get("ia", {})
         modelos = ia.get("modelos", {})
         self.proveedores: list[dict] = []
-        for nombre in ia.get("orden", ["anthropic", "gemini", "groq", "openai"]):
+        for nombre in ia.get("orden", ["anthropic", "gemini", "groq", "openai", "xai"]):
             clave = (entorno.get(VARIABLE.get(nombre, "")) or "").strip()
             if not clave:
                 continue
@@ -95,7 +97,7 @@ class Cerebro:
         ultimo = ""
         for cuerpo in cuerpos:
             parametro_rechazado = False
-            for intento in range(2):
+            for intento in range(3):
                 if time.monotonic() > self.vence:
                     raise SinCerebro("Se acabó el tiempo reservado para la IA en esta corrida.")
                 self.llamadas += 1
@@ -117,7 +119,8 @@ class Cerebro:
                         continue
                     raise Saltar(f"límite de uso ({ultimo})")
                 if r.status_code >= 500:
-                    time.sleep(2)
+                    # 503 = "mucha demanda": suele pasar en segundos. Se espera un poco antes de reintentar.
+                    time.sleep(4 if intento == 0 else 8)
                     continue
                 parametro_rechazado = True     # 400/404/422: probar con el pedido mínimo
                 if len(cuerpos) > 1 and cuerpo is cuerpos[0]:
