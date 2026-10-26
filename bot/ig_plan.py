@@ -67,7 +67,7 @@ Tienen que ENSEÑAR DE VERDAD: nada de frases vagas. Cada lámina explica una id
 Nunca prometas ganancias, ni "sin riesgo", ni porcentajes de ganancia, ni recomiendes comprar o vender algo concreto. No inventes casos reales.
 Solo datos ampliamente conocidos y estables (fechas, definiciones, reglas del protocolo). Si no estás seguro de un número, no lo pongas. Nada de afirmaciones discutibles como si fueran hechos.
 Postura de Eze sobre dónde guardar cripto: para empezar, un exchange grande y regulado (PSAV en Argentina, con 2FA) es lo más práctico; la billetera propia es para quien sabe usarla, porque si perdés la frase semilla o te hackean nadie te devuelve el dinero. No digas que el exchange es inseguro ni uses "not your keys, not your coins" como regla absoluta.
-Los números siempre con cifras (21 millones, no "veintiún millones").
+Los números siempre con cifras (21 millones, no "veintiún millones"). Nunca pongas estadísticas del tipo "el 70% de los traders pierde": no se pueden verificar. En la caja "dato" va un hecho comprobable, una cuenta (ej.: 2% de riesgo por 10 pérdidas seguidas deja la cuenta en 82%) o un tip práctico.
 Marcá entre *asteriscos* la palabra o frase corta más importante de cada titular y de cada texto (se pinta de color).
 
 ESTILO:
@@ -101,6 +101,11 @@ def _sin_problemas(textos: list[str]) -> list[str]:
     problemas = []
     if any(re.search(r"(?i)\bplata\b", t) for t in textos):
         problemas.append('dice "plata"')
+    # Estadísticas de "cuántos traders pierden" y similares: suenan a dato pero casi siempre son inventadas.
+    if any(re.search(r"(?i)(\d+\s*%|por ciento)\s+de\s+(los\s+|las\s+)?(traders|personas|inversores|principiantes|usuarios|argentinos)", t) for t in textos):
+        problemas.append("pusiste una estadística de cuánta gente hace o pierde algo (no se puede verificar: sacala)")
+    if any(re.search(r"(?i)\b(veinti|treinta|cuarenta|cincuenta|sesenta|setenta|ochenta|noventa)\w*\b|\b(dos|tres|cinco|diez) por ciento\b", t) for t in textos):
+        problemas.append("escribiste números con letras (van con cifras: 2%, 21 millones)")
     malas = [m for t in textos for m in promesas_charla(t)]
     if malas:
         problemas.append(f"suena a promesa ({', '.join(malas)})")
