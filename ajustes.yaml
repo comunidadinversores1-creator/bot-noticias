@@ -95,7 +95,7 @@ avisos_etiquetar_por_dia: 6
 grok:
   activa: true
   modelo: "grok-4.7"
-  temas_horas: ["08:00", "15:00"]
+  temas_horas: ["08:00"]           # 1 vez por día (cada búsqueda en X se cobra por los posts que lee)
   virales_hora: "10:00"
   virales_cantidad: 5
   ideas_horarios: ["12:00", "16:00", "21:00"]   # el bot publica en X las ideas del día (posts que pegaron por su formato, con tu voz)
@@ -103,7 +103,7 @@ grok:
   estrategias_dia: 0               # informe semanal de estrategias de las cuentas que más crecen: 0 = lunes
   estrategias_hora: "09:00"
   citar_impacto: 8                # cuando sale una noticia así de grande, te manda el post de X más fuerte sobre ella para citarlo
-  citas_por_dia: 3
+  citas_por_dia: 1
   areas: "trading, criptomonedas, exchanges, inteligencia artificial, empresas tecnológicas, bolsa, economía, guerras y conflictos que mueven los mercados, dólar, dinero y ahorro"
 
 # ------------------------------------------------------------

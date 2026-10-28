@@ -44,7 +44,7 @@ def _texto_de(respuesta: dict) -> str:
     return "\n".join(partes)
 
 
-def preguntar(cfg: dict, consigna: str, desde: datetime, max_turnos: int = 3) -> dict:
+def preguntar(cfg: dict, consigna: str, desde: datetime, max_turnos: int = 2) -> dict:
     clave = (os.environ.get("XAI_API_KEY") or "").strip()
     if not clave:
         raise SinGrok("falta XAI_API_KEY")
@@ -56,17 +56,10 @@ def preguntar(cfg: dict, consigna: str, desde: datetime, max_turnos: int = 3) ->
         "max_turns": max_turnos,
     }
     try:
-        r = None
-        for intento in range(2):
-            try:
-                # Buscar en X lleva su tiempo: se le da hasta 4 minutos y, si se corta, un segundo intento.
-                r = requests.post(URL, headers={"Authorization": f"Bearer {clave}", "Content-Type": "application/json"},
-                                  json=cuerpo, timeout=(10, 240))
-                break
-            except requests.Timeout:
-                if intento == 1:
-                    raise
-                log.warning("Grok tardó demasiado: pruebo de nuevo.")
+        # Una sola vez: cada búsqueda en X se cobra por los posts que lee, y un reintento después de un corte
+        # se cobra de nuevo. Si no responde, se prueba en la próxima tanda.
+        r = requests.post(URL, headers={"Authorization": f"Bearer {clave}", "Content-Type": "application/json"},
+                          json=cuerpo, timeout=(10, 240))
     except requests.RequestException as error:
         raise SinGrok(f"no respondió ({type(error).__name__})")
     if r.status_code == 401:
@@ -119,7 +112,7 @@ def virales(cfg: dict, momento: datetime, cantidad: int = 5) -> list[dict]:
         "Respondé SOLO con JSON: {\"posts\": [{\"url\": \"https://x.com/...\", \"cuenta\": \"@usuario\", \"de_que_habla\": \"1 oración\", "
         "\"por_que\": \"por qué conviene responder (ej.: 300 respuestas en 2 horas)\", \"idea\": \"la respuesta sugerida\"}]}"
     )
-    datos = preguntar(cfg, consigna, momento - timedelta(days=1), max_turnos=4)
+    datos = preguntar(cfg, consigna, momento - timedelta(days=1), max_turnos=2)
     posts = []
     for p in datos.get("posts") or []:
         if not isinstance(p, dict):
@@ -168,7 +161,7 @@ def inspiracion(cfg: dict, momento: datetime, cantidad: int = 2) -> list[dict]:
         "Respondé SOLO con JSON: {\"posts\": [{\"url\": \"https://x.com/...\", \"cuenta\": \"@usuario\", "
         "\"por_que_funciono\": \"1 oración sobre el formato\", \"borrador\": \"el post para Ezequiel\"}]}"
     )
-    datos = preguntar(cfg, consigna, momento - timedelta(days=3), max_turnos=4)
+    datos = preguntar(cfg, consigna, momento - timedelta(days=3), max_turnos=2)
     salida = []
     for p in datos.get("posts") or []:
         if not isinstance(p, dict):
@@ -199,4 +192,4 @@ def estrategias(cfg: dict, momento: datetime) -> dict:
         "\"material\": \"si para hacerlo hace falta algo que solo tiene Ezequiel (una captura de resultados, una foto, un dato propio), qué tiene que mandar, en 1 oración; si no, vacío\", "
         "\"pedido\": \"el mensaje que Ezequiel le tiene que mandar al bot para que lo publique, empezando con 'post:' o 'hilo:' y el tema, ej. 'hilo: resultados de mi bot esta semana' (vacío si no hace falta material)\"}]}"
     )
-    return preguntar(cfg, consigna, momento - timedelta(days=7), max_turnos=5)
+    return preguntar(cfg, consigna, momento - timedelta(days=7), max_turnos=3)
