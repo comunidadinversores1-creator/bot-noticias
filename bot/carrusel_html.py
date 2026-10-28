@@ -123,7 +123,7 @@ def _cierre(palabra: str, con_guia: bool, i: int, total: int, usuario: str, pape
                    f'<div><div style="font-size:46px; font-weight:800; line-height:1.15">{e(nombre)}</div>'
                    f'<div style="font-size:38px; color:#52525b; margin-top:6px">{e(usuario)}</div></div></div>'
                    f'<div style="font-size:38px; color:#3f3f46; margin-top:30px; line-height:1.4">Cripto, trading e inversiones<br>Bots de trading y automatización</div>'
-                   f'<div style="margin-top:34px; background:#22c55e; color:#04130a; border-radius:20px; text-align:center; font-size:48px; font-weight:800; padding:26px 0">Seguir</div></div>')
+                   f'<div style="margin-top:34px; background:#22c55e; color:#04130a; border-radius:20px; text-align:center; font-size:48px; font-weight:800; padding:26px 0; position:relative">Seguir<span style="position:absolute; right:90px; top:34px; font-size:120px; line-height:1">👆</span></div></div>')
         cuerpo = (f'<span class="tag">No te pierdas nada</span>'
                   f'<h2 style="font-size:100px"><span class="band">Seguime</span> y guardalo para tenerlo a mano</h2>'
                   f'<p style="font-size:42px">Trading, bots de IA y cripto, sin vender humo.</p>{tarjeta}')
