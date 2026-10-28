@@ -173,7 +173,7 @@ def inspiracion(cfg: dict, cantidad: int, ahora: datetime | None = None) -> list
         f"Mirá los temas de HOY sobre {areas}. Después escribí {cantidad} borradores ORIGINALES para la cuenta de X "
         "de Ezequiel Bagnato (trader, bots de trading, IA, cripto), cada uno con un formato distinto de los que se sabe que funcionan en X: "
         "una pregunta que cualquiera pueda contestar, un dilema con montos, una lista guardable, una cuenta con números o una opinión que divida. "
-        "Reglas: español rioplatense, en minúscula, frases cortas con renglón en blanco entre ideas, sin emojis ni hashtags ni links, "
+        "Reglas: español rioplatense, en minúscula, como habla una persona real, frases naturales, párrafos de 2 o 3 renglones con renglón en blanco solo entre párrafos, sin emojis ni hashtags ni links, "
         "decir 'dinero' y nunca 'plata', no prometer ganancias, no contar casos inventados como reales (nada de 'conocí a un pibe'), "
         "no recomendar comprar ni vender un activo concreto, y no inventar cifras de los temas. "
         "Respondé SOLO con JSON: {\"posts\": [{\"formato\": \"pregunta, dilema, lista, cuentas u opinión\", \"borrador\": \"el post\"}]}"
