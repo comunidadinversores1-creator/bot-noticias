@@ -70,6 +70,7 @@ def buscar(cfg: dict, consigna: str, con_busqueda: bool = True) -> dict:
                 ultimo = f"{modelo}: no devolvió el formato pedido"
                 break
             ultimo = f"{modelo}: error {r.status_code}"
+            log.warning("Búsqueda gratis, %s respondió %s: %s", modelo, r.status_code, r.text[:300].replace("\n", " "))
             if r.status_code in (500, 502, 503, 504):
                 time.sleep(3 if intento == 0 else 6)
                 continue
