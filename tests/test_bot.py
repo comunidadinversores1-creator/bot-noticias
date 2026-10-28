@@ -2249,3 +2249,21 @@ def test_modo_gratis_no_llama_a_grok(corrida, red, tmp_path, monkeypatch):
     assert c.correr() == 0
     assert not [p for p in red.pedidos if "api.x.ai" in p.url and "/responses" in p.url]
     assert _memoria(tmp_path)["grok"]["temas"][0]["tema"] == "dólar blue sube"
+
+
+def test_instagram_espera_si_el_contenedor_todavia_no_existe(monkeypatch):
+    from bot import instagram
+    monkeypatch.setattr(instagram.time, "sleep", lambda s: None)
+    respuestas = iter([instagram.ErrorInstagram("Instagram no aceptó el pedido: The requested resource does not exist"),
+                       {"status_code": "IN_PROGRESS"}, {"status_code": "FINISHED"}])
+
+    def pedir(metodo, ruta, token, **datos):
+        r = next(respuestas)
+        if isinstance(r, Exception):
+            raise r
+        return r
+    monkeypatch.setattr(instagram, "_pedir", pedir)
+    instagram._esperar("123", "token")                       # no tira error: espera y sigue hasta FINISHED
+    monkeypatch.setattr(instagram, "_pedir", lambda *a, **k: (_ for _ in ()).throw(instagram.ErrorInstagram("Instagram rechazó la llave")))
+    with pytest.raises(instagram.ErrorInstagram):
+        instagram._esperar("123", "token")                   # los demás errores siguen cortando

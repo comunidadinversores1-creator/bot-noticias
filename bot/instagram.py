@@ -119,8 +119,16 @@ def quien_soy(token: str) -> dict:
 
 
 def _esperar(contenedor: str, token: str, intentos: int = 20) -> None:
-    for _ in range(intentos):
-        estado = _pedir("GET", contenedor, token, fields="status_code").get("status_code")
+    time.sleep(2)                                     # Instagram a veces todavía no "ve" el contenedor recién creado
+    for i in range(intentos):
+        try:
+            estado = _pedir("GET", contenedor, token, fields="status_code").get("status_code")
+        except ErrorInstagram as error:
+            # "The requested resource does not exist" justo después de crearlo es un tropiezo pasajero de Instagram: se espera y se mira de nuevo.
+            if "does not exist" in str(error) and i < 8:
+                time.sleep(3)
+                continue
+            raise
         if estado == "FINISHED":
             return
         if estado in ("ERROR", "EXPIRED"):
@@ -145,9 +153,18 @@ def publicar_carrusel(token: str, urls: list[str], texto: str) -> str:
 
 def publicar_historia(token: str, url: str) -> str:
     yo = quien_soy(token)["user_id"]
-    c = _pedir("POST", f"{yo}/media", token, image_url=url, media_type="STORIES")["id"]
-    _esperar(c, token)
-    return _pedir("POST", f"{yo}/media_publish", token, creation_id=c)["id"]
+    for intento in range(2):
+        try:
+            c = _pedir("POST", f"{yo}/media", token, image_url=url, media_type="STORIES")["id"]
+            _esperar(c, token)
+            return _pedir("POST", f"{yo}/media_publish", token, creation_id=c)["id"]
+        except ErrorInstagram as error:
+            # Si Instagram dice que "el recurso no existe" antes de publicar, se arma un contenedor nuevo una vez más
+            # (nunca hay riesgo de duplicar: la historia no llegó a publicarse).
+            if intento == 0 and "does not exist" in str(error):
+                time.sleep(5)
+                continue
+            raise
 
 
 def comentarios(token: str, media_id: str) -> list[dict]:
