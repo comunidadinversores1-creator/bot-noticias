@@ -341,9 +341,12 @@ class Corrida:
             return
         memoria["citas"] = int(memoria.get("citas", 0)) + 1
         e = lambda s: html.escape(s, quote=False)
-        mensaje = (f"📣 <b>Noticia grande para citar</b>\n{e(post['titular'])}\n\n"
-                   f'<a href="{html.escape(cita["url"], quote=True)}">Abrí el post de {e(cita["cuenta"] or "X")}</a>, tocá "Repostear" → "Citar" y poné tu mirada.\n\n'
-                   f"💡 Idea: {e(cita['cita'])}")
+        enlace = html.escape(cita["url"], quote=True)
+        if "/search?" in cita["url"]:
+            llamado = f'<a href="{enlace}">Mirá los posts más vistos sobre esto</a>, elegí uno, tocá "Repostear" → "Citar" y poné tu mirada.'
+        else:
+            llamado = f'<a href="{enlace}">Abrí el post de {e(cita["cuenta"] or "X")}</a>, tocá "Repostear" → "Citar" y poné tu mirada.'
+        mensaje = f"📣 <b>Noticia grande para citar</b>\n{e(post['titular'])}\n\n{llamado}\n\n💡 Idea: {e(cita['cita'])}"
         try:
             telegram_mensaje(self.token, self.chat_prueba, mensaje, html=True)
         except ErrorPublicacion as error:
@@ -695,8 +698,10 @@ class Corrida:
                          for _ in range(max(1, self.cantidad)))
             return self.cerrar(hechas)
         if not self.real and self.promo_pedida.lower() == "estrategias":
-            return self.cerrar(1 if grok.disponible() and self.mandar_estrategias() else 0)
-        if not self.real and self.promo_pedida.lower() == "grok":
+            return self.cerrar(1 if grok.disponible_grok() and self.mandar_estrategias() else 0)
+        if not self.real and self.promo_pedida.lower() in ("grok", "gratis"):
+            if self.promo_pedida.lower() == "gratis":
+                self.cfg.setdefault("grok", {})["modo"] = "gratis"      # prueba de la búsqueda gratis: no toca Grok
             return self.muestra_grok()
         if not self.real and self.promo_pedida.lower() == "calendario":
             return self.muestra_calendario()
@@ -1109,7 +1114,8 @@ class Corrida:
                 self.avisar("grok", f"Grok {error}. Las preguntas de X siguen saliendo con temas generales.", cada_horas=24)
         # Informe semanal de estrategias (qué hacen las cuentas que más crecen), los lunes.
         hora_est = a_hora(c.get("estrategias_hora") or "09:00")
-        if (local.weekday() == int(c.get("estrategias_dia", 0)) and g.get("estrategias_dia") != hoy
+        grok_ok = grok.disponible_grok() and str(c.get("modo") or "auto").lower() != "gratis" and not g.get("sin_saldo")
+        if (grok_ok and local.weekday() == int(c.get("estrategias_dia", 0)) and g.get("estrategias_dia") != hoy
                 and hora_est is not None and local.time() >= hora_est):
             g["estrategias_dia"] = hoy
             self.mandar_estrategias()
@@ -1118,7 +1124,20 @@ class Corrida:
         if g.get("virales_dia") != hoy and hora_virales is not None and local.time() >= hora_virales:
             g["virales_dia"] = hoy
             self.mandar_virales()
+        self.avisar_cambio_a_gratis()
         self.estado.guardar()
+
+    def avisar_cambio_a_gratis(self) -> None:
+        """Si Grok se quedó sin saldo, lo avisa una vez y lo recuerda (el informe semanal necesita Grok)."""
+        g = self.estado.datos["grok"]
+        if grok.USO.get("modo") == "gratis" and "saldo" in str(grok.USO.get("motivo") or ""):
+            if not g.get("sin_saldo"):
+                g["sin_saldo"] = True
+                self.avisar("grok_sin_saldo", "💳 Grok se quedó sin saldo. Desde ahora el bot busca los temas del día con la búsqueda gratis "
+                            "(Gemini + Google). Cambia: los virales pasan a ser temas calientes con un link que abre la búsqueda en X, "
+                            "y el informe semanal de estrategias se pausa. Si cargás saldo en xAI, vuelve solo a Grok.", cada_horas=72)
+        elif grok.USO.get("modo") == "grok":
+            g.pop("sin_saldo", None)
 
     def mandar_virales(self) -> int:
         c = self.cfg.get("grok") or {}
@@ -1130,8 +1149,12 @@ class Corrida:
         if not posts or not (self.token and self.chat_prueba):
             return 0
         e = lambda s: html.escape(s, quote=False)
-        partes = ["🔥 <b>Posts virales para responder hoy</b>",
-                  "Respondé desde tu celu con algo que aporte: un dato, tu experiencia o una pregunta. Lo ideal, en la primera hora.", ""]
+        if grok.USO.get("modo") == "gratis":
+            partes = ["🔥 <b>Temas calientes para opinar hoy</b>",
+                      "Tocá el nombre para abrir la búsqueda en X (ordenada por lo más visto), elegí un post y respondé desde tu celu con algo que aporte. Lo ideal, en la primera hora.", ""]
+        else:
+            partes = ["🔥 <b>Posts virales para responder hoy</b>",
+                      "Respondé desde tu celu con algo que aporte: un dato, tu experiencia o una pregunta. Lo ideal, en la primera hora.", ""]
         for i, p in enumerate(posts, start=1):
             partes.append(f'<b>{i}. <a href="{html.escape(p["url"], quote=True)}">{e(p["cuenta"] or "ver post")}</a></b>')
             if p["de_que_habla"]:
@@ -1884,7 +1907,9 @@ class Corrida:
             lineas = ["🧠 <b>De esto se habla hoy en X</b> (las preguntas del día van a salir sobre estos temas):", ""]
             lineas += [f"• <b>{html.escape(t['tema'], quote=False)}</b>: {html.escape(t['contexto'], quote=False)}" for t in temas]
             telegram_mensaje(self.token, self.chat_prueba, "\n".join(lineas), html=True)
-        return self.cerrar(1 + (1 if self.mandar_virales() else 0) + (1 if self.mandar_estrategias() else 0))
+        estrategias = (str((self.cfg.get("grok") or {}).get("modo") or "auto").lower() != "gratis" and grok.disponible_grok()
+                       and self.mandar_estrategias())
+        return self.cerrar(1 + (1 if self.mandar_virales() else 0) + (1 if estrategias else 0))
 
     def tal_vez_calendario(self) -> bool:
         """La agenda del día (a la mañana) y el aviso un rato antes de cada dato importante."""

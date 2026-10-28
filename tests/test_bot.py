@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import io
 import json
+import os
 from datetime import datetime, timedelta, timezone
 
 import pytest
@@ -69,6 +70,7 @@ def corrida(monkeypatch, tmp_path, red):
         c.cfg["ensenanza"]["activa"] = False          # las enseñanzas, solo en sus pruebas
         c.cfg["calendario"]["activa"] = False         # el calendario económico, solo en sus pruebas
         c.cfg["campana_video"]["activa"] = False      # la campaña del video, solo en sus pruebas
+        c.cfg["grok"]["activa"] = bool(os.environ.get("XAI_API_KEY"))   # la búsqueda de temas (Grok o gratis), solo en sus pruebas
         c.cfg["ritmo"]["horarios_noticias"] = []      # reparto parejo (los horarios fijos tienen su prueba)
         c.cfg["imagen"]["idea_para_chatgpt"] = True    # la función sigue existiendo (Eze la tiene apagada)
         c.cfg["x_charla"]["horarios"] = ["09:30", "14:00", "21:30"]
@@ -2219,3 +2221,30 @@ def test_textos_de_la_campana_cumplen_las_reglas(cfg):
         assert "plata" not in t.lower() and "garantiz" not in t.lower() and "ganancias aseguradas" not in t.lower()
         assert "://" not in v["texto_x"] and texto.peso_x(v["texto_x"]) <= 280
         assert (imagen.RAIZ / v["imagen"]).exists()
+
+
+def test_sin_saldo_en_grok_pasa_solo_a_la_busqueda_gratis(corrida, red, tmp_path, monkeypatch):
+    from bot import grok as mod_grok
+    _sin_la_fed(red)
+    monkeypatch.setenv("XAI_API_KEY", "clave-xai")
+    red.grok_sin_saldo = True                      # xAI contesta 402: sin saldo
+    c = corrida(imagen="ninguna", charla=True, ahora=_hora(13, 10))
+    c.cfg["grok"]["citar_impacto"] = 99
+    assert c.correr() == 0
+    memoria = _memoria(tmp_path)
+    assert memoria["grok"]["temas"][0]["tema"] == "dólar blue sube"          # los temas salieron de la búsqueda gratis
+    assert memoria["grok"].get("sin_saldo") is True
+    assert any("se quedó sin saldo" in m["text"] for m in _al_privado(red))   # y te avisó una vez
+    virales = [m["text"] for m in _al_privado(red) if "Temas calientes" in m["text"]]
+    assert len(virales) == 1 and "https://x.com/search?q=d%C3%B3lar+blue&amp;f=top" in virales[0].replace("&f=", "&amp;f=")
+    assert mod_grok.USO["modo"] == "gratis"
+
+
+def test_modo_gratis_no_llama_a_grok(corrida, red, tmp_path, monkeypatch):
+    _sin_la_fed(red)
+    monkeypatch.setenv("XAI_API_KEY", "clave-xai")
+    c = corrida(imagen="ninguna", ahora=_hora(13, 10))
+    c.cfg["grok"]["modo"] = "gratis"
+    assert c.correr() == 0
+    assert not [p for p in red.pedidos if "api.x.ai" in p.url and "/responses" in p.url]
+    assert _memoria(tmp_path)["grok"]["temas"][0]["tema"] == "dólar blue sube"

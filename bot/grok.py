@@ -13,6 +13,7 @@ from datetime import datetime, timedelta
 
 import requests
 
+from . import gratis
 from .ia import extraer_json
 from .util import log
 
@@ -26,8 +27,17 @@ class SinGrok(Exception):
     pass
 
 
-def disponible(entorno: dict | None = None) -> bool:
+def disponible_grok(entorno: dict | None = None) -> bool:
     return bool(((entorno or os.environ).get("XAI_API_KEY") or "").strip())
+
+
+def disponible(entorno: dict | None = None) -> bool:
+    """Hay con qué buscar: la llave de Grok o, si no, la búsqueda gratis (Gemini)."""
+    return disponible_grok(entorno) or bool(((entorno or os.environ).get("GEMINI_API_KEY") or "").strip())
+
+
+# Qué se usó en la última búsqueda ("grok" o "gratis") y por qué se pasó a la gratis.
+USO: dict = {"modo": "", "motivo": ""}
 
 
 def _texto_de(respuesta: dict) -> str:
@@ -77,7 +87,7 @@ def preguntar(cfg: dict, consigna: str, desde: datetime, max_turnos: int = 2) ->
     return datos
 
 
-def temas_del_dia(cfg: dict, momento: datetime) -> list[dict]:
+def _temas_grok(cfg: dict, momento: datetime) -> list[dict]:
     """Los temas de los que más se está hablando ahora en X (en español), dentro del nicho."""
     areas = str((cfg.get("grok") or {}).get("areas") or AREAS)
     consigna = (
@@ -100,7 +110,7 @@ def temas_del_dia(cfg: dict, momento: datetime) -> list[dict]:
     return temas[:8], ganchos
 
 
-def virales(cfg: dict, momento: datetime, cantidad: int = 5) -> list[dict]:
+def _virales_grok(cfg: dict, momento: datetime, cantidad: int = 5) -> list[dict]:
     """Posts que están explotando en el nicho, para que Eze les responda a mano."""
     areas = str((cfg.get("grok") or {}).get("areas") or AREAS)
     consigna = (
@@ -128,7 +138,7 @@ def guardar_json(datos) -> str:
     return json.dumps(datos, ensure_ascii=False)
 
 
-def para_citar(cfg: dict, momento: datetime, titular: str, resumen: str) -> dict | None:
+def _citar_grok(cfg: dict, momento: datetime, titular: str, resumen: str) -> dict | None:
     """El post de X más importante sobre una noticia grande (de un medio o una cuenta conocida), para que
     Eze lo cite con su opinión."""
     consigna = (
@@ -146,7 +156,7 @@ def para_citar(cfg: dict, momento: datetime, titular: str, resumen: str) -> dict
     return {"url": url, "cuenta": str(datos.get("cuenta") or "").strip()[:60], "cita": str(datos.get("cita") or "").strip()[:300]}
 
 
-def inspiracion(cfg: dict, momento: datetime, cantidad: int = 2) -> list[dict]:
+def _inspiracion_grok(cfg: dict, momento: datetime, cantidad: int = 2) -> list[dict]:
     """Posts que se hicieron virales por su FORMATO (no por quién los escribió), con un borrador propio
     de Eze que toma la idea y la estructura, pero con su tema y su voz: nunca una copia."""
     areas = str((cfg.get("grok") or {}).get("areas") or AREAS)
@@ -193,3 +203,41 @@ def estrategias(cfg: dict, momento: datetime) -> dict:
         "\"pedido\": \"el mensaje que Ezequiel le tiene que mandar al bot para que lo publique, empezando con 'post:' o 'hilo:' y el tema, ej. 'hilo: resultados de mi bot esta semana' (vacío si no hace falta material)\"}]}"
     )
     return preguntar(cfg, consigna, momento - timedelta(days=7), max_turnos=3)
+
+
+# ------------------------------------------------------------------ Grok primero, y si no hay, la búsqueda gratis
+def _con_respaldo(cfg: dict, con_grok, gratis_fn):
+    """modo 'auto' (por defecto): Grok mientras tenga saldo; cuando falla o se queda sin saldo, la búsqueda gratis.
+    modo 'gratis': nunca usa Grok (no gasta nada)."""
+    modo = str((cfg.get("grok") or {}).get("modo") or "auto").strip().lower()
+    USO["motivo"] = ""
+    if modo != "gratis" and disponible_grok():
+        try:
+            resultado = con_grok()
+            USO["modo"] = "grok"
+            return resultado
+        except SinGrok as error:
+            USO["motivo"] = str(error)
+            log.warning("Grok no pudo (%s): pruebo con la búsqueda gratis.", error)
+    try:
+        resultado = gratis_fn()
+    except gratis.SinBusqueda as error:
+        raise SinGrok(f"{USO['motivo'] + ' y ' if USO['motivo'] else ''}la búsqueda gratis tampoco funcionó ({error})")
+    USO["modo"] = "gratis"
+    return resultado
+
+
+def temas_del_dia(cfg: dict, momento: datetime):
+    return _con_respaldo(cfg, lambda: _temas_grok(cfg, momento), lambda: gratis.temas_del_dia_limpio(cfg))
+
+
+def virales(cfg: dict, momento: datetime, cantidad: int = 5) -> list[dict]:
+    return _con_respaldo(cfg, lambda: _virales_grok(cfg, momento, cantidad), lambda: gratis.virales(cfg, cantidad))
+
+
+def inspiracion(cfg: dict, momento: datetime, cantidad: int = 2) -> list[dict]:
+    return _con_respaldo(cfg, lambda: _inspiracion_grok(cfg, momento, cantidad), lambda: gratis.inspiracion(cfg, cantidad))
+
+
+def para_citar(cfg: dict, momento: datetime, titular: str, resumen: str) -> dict | None:
+    return _con_respaldo(cfg, lambda: _citar_grok(cfg, momento, titular, resumen), lambda: gratis.para_citar(cfg, titular, resumen))

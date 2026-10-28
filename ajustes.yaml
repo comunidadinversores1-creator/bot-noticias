@@ -94,6 +94,9 @@ avisos_etiquetar_por_dia: 6
 # ------------------------------------------------------------
 grok:
   activa: true
+  # modo: auto  = usa Grok mientras tenga saldo; cuando se acaba, pasa solo a la búsqueda gratis (Gemini + Google)
+  #       gratis = nunca usa Grok (no gasta nada): temas del día de Google y links de búsqueda en X
+  modo: auto
   modelo: "grok-4.7"
   temas_horas: ["08:00"]           # 1 vez por día (cada búsqueda en X se cobra por los posts que lee)
   virales_hora: "10:00"

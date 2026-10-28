@@ -95,6 +95,21 @@ class InternetFalso:
             ]),
         }
 
+    def _busqueda_gratis(self, pedido):
+        """Gemini con la búsqueda de Google (el respaldo gratis de Grok)."""
+        self.busquedas_gratis = getattr(self, "busquedas_gratis", 0) + 1
+        consigna = json.loads(self._cuerpo(pedido))["contents"][0]["parts"][0]["text"]
+        if "los 6 temas" in consigna:
+            contenido = {"temas": [{"tema": "dólar blue sube", "contexto": "El dólar blue subió $20 en el día.", "hashtag": "Dólar", "cuentas": []}]}
+        elif "ORIGINALES" in consigna:
+            contenido = {"posts": [{"formato": "dilema", "borrador": "imaginá un trader que gana 10 operaciones seguidas\n\n¿sube el lote o lo deja igual?"}]}
+        elif "acaba de salir" in consigna:
+            contenido = {"cita": "ojo con el dólar esta semana"}
+        else:
+            contenido = {"posts": [{"busqueda": "dólar blue", "de_que_habla": "El dólar blue subió.", "idea": "yo miro primero el stop loss"}]}
+        texto = json.dumps(contenido, ensure_ascii=False)
+        return self._r(pedido, 200, {"candidates": [{"content": {"parts": [{"text": texto}]}}]})
+
     # ------------------------------------------------------------ enrutador
     def enviar(self, pedido: requests.PreparedRequest, **_) -> requests.Response:
         self.pedidos.append(pedido)
@@ -106,10 +121,14 @@ class InternetFalso:
             return self._x(pedido, u)
         if host == "generativelanguage.googleapis.com" and u.path.endswith("/interactions"):
             return self._imagen_ia(pedido)
+        if host == "generativelanguage.googleapis.com" and ":generateContent" in u.path:
+            return self._busqueda_gratis(pedido)
         if host in ("generativelanguage.googleapis.com", "api.groq.com", "api.openai.com", "api.anthropic.com"):
             return self._ia(pedido, host)
         if host.endswith("wikipedia.org") or host == "commons.wikimedia.org":
             return self._wiki(pedido, u, host)
+        if host == "api.x.ai" and getattr(self, "grok_sin_saldo", False):
+            return self._r(pedido, 402, {"error": "no credits"})
         if host == "api.x.ai":
             cuerpo = json.loads(self._cuerpo(pedido))
             consigna = cuerpo["input"][0]["content"]
