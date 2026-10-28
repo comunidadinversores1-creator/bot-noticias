@@ -165,11 +165,11 @@ def html_carrusel(portada: bytes, tema: str, usuario: str) -> str:
     {_firma(usuario)}</div></section>''')
 
 
-def html_promo(imagen: bytes, titulo: str, usuario: str) -> str:
+def html_promo(imagen: bytes, titulo: str, usuario: str, cta: str = "El link está en mi perfil ↑") -> str:
     return _pagina(f'''<section class="h"><div class="c">
       <h1 style="font-size:92px">{e(titulo)}</h1>
       <div class="marco" style="width:720px"><img src="{_datos(imagen)}"></div>
-      <div class="cta">El link está en mi perfil ↑</div>
+      <div class="cta">{e(cta)}</div>
     {_firma(usuario)}</div></section>''')
 
 

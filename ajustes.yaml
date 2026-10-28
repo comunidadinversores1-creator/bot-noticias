@@ -297,6 +297,107 @@ enlace_general: "https://linktr.ee/comunidadinversores"
 #  Los porcentajes solo se aceptan si son un dato del producto que figure acá
 #  (un reintegro, un descuento). Nunca como rendimiento o ganancia.
 # ------------------------------------------------------------
+# =====================================================================================================
+#  CAMPAÑA DEL VIDEO "Reversión Z" (YouTube). Sale una vez cada 2 días, rotando las 3 miniaturas y sus
+#  textos: Telegram (canal y tema Noticias Financieras), X, y historias de @ezebagnato y @comunidad_inversores_ok.
+#  Desde la primera corrida. Termina sola el 26/11 (a los 30 días de la prueba, cuando "todavía no hay
+#  resultados finales" deja de ser cierto). Para frenarla antes: activa: false.
+# =====================================================================================================
+campana_video:
+  activa: true
+  id: video-reversion-z
+  cada_dias: 2
+  desde: "11:30"                  # no sale antes de esta hora (hora Argentina); el bot corre cerca de :35 de cada hora
+  vence: "2026-11-26"
+  variantes:
+    - imagen: assets/promos/reversion-z-1.jpg
+      titulo_historia: "Un bot opera solo con USD 100 reales"
+      texto: |
+        🤖 UN BOT OPERANDO SOLO EN UNA CUENTA REAL CON USD 100
+
+        Ya está el video donde instalo y activo GRATIS el bot Reversión Z en MetaTrader 5 con Exness, paso a paso y desde cero.
+
+        En el video vas a ver:
+        ✅ Cómo funciona y qué pares opera
+        ✅ Cómo configurar tu cuenta
+        ✅ Cómo activar la licencia gratuita
+
+        🧪 La prueba real de 30 días con USD 100 ya está corriendo. Todavía no hay resultados finales: los voy a compartir con total transparencia, salgan como salgan. Sin promesas de rentabilidad y sin humo.
+
+        ▶️ Mirá el tutorial completo acá:
+        https://youtu.be/icTdEFD-d6c
+
+        ¿Todavía no tenés cuenta en Exness? [Abrila con mi link](https://one.exnessonelink.com/a/ptf6lzlrc8)
+
+        Operar con apalancamiento implica riesgo de perder tu capital.
+      texto_x: |
+        🤖 Un bot operando solo en una cuenta real con USD 100.
+
+        Ya está el video: cómo instalar y activar gratis el bot Reversión Z en MetaTrader 5 con Exness, paso a paso.
+
+        La prueba de 30 días ya está corriendo. Sin promesas de rentabilidad y sin humo.
+
+        ▶️ El video está en mi perfil
+    - imagen: assets/promos/reversion-z-2.jpg
+      titulo_historia: "USD 100 en real: ¿qué hace el bot?"
+      texto: |
+        💵 ¿QUÉ PASA SI PONÉS UN BOT A OPERAR CON USD 100 EN UNA CUENTA REAL?
+
+        Lo vamos a saber en 30 días, y lo vas a poder seguir desde el día 1. Ya arrancó la prueba y el video donde te muestro cómo instalar y activar gratis el bot Reversión Z en MetaTrader 5 con Exness ya está en YouTube.
+
+        📌 Qué vas a aprender:
+        ✅ Cómo funciona el bot y qué pares opera
+        ✅ Cómo configurar tu cuenta paso a paso
+        ✅ Cómo activar la licencia gratuita
+
+        No hay resultados finales todavía. Los vamos a evaluar y compartir con transparencia, sin promesas de rentabilidad y sin humo.
+
+        ▶️ Mirá el video completo acá:
+        https://youtu.be/icTdEFD-d6c
+
+        ¿No tenés cuenta en Exness? [Registrate con mi link](https://one.exnessonelink.com/a/ptf6lzlrc8)
+
+        Operar con apalancamiento implica riesgo de perder tu capital.
+
+        💬 ¿Te animarías a probar un bot con USD 100 o preferís operar manualmente?
+      texto_x: |
+        💵 ¿Qué pasa si ponés un bot a operar con USD 100 en una cuenta real?
+
+        Lo vamos a ver en 30 días. Sin resultados finales todavía y sin promesas de rentabilidad.
+
+        ▶️ El video está en mi perfil
+
+        ¿Te animarías o preferís operar manualmente?
+    - imagen: assets/promos/reversion-z-3.jpg
+      titulo_historia: "Bot gratis para MetaTrader 5"
+      texto: |
+        🎁 BOT GRATIS PARA METATRADER 5: ya podés instalarlo y activarlo vos
+
+        Salió el video con el paso a paso del bot Reversión Z en MetaTrader 5 con Exness. Lo instalás, configurás tu cuenta y activás la licencia gratuita siguiendo el tutorial, aunque nunca hayas usado un bot.
+
+        En el video:
+        ✅ Cómo funciona y qué pares opera
+        ✅ Cómo configurar tu cuenta
+        ✅ Cómo activar la licencia gratuita
+        ✅ El arranque de la prueba real de 30 días con USD 100
+
+        Es una prueba, no una promesa: todavía no hay resultados finales y los comparto tal cual salgan. Sin promesas de rentabilidad y sin humo.
+
+        ▶️ Mirá el tutorial completo acá:
+        https://youtu.be/icTdEFD-d6c
+
+        ¿Todavía no tenés cuenta en Exness? [Abrila con mi link](https://one.exnessonelink.com/a/ptf6lzlrc8)
+
+        Operar con apalancamiento implica riesgo de perder tu capital.
+      texto_x: |
+        🎁 Bot gratis para MetaTrader 5: Reversión Z.
+
+        Salió el video con el paso a paso para instalarlo y activar la licencia gratuita con Exness, aunque nunca hayas usado un bot.
+
+        Es una prueba real de 30 días, sin promesas de rentabilidad y sin humo.
+
+        ▶️ El video está en mi perfil
+
 promos:
   # ===== Con TU texto (sale tal cual, la IA no lo toca) =====
   - id: senales-exness

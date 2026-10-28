@@ -68,6 +68,7 @@ def corrida(monkeypatch, tmp_path, red):
         c.cfg["hashtags"] = []                        # sin hashtags, salvo en su prueba
         c.cfg["ensenanza"]["activa"] = False          # las enseñanzas, solo en sus pruebas
         c.cfg["calendario"]["activa"] = False         # el calendario económico, solo en sus pruebas
+        c.cfg["campana_video"]["activa"] = False      # la campaña del video, solo en sus pruebas
         c.cfg["ritmo"]["horarios_noticias"] = []      # reparto parejo (los horarios fijos tienen su prueba)
         c.cfg["imagen"]["idea_para_chatgpt"] = True    # la función sigue existiendo (Eze la tiene apagada)
         c.cfg["x_charla"]["horarios"] = ["09:30", "14:00", "21:30"]
@@ -2177,3 +2178,44 @@ def test_carrusel_se_prepara_el_dia_anterior_y_se_puede_cancelar(corrida, red, t
     c.cfg["instagram"] = {"carruseles": True, "dias_carrusel": [0], "hora_carrusel": "18:00", "hora_preparar": "12:00"}
     assert c.correr() == 0
     assert _memoria(tmp_path)["ig"]["preparados"]["2026-10-26"]["cancelado"] is True
+
+
+def test_campana_del_video_sale_cada_dos_dias_rotando_la_miniatura(corrida, red, tmp_path):
+    _sin_la_fed(red)
+
+    def campana(ahora):
+        c = corrida(imagen="ninguna", ahora=ahora)
+        c.cfg["campana_video"]["activa"] = True
+        c.cfg["promos"] = []
+        c.cfg["instagram"] = {"historias": {"activa": False}}
+        assert c.correr() == 0
+        return [p for p in _memoria(tmp_path)["publicadas"] if p.get("promo_id") == "video-reversion-z"]
+
+    dia1 = datetime(2026, 10, 28, 16, 10, tzinfo=timezone.utc)                  # 13:10 en Argentina
+    salidas = campana(dia1)
+    assert len(salidas) == 1 and salidas[0]["foto"] == "assets/promos/reversion-z-1.jpg"
+    pie = red.telegram_fotos[0].get("caption") or _al_canal(red)[0]["text"]
+    assert "icTdEFD-d6c" in pie and "plata" not in pie.lower()
+    assert len(campana(dia1 + timedelta(hours=3))) == 1                         # el mismo día no se repite
+    assert len(campana(dia1 + timedelta(days=1))) == 1                          # ni al día siguiente
+    salidas = campana(dia1 + timedelta(days=2))                                 # a los 2 días, la siguiente miniatura
+    assert [p["foto"] for p in salidas] == ["assets/promos/reversion-z-1.jpg", "assets/promos/reversion-z-2.jpg"]
+    assert len(campana(dia1 + timedelta(days=30))) == 2                         # vencida (26/11): no sale más
+
+
+def test_campana_del_video_no_sale_de_madrugada(corrida, red, tmp_path):
+    _sin_la_fed(red)
+    c = corrida(imagen="ninguna", ahora=datetime(2026, 10, 28, 12, 10, tzinfo=timezone.utc))   # 9:10 en Argentina
+    c.cfg["campana_video"]["activa"] = True
+    c.cfg["promos"] = []
+    c.correr()
+    assert not [p for p in _memoria(tmp_path)["publicadas"] if p.get("promo_id") == "video-reversion-z"]
+
+
+def test_textos_de_la_campana_cumplen_las_reglas(cfg):
+    for v in cfg["campana_video"]["variantes"]:
+        t = v["texto"]
+        assert "icTdEFD-d6c" in t and "one.exnessonelink.com/a/ptf6lzlrc8" in t and "riesgo de perder" in t
+        assert "plata" not in t.lower() and "garantiz" not in t.lower() and "ganancias aseguradas" not in t.lower()
+        assert "://" not in v["texto_x"] and texto.peso_x(v["texto_x"]) <= 280
+        assert (imagen.RAIZ / v["imagen"]).exists()

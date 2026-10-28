@@ -505,6 +505,70 @@ class Corrida:
             self.estado.marcar_promo(str(promo.get("id")), self.ahora)
         return resultado
 
+    def tal_vez_campana_video(self) -> bool:
+        """Campaña del video: una vez cada N días sale en Telegram (canal y tema), en X y en las historias de las
+        dos cuentas de Instagram, rotando miniatura y texto. Devuelve True si publicó algo en esta corrida."""
+        c = self.cfg.get("campana_video") or {}
+        variantes = [v for v in (c.get("variantes") or []) if str(v.get("texto") or "").strip()]
+        if not (self.real and verdadero(c.get("activa")) and variantes) or en_silencio(self.cfg, self.ahora):
+            return False
+        if self.promo_vencida(c):
+            return False
+        local = self.ahora.astimezone(zona(self.cfg))
+        desde = a_hora(c.get("desde") or "11:30")
+        mem = self.estado.datos.setdefault("campanas", {}).setdefault(str(c.get("id") or "video"), {})
+        if mem.get("ultima"):
+            dias = (local.date() - datetime.fromisoformat(mem["ultima"]).astimezone(zona(self.cfg)).date()).days
+            if dias < int(c.get("cada_dias", 2)):
+                return False
+        if (desde and local.time() < desde) and not self.forzar:
+            return False
+        ultima_promo = self.estado.ultima_fecha("promo")
+        if ultima_promo is not None and (self.ahora - ultima_promo).total_seconds() < 3600:
+            return False                                 # nunca pegada a otra promo
+        vuelta = int(mem.get("vuelta", 0))
+        v = variantes[vuelta % len(variantes)]
+        promo = {"id": str(c.get("id") or "video"), "nombre": "Campaña: " + str(v.get("titulo_historia") or ""),
+                 "imagen": v.get("imagen") or "", "texto_x": v.get("texto_x") or ""}
+        resultado = self.promo_con_texto_propio(promo, str(v["texto"]).strip(), 90 + vuelta % 3)
+        if resultado != "ok":
+            return False
+        mem["ultima"], mem["vuelta"] = self.ahora.isoformat(), vuelta + 1
+        self.estado.guardar()
+        # Historias: la misma miniatura en las dos cuentas (cada una respeta su tope diario).
+        ruta = RAIZ / str(v.get("imagen") or "")
+        if self.historias_activas() and ruta.exists():
+            titulo = str(v.get("titulo_historia") or "")
+            foto = ruta.read_bytes()
+            try:
+                self.subir_historia("ezebagnato", historias.html_promo(foto, titulo, "@ezebagnato"), "campana")
+                self.subir_historia("comunidad", historias.html_promo(foto, titulo, "@comunidad_inversores_ok",
+                                                                      "Video en el perfil de @ezebagnato ↑"), "campana")
+            except Exception as error:               # las historias son un extra: no deshacen lo ya publicado
+                log.warning("historias (campaña): %s", error)
+        return True
+
+    def muestra_campana(self) -> bool:
+        """Prueba: manda a tu chat privado cómo saldría cada variante de la campaña (Telegram, X e historias)."""
+        c = self.cfg.get("campana_video") or {}
+        variantes = [v for v in (c.get("variantes") or []) if str(v.get("texto") or "").strip()]
+        if not variantes:
+            return False
+        fotos = []
+        for n, v in enumerate(variantes, 1):
+            promo = {"id": str(c.get("id") or "video"), "nombre": "Campaña", "imagen": v.get("imagen") or "", "texto_x": v.get("texto_x") or ""}
+            if self.promo_con_texto_propio(promo, str(v["texto"]).strip(), 90 + n) != "ok":
+                return False
+            ruta = RAIZ / str(v.get("imagen") or "")
+            if ruta.exists():
+                fotos.append(historias.sacar_foto(historias.html_promo(ruta.read_bytes(), str(v.get("titulo_historia") or ""), "@ezebagnato")))
+        if fotos:
+            try:
+                telegram_album(self.token, self.chat_prueba, fotos, "📱 <b>Así saldrían las historias de la campaña</b> (no se publicó nada)")
+            except ErrorPublicacion as error:
+                log.warning("%s", error)
+        return True
+
     def promo_con_texto_propio(self, promo: dict, propio: str, numero: int) -> str:
         """Promo con el texto que escribió Eze: sale tal cual (la IA no lo toca), con su imagen si tiene."""
         ruta = str(promo.get("imagen") or "").strip()
@@ -576,6 +640,8 @@ class Corrida:
             self.tal_vez_historias()         # Instagram: agenda, avisos de datos y promos en historias de @ezebagnato
             self.ocupado = self.tal_vez_material()      # lo que vos pedís por privado sale primero
             if not self.ocupado:
+                self.ocupado = self.tal_vez_campana_video()
+            if not self.ocupado:
                 self.ocupado = self.tal_vez_calendario()
             if not self.ocupado:
                 self.ocupado = self.tal_vez_hilo()
@@ -613,6 +679,8 @@ class Corrida:
                         resultados.append(f"{prov['nombre']}/{modelo}: FALLA ({str(error)[:80]})")
             log.warning("Prueba de IA: %s", " | ".join(resultados))
             return self.cerrar(1)
+        if not self.real and self.promo_pedida.lower() == "campana":
+            return self.cerrar(1 if self.muestra_campana() else 0)
         if not self.real and self.promo_pedida.lower() == "historias":
             return self.cerrar(1 if self.muestra_historias() else 0)
         if not self.real and self.promo_pedida.lower() == "instagram":
