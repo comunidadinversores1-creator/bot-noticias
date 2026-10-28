@@ -963,7 +963,7 @@ instagram:
   # una promo cada 2 días (máximo 3 por día). @comunidad_inversores_ok: cada noticia que sale (máximo 6 por día).
   historias:
     activa: true
-    max_ezebagnato: 3
+    max_ezebagnato: 4             # agenda + avisos de datos + promo + el video de la campaña
     max_comunidad: 6
     agenda_hora: "07:45"
     promo_hora: "20:00"
