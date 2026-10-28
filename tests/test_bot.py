@@ -70,6 +70,7 @@ def corrida(monkeypatch, tmp_path, red):
         c.cfg["ensenanza"]["activa"] = False          # las enseñanzas, solo en sus pruebas
         c.cfg["calendario"]["activa"] = False         # el calendario económico, solo en sus pruebas
         c.cfg["campana_video"]["activa"] = False      # la campaña del video, solo en sus pruebas
+        c.cfg["grok"]["modo"] = "auto"                 # las pruebas de Grok parten de "Grok primero" (en ajustes.yaml hoy está en "gratis")
         c.cfg["grok"]["activa"] = bool(os.environ.get("XAI_API_KEY"))   # la búsqueda de temas (Grok o gratis), solo en sus pruebas
         c.cfg["ritmo"]["horarios_noticias"] = []      # reparto parejo (los horarios fijos tienen su prueba)
         c.cfg["imagen"]["idea_para_chatgpt"] = True    # la función sigue existiendo (Eze la tiene apagada)
