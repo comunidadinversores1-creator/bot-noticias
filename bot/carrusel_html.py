@@ -117,8 +117,16 @@ def _cierre(palabra: str, con_guia: bool, i: int, total: int, usuario: str, pape
                   f'<div style="margin-top:40px; font-family:Anton; font-size:84px; color:{"#111" if papel else "#fff"}">COMENTÁ</div>'
                   f'<div class="palabra">{e(palabra)}</div><p>y te la mando por privado.</p>')
     else:
-        cuerpo = (f'<span class="tag">¿Te sirvió?</span><h2 style="font-size:104px">Guardalo para <span class="band">tenerlo a mano</span></h2>'
-                  f'<p style="font-size:44px"><b>Guardalo</b> para cuando lo necesites, <b>mandáselo</b> a alguien que le sirva y <b>seguime</b> para más contenido de trading, bots de IA y cripto, sin vender humo.</p>')
+        nombre = "Ezequiel Bagnato | Cripto & Trading" if "ezebagnato" in usuario else "Comunidad Inversores"
+        tarjeta = (f'<div style="margin-top:56px; background:#fff; border-radius:36px; padding:44px; color:#111">'
+                   f'<div style="display:flex; align-items:center; gap:32px"><img src="{_logo()}" style="width:150px; height:150px; border-radius:50%">'
+                   f'<div><div style="font-size:46px; font-weight:800; line-height:1.15">{e(nombre)}</div>'
+                   f'<div style="font-size:38px; color:#52525b; margin-top:6px">{e(usuario)}</div></div></div>'
+                   f'<div style="font-size:38px; color:#3f3f46; margin-top:30px; line-height:1.4">Cripto, trading e inversiones<br>Bots de trading y automatización</div>'
+                   f'<div style="margin-top:34px; background:#22c55e; color:#04130a; border-radius:20px; text-align:center; font-size:48px; font-weight:800; padding:26px 0">Seguir</div></div>')
+        cuerpo = (f'<span class="tag">No te pierdas nada</span>'
+                  f'<h2 style="font-size:100px"><span class="band">Seguime</span> y guardalo para tenerlo a mano</h2>'
+                  f'<p style="font-size:42px">Trading, bots de IA y cripto, sin vender humo.</p>{tarjeta}')
     return f'<section class="l{" papel" if papel else ""}"><div class="pad">{cuerpo}</div>{_pie(i, total, usuario)}</section>'
 
 
