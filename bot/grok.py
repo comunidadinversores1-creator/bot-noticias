@@ -228,15 +228,15 @@ def _con_respaldo(cfg: dict, con_grok, gratis_fn):
 
 
 def temas_del_dia(cfg: dict, momento: datetime):
-    return _con_respaldo(cfg, lambda: _temas_grok(cfg, momento), lambda: gratis.temas_del_dia_limpio(cfg))
+    return _con_respaldo(cfg, lambda: _temas_grok(cfg, momento), lambda: gratis.temas_del_dia_limpio(cfg, momento))
 
 
 def virales(cfg: dict, momento: datetime, cantidad: int = 5) -> list[dict]:
-    return _con_respaldo(cfg, lambda: _virales_grok(cfg, momento, cantidad), lambda: gratis.virales(cfg, cantidad))
+    return _con_respaldo(cfg, lambda: _virales_grok(cfg, momento, cantidad), lambda: gratis.virales(cfg, cantidad, momento))
 
 
 def inspiracion(cfg: dict, momento: datetime, cantidad: int = 2) -> list[dict]:
-    return _con_respaldo(cfg, lambda: _inspiracion_grok(cfg, momento, cantidad), lambda: gratis.inspiracion(cfg, cantidad))
+    return _con_respaldo(cfg, lambda: _inspiracion_grok(cfg, momento, cantidad), lambda: gratis.inspiracion(cfg, cantidad, momento))
 
 
 def para_citar(cfg: dict, momento: datetime, titular: str, resumen: str) -> dict | None:

@@ -1134,7 +1134,7 @@ class Corrida:
             if not g.get("sin_saldo"):
                 g["sin_saldo"] = True
                 self.avisar("grok_sin_saldo", "💳 Grok se quedó sin saldo. Desde ahora el bot busca los temas del día con la búsqueda gratis "
-                            "(Gemini + Google). Cambia: los virales pasan a ser temas calientes con un link que abre la búsqueda en X, "
+                            "(titulares de tus fuentes, tendencias de Google y Gemini). Cambia: los virales pasan a ser temas calientes con un link que abre la búsqueda en X, "
                             "y el informe semanal de estrategias se pausa. Si cargás saldo en xAI, vuelve solo a Grok.", cada_horas=72)
         elif grok.USO.get("modo") == "grok":
             g.pop("sin_saldo", None)
