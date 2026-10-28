@@ -166,7 +166,7 @@ def _inspiracion_grok(cfg: dict, momento: datetime, cantidad: int = 2) -> list[d
         "que el éxito venga del formato y no de la fama de la cuenta. Nada de estafas, sorteos ni promesas de ganancias. "
         "Para cada uno escribí un borrador ORIGINAL para la cuenta de Ezequiel Bagnato (trader, bots de trading, IA, cripto): "
         "que use la misma estructura que lo hizo viral pero con otro tema o ángulo propio, sin copiar frases. Reglas del borrador: "
-        "español rioplatense, en minúscula, como habla una persona real, frases naturales, párrafos de 2 o 3 renglones con renglón en blanco solo entre párrafos, sin emojis ni hashtags ni links, "
+        "español rioplatense, en minúscula, como habla una persona real, frases naturales, párrafos de 2 o 3 renglones con renglón en blanco solo entre párrafos, emojis solo para ordenar (📌, 1️⃣ 2️⃣ 3️⃣, ✅ ❌, 👇 en el cierre), números siempre con dígitos, sin hashtags ni links, "
         "decir 'dinero' y nunca 'plata', no prometer ganancias, no contar casos inventados como reales (nada de 'conocí a un pibe'). "
         "Respondé SOLO con JSON: {\"posts\": [{\"url\": \"https://x.com/...\", \"cuenta\": \"@usuario\", "
         "\"por_que_funciono\": \"1 oración sobre el formato\", \"borrador\": \"el post para Ezequiel\"}]}"
