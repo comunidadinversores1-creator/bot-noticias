@@ -46,7 +46,7 @@ def buscar(cfg: dict, consigna: str, con_busqueda: bool = True) -> dict:
     clave = (os.environ.get("GEMINI_API_KEY") or "").strip()
     if not clave:
         raise SinBusqueda("falta GEMINI_API_KEY")
-    modelos = list(((cfg.get("ia") or {}).get("modelos") or {}).get("gemini") or []) + ["gemini-2.5-flash"]
+    modelos = list((cfg.get("grok") or {}).get("modelos_gratis") or []) + list(((cfg.get("ia") or {}).get("modelos") or {}).get("gemini") or [])
     cuerpo = {"contents": [{"role": "user", "parts": [{"text": consigna}]}], "generationConfig": {"temperature": 0.4}}
     if con_busqueda:
         cuerpo["tools"] = [{"google_search": {}}]
@@ -70,7 +70,7 @@ def buscar(cfg: dict, consigna: str, con_busqueda: bool = True) -> dict:
                 ultimo = f"{modelo}: no devolvió el formato pedido"
                 break
             ultimo = f"{modelo}: error {r.status_code}"
-            log.warning("Búsqueda gratis, %s respondió %s: %s", modelo, r.status_code, r.text[:300].replace("\n", " "))
+            log.warning("Búsqueda gratis, %s respondió %s: %s", modelo, r.status_code, r.text[:1500].replace("\n", " "))
             if r.status_code in (500, 502, 503, 504):
                 time.sleep(3 if intento == 0 else 6)
                 continue
