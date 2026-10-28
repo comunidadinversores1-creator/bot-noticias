@@ -309,6 +309,9 @@ campana_video:
   cada_dias: 2
   desde: "11:30"                  # no sale antes de esta hora (hora Argentina); el bot corre cerca de :35 de cada hora
   vence: "2026-11-26"
+  ctas_historia:                  # el cartel de las historias (en @ezebagnato y en @comunidad_inversores_ok): rota entre estos
+    - "Link en el perfil ↑"
+    - "Video completo en YouTube · link en el perfil ↑"
   variantes:
     - imagen: assets/promos/reversion-z-1.jpg
       titulo_historia: "Un bot opera solo con USD 100 reales"

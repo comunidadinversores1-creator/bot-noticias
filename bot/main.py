@@ -540,10 +540,12 @@ class Corrida:
         if self.historias_activas() and ruta.exists():
             titulo = str(v.get("titulo_historia") or "")
             foto = ruta.read_bytes()
+            # El cartel de abajo rota: "link en el perfil" y "video completo en YouTube" (siempre con el link en el perfil).
+            ctas = [str(x) for x in (c.get("ctas_historia") or []) if str(x).strip()] or ["Link en el perfil ↑"]
+            cta = ctas[vuelta % len(ctas)]
             try:
-                self.subir_historia("ezebagnato", historias.html_promo(foto, titulo, "@ezebagnato"), "campana")
-                self.subir_historia("comunidad", historias.html_promo(foto, titulo, "@comunidad_inversores_ok",
-                                                                      "Video en el perfil de @ezebagnato ↑"), "campana")
+                self.subir_historia("ezebagnato", historias.html_promo(foto, titulo, "@ezebagnato", cta), "campana")
+                self.subir_historia("comunidad", historias.html_promo(foto, titulo, "@comunidad_inversores_ok", cta), "campana")
             except Exception as error:               # las historias son un extra: no deshacen lo ya publicado
                 log.warning("historias (campaña): %s", error)
         return True
