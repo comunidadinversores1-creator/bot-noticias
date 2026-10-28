@@ -128,7 +128,7 @@ calendario:
   activa: true
   agenda_hora: "07:30"
   impacto: ["High"]
-  paises: ["USD", "EUR", "AUD", "CAD", "CNY"]     # EE.UU., zona euro, Australia, Canadá y China (AUD y CAD: los pares del bot de señales)
+  paises: ["USD", "EUR", "CNY"]     # solo EE.UU., zona euro y China (lo pidió Eze: Canadá y Australia no le importan a nadie)
   aviso_desde_min: 10                             # el aviso sale entre 10 y 80 minutos antes del dato
   aviso_hasta_min: 80
 
