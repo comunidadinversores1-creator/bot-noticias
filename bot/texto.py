@@ -766,12 +766,35 @@ def x_largo(texto_html: str, cfg_x: dict, con_links: bool) -> str:
 _CUENTO_REAL = re.compile(r"(?i)\b(conoc[ií]|habl[eé] con|me cont[oó]|un amigo|una amiga|un alumno|una alumna|un seguidor|mi primo|mi vecino)\b")
 
 
+_NUMEROS_EN_LETRAS = re.compile(
+    r"(?<!\d )(?<!\d)\b(?:dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez|once|doce|trece|catorce|quince|veinte|treinta|cuarenta|cincuenta"
+    r"|sesenta|setenta|ochenta|noventa|cien|ciento|doscientos|trescientos|cuatrocientos|quinientos|seiscientos|setecientos|ochocientos|novecientos"
+    r"|mil|millon|millones)\b(?!\s+(?:usd|dolares|pesos))?"
+)
+
+
+def agrupar_parrafos(texto: str) -> str:
+    """Si cada frase quedó sola con un renglón en blanco alrededor (se lee robótico), las junta de a 2 por párrafo.
+    No toca listas, cuentas ni textos con pocas líneas."""
+    bloques = [b for b in texto.split("\n\n")]
+    if len(bloques) < 4 or any("\n" in b for b in bloques):
+        return texto
+    if any(re.match(r"\s*(?:\d+[.)/]|[-•✅❌📌]|\d\uFE0F?\u20E3)", b) or b.lstrip().startswith("#") for b in bloques):
+        return texto
+    unidos = ["\n".join(bloques[i:i + 2]) for i in range(0, len(bloques), 2)]
+    return "\n\n".join(unidos)
+
+
 def revisar_charla(crudo: dict, anteriores: list[str], limite: int = 280) -> tuple[str, list[str]]:
     """Limpia el texto de una charla y devuelve (texto, problemas). Sin problemas = se puede publicar."""
     texto = crudo.get("texto") if isinstance(crudo, dict) else ""
     texto = sin_links(str(texto or "")).strip().strip('"').strip()
     texto = re.sub(r"\n{3,}", "\n\n", texto)
+    texto = agrupar_parrafos(texto)
     problemas = []
+    palabras = _NUMEROS_EN_LETRAS.findall(_plano(texto))
+    if palabras:
+        problemas.append(f"números con letras ({', '.join(sorted(set(palabras)))}): tienen que ir con dígitos (3, 400, 1.000)")
     # Eze dice "dinero", nunca "plata" (no se reemplaza solo: "la plata" -> "la dinero" quedaría mal).
     if re.search(r"(?i)\bplata\b", texto):
         problemas.append('dice "plata": tiene que decir "dinero" (y concordar: "el dinero", "tu dinero lo...")')
