@@ -151,9 +151,6 @@ x_charla:
   # VENTA: preguntas que hacen pensar en el problema que resuelve un producto tuyo.
   # Abajo, la respuesta lleva al producto (X la marca como publicidad).
   ventas:
-    - producto: "las señales gratuitas del bot de trading de Ezequiel para EUR/AUD y AUD/CAD, en Exness"
-      datos: "El bot indica entrada, Stop Loss, Take Profit y cuándo pasar a Break Even. El canal es gratis para quien se registra en Exness con el link de Ezequiel. No garantiza resultados."
-      respuesta: "por eso armé un bot que me avisa la entrada, el stop loss y el take profit en EUR/AUD y AUD/CAD.\n\nlas señales son gratis si te registrás en Exness con mi link (está en mi perfil). operar con apalancamiento implica riesgo."
     - producto: "Exness Terminal: operar con un clic, stop loss y take profit desde el gráfico, hasta 8 gráficos y calendario económico"
       datos: "Exness Terminal tiene One-Click Trading, más de 100 indicadores, hasta 8 gráficos a la vez, SL y TP desde el gráfico y calendario económico integrado."
       respuesta: "yo opero desde Exness Terminal: un clic para entrar, stop loss y take profit desde el gráfico, y el calendario económico a la vista.\n\nsi querés probarlo, mi link está en el perfil. operar con apalancamiento implica riesgo."
@@ -255,7 +252,7 @@ socios:
     activo: true
     nombre: "Exness"
     alias: ["Exness"]
-    llamado: "Registrate en Exness con mi link y usá las señales de mi bot"
+    llamado: "Registrate en Exness con mi link"
     enlace: "https://one.exnessonelink.com/a/ptf6lzlrc8"
     aviso: "Operar con apalancamiento implica riesgo de perder tu capital."
   binance:
@@ -407,7 +404,7 @@ campana_video:
 promos:
   # ===== Con TU texto (sale tal cual, la IA no lo toca) =====
   - id: senales-exness
-    activa: true
+    activa: false                 # pausada: Eze pidió frenar las señales y promocionar el bot Reversión Z (29/10/2026)
     socio: exness
     nombre: "Bot de señales de Forex con Exness"
     imagen: assets/promos/senales-exness.jpg
@@ -483,7 +480,6 @@ promos:
 
       💰 Además, podés acceder al 20% de devolución en comisiones durante la promoción correspondiente.
 
-      🤖 Y con tu cuenta en Exness accedés a las señales de mi bot para EUR/AUD y AUD/CAD. Mirá cómo funciona en el video completo: https://youtu.be/WGP222nUgvA
 
       ⚠️ Operar con apalancamiento implica riesgo de perder tu capital.
     texto_x: |
@@ -495,7 +491,7 @@ promos:
       ⚠️ Operar con apalancamiento implica riesgo.
 
   - id: video-senales
-    activa: true
+    activa: false                 # pausada: Eze pidió frenar las señales (29/10/2026)
     nombre: "Video: probé más de 9.300 combinaciones de trading"
     imagen: assets/promos/video-senales.jpg
     titulo_historia: "Probé 9.300 combinaciones: solo 2 pares sirvieron"
