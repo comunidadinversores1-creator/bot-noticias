@@ -645,9 +645,9 @@ class Corrida:
                 salio = self.cerebro.disponible and self.publicar_charla(self.promo_pedida.lower())
                 self.estado.guardar()
                 return self.cerrar(1 if salio else 0)
-            if self.promo_pedida.lower() == "carrusel_noticia":
+            if self.promo_pedida.lower().startswith("carrusel_noticia"):
                 # A pedido (modo real): carrusel de la noticia fuerte más reciente, publicado ya.
-                salio = self.carrusel_de_noticia_pedido()
+                salio = self.carrusel_de_noticia_pedido(self.promo_pedida.partition(":")[2].strip().lower())
                 self.estado.guardar()
                 return self.cerrar(1 if salio else 0)
             if self.promo_pedida.lower() == "carrusel_semana":
@@ -1593,14 +1593,15 @@ class Corrida:
             log.warning("no pude mandar el aviso del carrusel de noticia: %s", error)
         return True
 
-    def carrusel_de_noticia_pedido(self) -> bool:
-        """Modo a pedido: el carrusel de la noticia de mayor impacto de las últimas 24 horas, ya."""
+    def carrusel_de_noticia_pedido(self, palabra: str = "") -> bool:
+        """Modo a pedido: el carrusel de la noticia de mayor impacto de las últimas 36 horas (o la que nombra la palabra), ya."""
         if not self.real:
             return False
         recientes = []
         for p in self.estado.datos["publicadas"]:
             try:
-                if p.get("tipo") == "noticia" and (self.ahora - datetime.fromisoformat(p["fecha"])).total_seconds() < 86400:
+                if (p.get("tipo") == "noticia" and (self.ahora - datetime.fromisoformat(p["fecha"])).total_seconds() < 129600
+                        and palabra in p.get("titular", "").lower()):
                     recientes.append(p)
             except (KeyError, ValueError):
                 continue
