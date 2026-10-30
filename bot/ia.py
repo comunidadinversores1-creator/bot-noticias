@@ -360,7 +360,7 @@ Respondé ÚNICAMENTE con JSON válido, sin texto extra:
 {
  "titular": "gancho de una línea, máx. 70 caracteres, sin emojis y sin punto final",
  "titular_imagen": "versión para la placa, máx. 44 caracteres, sin emojis",
- "texto": "2 o 3 oraciones, máx. 240 caracteres. Números siempre con dígitos. Si enumerás beneficios o pasos, usá 1️⃣ 2️⃣ 3️⃣; el cierre con el llamado a la acción en un renglón aparte que arranque con 👇",
+ "texto": "2 o 3 oraciones, máx. 240 caracteres. Números siempre con dígitos y con punto de miles (500.000, no 500000). Si enumerás beneficios o pasos, usá 1️⃣ 2️⃣ 3️⃣; el cierre con el llamado a la acción en un renglón aparte que arranque con 👇",
  "puntos": ["3 beneficios o características concretas, cada uno de máx. 36 caracteres, sin punto final"]
 }"""
 
@@ -531,7 +531,7 @@ def redactar_hilo(cerebro: Cerebro, noticias: list[dict], cantidad: int = 5, cor
 SISTEMA_MATERIAL = """Escribís para la cuenta de X de Ezequiel Bagnato (trader, bots de trading, IA, cripto). Eze te manda notas (y a veces una captura) y vos armás el post o el hilo con SUS datos.
 
 - Usá solo los hechos y números de sus notas: no inventes cifras ni resultados.
-- Emojis solo para ordenar (📌 subtítulos, 1️⃣ 2️⃣ 3️⃣ listas, ✅ ❌, 👇 para el cierre), nunca decorando. Números siempre con dígitos (3, 10, 1.000), nunca con letras.
+- Emojis solo para ordenar (📌 subtítulos, 1️⃣ 2️⃣ 3️⃣ listas, ✅ ❌, 👇 para el cierre), nunca decorando. Números siempre con dígitos y con punto de miles (3, 10, 1.000, 500.000), nunca con letras.
 - Español rioplatense con voseo, en minúscula, como habla una persona real (frases naturales, no telegráficas), párrafos de 2 o 3 renglones y renglón en blanco solo entre párrafos. Decí siempre "dinero", nunca "plata".
 - Si son resultados de un bot o de una operación, mostrá lo bueno y lo malo, sin prometer que se va a repetir ni decir que no hay riesgo.
 - Primera línea: un gancho que haga frenar el scroll (un número, una pregunta, una advertencia).

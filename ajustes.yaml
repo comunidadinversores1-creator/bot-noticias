@@ -71,7 +71,7 @@ hashtags:
   - {hashtag: "Fed",         si_dice: ["fed", "reserva federal", "powell", "fomc"], cuenta: "federalreserve"}
   - {hashtag: "BCRA",        si_dice: ["bcra", "banco central de la republica argentina"]}
   - {hashtag: "Inflación",   si_dice: ["inflacion", "ipc", "cpi"]}
-  - {hashtag: "Dólar",       si_dice: ["dolar", "dolares", "blue", "mep"]}
+  - {hashtag: "Dólar",       si_dice: ["dolar", "blue", "mep"]}
   - {hashtag: "RiesgoPaís",  si_dice: ["riesgo pais"]}
   - {hashtag: "Merval",      si_dice: ["merval", "acciones argentinas", "adr"]}
   - {hashtag: "Oro",         si_dice: ["oro", "gold"]}
