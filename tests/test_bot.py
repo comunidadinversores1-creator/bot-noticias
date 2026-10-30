@@ -2267,3 +2267,20 @@ def test_instagram_espera_si_el_contenedor_todavia_no_existe(monkeypatch):
     monkeypatch.setattr(instagram, "_pedir", lambda *a, **k: (_ for _ in ()).throw(instagram.ErrorInstagram("Instagram rechazó la llave")))
     with pytest.raises(instagram.ErrorInstagram):
         instagram._esperar("123", "token")                   # los demás errores siguen cortando
+
+
+def test_semana_top_no_repite_el_mismo_tema():
+    from datetime import datetime, timedelta, timezone
+    from bot import ig_noticias
+    ahora = datetime(2026, 11, 1, 20, tzinfo=timezone.utc)
+    pub = [{"tipo": "noticia", "fecha": (ahora - timedelta(days=i)).isoformat(), "impacto": 9, "categoria": "CRIPTO",
+            "titular": t} for i, t in enumerate(["Binance sufre un hackeo de USD 6.300 millones", "Binance halla nuevos puntos de vulnerabilidad",
+                                                 "La Fed mantiene las tasas sin cambios", "Bitcoin cae por debajo de USD 80.000"])]
+    top = ig_noticias.semana_top(pub, ahora - timedelta(days=7), ahora, 5)
+    assert [p["titular"].split()[0] for p in top].count("Binance") == 1 and len(top) == 3
+
+
+def test_los_disenos_de_carrusel_van_cambiando():
+    from bot import carrusel_html
+    nombres = [carrusel_html.elegir_diseno(n) for n in range(12)]
+    assert len(set(nombres)) == 12

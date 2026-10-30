@@ -546,3 +546,23 @@ def redactar_material(cerebro: Cerebro, tipo: str, notas: str, con_foto: bool, c
     if correccion:
         usuario += f"\n\nATENCIÓN: {correccion}"
     return cerebro.pedir_json(SISTEMA_MATERIAL, usuario, max_tokens=1500, temperatura=0.6)
+
+
+SISTEMA_RESUMEN_TITULOS = """Te paso el titular de una noticia financiera ya publicada y los titulares originales de los medios que la cubrieron.
+Armá los textos de un carrusel usando SOLO lo que dicen esos titulares: nada de datos, cifras, nombres ni fechas que no estén ahí.
+Los números siempre con dígitos y con punto de miles (6.300 millones). Español rioplatense, tono serio, sin consejos de inversión.
+Respondé SOLO con JSON:
+{"resumen": "2 oraciones completas, máx. 260 caracteres", "dato_clave": "el dato más importante, máx. 80 caracteres",
+ "por_que_importa": "una oración en potencial ('puede', 'suele'), sin cifras, máx. 150 caracteres", "pregunta": "pregunta corta con voseo para que opinen, máx. 70 caracteres (nunca sobre comprar o vender)",
+ "fuente": "el medio principal si figura, o \\"\\""}"""
+
+
+def resumen_de_titulos(cerebro, titular: str, titulos: list[str]) -> dict | None:
+    """Los textos de un carrusel armados solo con los titulares originales (para noticias viejas sin resumen guardado)."""
+    try:
+        datos = cerebro.pedir_json(SISTEMA_RESUMEN_TITULOS, f"TITULAR PUBLICADO: {titular}\n\nTITULARES ORIGINALES:\n- " + "\n- ".join(titulos), max_tokens=600, temperatura=0.2)
+    except Exception:
+        return None
+    if not isinstance(datos, dict) or not str(datos.get("resumen") or "").strip():
+        return None
+    return {k: str(datos.get(k) or "").strip() for k in ("resumen", "dato_clave", "por_que_importa", "pregunta", "fuente")}

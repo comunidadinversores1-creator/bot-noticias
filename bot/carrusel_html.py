@@ -100,8 +100,47 @@ def _fuentes() -> str:
     return _FUENTES_CSS[0]
 
 
+# Diseños para ir probando cuál rinde más: el color de acento y el fondo van cambiando de un carrusel a otro.
+# (nombre, color de acento, color del segundo acento, resplandor)
+COLORES = [
+    ("verde", "#22c55e", "#f7931a", "34,197,94"),
+    ("naranja", "#f7931a", "#22c55e", "247,147,26"),
+    ("celeste", "#38bdf8", "#f7931a", "56,189,248"),
+    ("amarillo", "#facc15", "#38bdf8", "250,204,21"),
+    ("violeta", "#a78bfa", "#facc15", "167,139,250"),
+    ("rojo", "#ef4444", "#facc15", "239,68,68"),
+]
+FONDOS = ["rejilla", "liso", "diagonal"]
+_ACTUAL = {"diseno": "verde·rejilla"}
+
+
+def elegir_diseno(n: int) -> str:
+    """Un diseño distinto cada vez (el color y el fondo avanzan a distinto ritmo, así no se repiten las parejas)."""
+    return f"{COLORES[n % len(COLORES)][0]}·{FONDOS[(n // len(COLORES) + n) % len(FONDOS)]}"
+
+
+def usar_diseno(nombre: str | None) -> str:
+    """Deja elegido el diseño para los carruseles que se armen a continuación. Devuelve el nombre."""
+    _ACTUAL["diseno"] = nombre or "verde·rejilla"
+    return _ACTUAL["diseno"]
+
+
+def _css_diseno() -> str:
+    color, _, fondo = _ACTUAL["diseno"].partition("·")
+    _, acento, segundo, brillo = next((c for c in COLORES if c[0] == color), COLORES[0])
+    css = [f":root {{ --verde:{acento}; --naranja:{segundo}; }}",
+           f".l::after {{ background: radial-gradient(900px 700px at 85% -10%, rgba({brillo},.18), transparent 60%), "
+           f"radial-gradient(800px 600px at -10% 110%, rgba(255,255,255,.05), transparent 60%) !important; }}",
+           f".palabra {{ box-shadow: 0 0 90px rgba({brillo},.35) !important; }}"]
+    if fondo == "liso":
+        css.append(".l::before { display: none !important; }")
+    elif fondo == "diagonal":
+        css.append(".l::before { background-image: repeating-linear-gradient(135deg, rgba(255,255,255,.04) 0 2px, transparent 2px 46px) !important; background-size: auto !important; }")
+    return "\n".join(css)
+
+
 def _pagina(cuerpo: str) -> str:
-    css = _fuentes() + CSS
+    css = _fuentes() + CSS + _css_diseno()
     return f'<!doctype html><html lang="es"><head><meta charset="utf-8"><style>{css}</style></head><body>{cuerpo}</body></html>'
 
 
@@ -158,7 +197,7 @@ def titular(laminas: list[dict], palabra: str, con_guia: bool, usuario: str = "@
         dato = (f'<div class="dato"><div class="dt">{e(l.get("dato_titulo") or "DATO")}</div><div class="dc">{resaltar(l["dato"], "verde")}</div></div>'
                 if l.get("dato") else "")
         cuerpo = (f'<span class="tag{" n" if i % 2 == 0 else ""}">{e(l.get("etiqueta") or f"Paso {i}")}</span>'
-                  f'<h2>{resaltar(l.get("titulo"))}</h2><p>{resaltar(l.get("texto"), "verde")}</p>{dato}')
+                  f'<h2>{resaltar(l.get("titulo"))}</h2><p{" style=\"font-size:58px; line-height:1.38\"" if l.get("grande") else ""}>{resaltar(l.get("texto"), "verde")}</p>{dato}')
         arriba, relleno = "", ""
         if l.get("_foto"):
             # Foto real arriba, que se funde con el fondo (como la lámina 2 del carrusel de Bitcoin).
@@ -167,6 +206,8 @@ def titular(laminas: list[dict], palabra: str, con_guia: bool, usuario: str = "@
                       f'<div style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(9,9,11,.1) 0%, rgba(9,9,11,.55) 55%, #09090b 100%)"></div>'
                       f'{credito_html(l.get("_credito"))}</div>')
             relleno = ' style="padding-top:400px"'
+        if l.get("grande") and not relleno:
+            relleno = ' style="justify-content:center; padding-bottom:230px"'
         secciones.append(f'<section class="l">{arriba}<div class="ghost">{i:02d}</div><div class="pad"{relleno}>{cuerpo}</div>{_pie(i, total, usuario)}</section>')
     secciones.append(_cierre(palabra, con_guia, total - 1, total, usuario))
     return _pagina("".join(secciones))

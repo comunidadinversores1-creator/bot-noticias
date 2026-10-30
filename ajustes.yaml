@@ -952,6 +952,15 @@ ia:
 # Días: 0 = lunes ... 6 = domingo.
 instagram:
   carruseles: true
+  carrusel_noticias:              # una noticia muy fuerte (ej. un hackeo enorme) sale también como carrusel en @ezebagnato
+    activa: true
+    impacto_minimo: 9
+    max_por_dia: 1
+  semanal:                        # el resumen de la semana, en @comunidad_inversores_ok
+    activa: true
+    dia: 6                        # 0 = lunes ... 6 = domingo
+    hora: "19:00"
+    cantidad: 5
   dias_carrusel: [0, 2, 4, 6]
   hora_carrusel: "18:00"
   # Guías que se mandan por DM a quien comenta la palabra del carrusel (la palabra va en mayúsculas).
@@ -965,8 +974,13 @@ instagram:
   # una promo cada 2 días (máximo 3 por día). @comunidad_inversores_ok: cada noticia que sale (máximo 6 por día).
   historias:
     activa: true
-    max_ezebagnato: 4             # agenda + avisos de datos + promo + el video de la campaña
-    max_comunidad: 6
+    max_ezebagnato: 8             # agenda + avisos de datos + promo + el video de la campaña + hasta 3 noticias
+    max_comunidad: 9              # agenda + avisos de datos + las noticias que salen (hasta 6)
+    agenda_comunidad: true        # la agenda económica y los avisos de datos también en @comunidad_inversores_ok
+    noticias_ezebagnato:          # solo las noticias más importantes en las historias de @ezebagnato
+      activa: true
+      impacto_minimo: 8
+      max_por_dia: 3
     agenda_hora: "07:45"
     promo_hora: "20:00"
     promo_cada_dias: 2

@@ -23,6 +23,8 @@ from PIL import Image
 from . import calendario as cal
 from . import grok
 from . import ig_plan
+from . import ig_noticias
+from . import carrusel_html
 from . import historias
 from . import instagram
 from . import ia
@@ -284,6 +286,10 @@ class Corrida:
             "fecha": self.ahora.isoformat(), "tipo": "noticia", "titular": post["titular"], "categoria": g.categoria,
             "impacto": g.impacto, "fuente": post["fuente"], "foto": foto.titulo if foto else "", "socio": g.socio,
             "llamado": bool(llamado), "titulos_originales": [m.titulo for m in g.miembros[:3]], "telegram": None, "x": None,
+            # Para armar después el carrusel de la noticia o el resumen de la semana.
+            "resumen": str(post.get("resumen") or "")[:330], "dato_clave": str(post.get("dato_clave") or "")[:110],
+            "por_que_importa": str(post.get("por_que_importa") or "")[:150], "pregunta": str(post.get("pregunta") or "")[:70],
+            "titular_imagen": str(post.get("titular_imagen") or "")[:58],
         }
         resultado = self.entregar(
             numero, jpg, para_telegram, para_x, registro,
@@ -296,6 +302,7 @@ class Corrida:
         if resultado == "ok" and self.real:
             self.mandar_cita(post, g)
             self.historia_de_noticia(g, post, foto, jpg)
+            self.carrusel_de_noticia(g, post, foto)
         return resultado
 
     def avisar_etiquetar(self, id_post: str, texto: str, cuentas: list[str]) -> None:
@@ -638,11 +645,21 @@ class Corrida:
                 salio = self.cerebro.disponible and self.publicar_charla(self.promo_pedida.lower())
                 self.estado.guardar()
                 return self.cerrar(1 if salio else 0)
+            if self.promo_pedida.lower() == "carrusel_noticia":
+                # A pedido (modo real): carrusel de la noticia fuerte más reciente, publicado ya.
+                salio = self.carrusel_de_noticia_pedido()
+                self.estado.guardar()
+                return self.cerrar(1 if salio else 0)
+            if self.promo_pedida.lower() == "carrusel_semana":
+                salio = self.tal_vez_carrusel_semanal(forzar=True)
+                self.estado.guardar()
+                return self.cerrar(1 if salio else 0)
             self.tal_vez_grok()              # no publica nada: busca temas del día y te manda los virales
             self.tal_vez_carrusel()          # Instagram: arma y publica el carrusel del día (y te avisa)
             self.tal_vez_numeros_ig()        # Instagram: lee cómo le fue a cada carrusel y los domingos te manda el ranking
             self.tal_vez_comentarios_ig()    # Instagram: a quien comenta la palabra le responde y le manda la guía por DM
             self.tal_vez_historias()         # Instagram: agenda, avisos de datos y promos en historias de @ezebagnato
+            self.tal_vez_carrusel_semanal()  # Instagram: los domingos, el resumen de la semana en @comunidad_inversores_ok
             self.ocupado = self.tal_vez_material()      # lo que vos pedís por privado sale primero
             if not self.ocupado:
                 self.ocupado = self.tal_vez_campana_video()
@@ -1433,6 +1450,7 @@ class Corrida:
                         fotos.append(Image.open(io.BytesIO(b)).convert("RGB"))
                     except OSError:
                         continue
+        diseno = str((prep or {}).get("diseno") or "verde·rejilla") if listas is not None else "verde·rejilla"
         if listas is not None:
             laminas = listas
         else:
@@ -1443,6 +1461,7 @@ class Corrida:
                 fotos_eze = []
                 for f in fotos:
                     b = io.BytesIO(); f.save(b, "JPEG", quality=90); fotos_eze.append(b.getvalue())
+                diseno = carrusel_html.usar_diseno(carrusel_html.elegir_diseno(len(g.get("historial") or []) + (1 if preparar_para else 0)))
                 try:
                     laminas = ig_plan.armar_html(contenido, estilo, con_guia, buscar=self.foto_para_carrusel,
                                                  fotos_eze=fotos_eze, tema=tema)
@@ -1468,7 +1487,7 @@ class Corrida:
                 g["preparados"].pop(preparar_para, None)
                 return False
             g["preparados"][preparar_para] = {"tipo": tipo, "estilo": estilo, "tema": tema, "urls": urls,
-                                             "texto_post": contenido["texto_post"], "palabra": contenido["palabra"]}
+                                             "texto_post": contenido["texto_post"], "palabra": contenido["palabra"], "diseno": diseno}
             # El tema queda reservado para que no se repita.
             g["temas_usados"] = ([*(g.get("temas_usados") or []), tema])[-80:]
             self.estado.guardar()
@@ -1503,7 +1522,7 @@ class Corrida:
             except Exception as error:            # la historia es un extra: nunca frena el carrusel
                 log.warning("historia del carrusel: %s", error)
         if media_id:
-            cabeza = (f"✅ <b>Publiqué el carrusel en @ezebagnato</b> · {html.escape(tema)}\n<i>Estilo {estilo} · {tipo}</i>\n\n"
+            cabeza = (f"✅ <b>Publiqué el carrusel en @ezebagnato</b> · {html.escape(tema)}\n<i>Estilo {estilo} · {tipo} · diseño {diseno}</i>\n\n"
                       "Respondé los comentarios en la primera hora: es lo que más lo empuja.")
         else:
             cabeza = (f"🖼 <b>Carrusel para Instagram</b> · {html.escape(tema)}\n<i>Estilo {estilo} · {tipo}</i>\n\n"
@@ -1520,9 +1539,117 @@ class Corrida:
             g["vuelta"] = int(g.get("vuelta", 0) or 0) + 1
             g["temas_usados"] = ([*(g.get("temas_usados") or []), tema])[-80:]
             g["historial"] = ([*(g.get("historial") or []), {"fecha": self.ahora.isoformat(), "tipo": tipo, "estilo": estilo,
-                                                              "tema": tema, "palabra": contenido["palabra"], "media_id": media_id}])[-200:]
+                                                              "tema": tema, "palabra": contenido["palabra"], "media_id": media_id, "diseno": diseno}])[-200:]
             self.estado.guardar()
         return True
+
+    # --------------------------------------------- carruseles de noticias
+    def _foto_para_noticia(self, foto):
+        """(foto jpg, logo png, crédito) de la imagen de una noticia, o (None, None, '')."""
+        if foto is None or getattr(foto, "imagen", None) is None:
+            return None, None, ""
+        b = io.BytesIO()
+        if foto.es_logo or foto.origen == "marca":
+            foto.imagen.convert("RGBA").save(b, "PNG")
+            return None, b.getvalue(), ""
+        foto.imagen.convert("RGB").save(b, "JPEG", quality=90)
+        return b.getvalue(), None, foto.credito()
+
+    def carrusel_de_noticia(self, g, post: dict, foto) -> bool:
+        """Una noticia muy fuerte (ej. un hackeo enorme) sale también como carrusel en @ezebagnato."""
+        c = (self.cfg.get("instagram") or {}).get("carrusel_noticias") or {}
+        if not (self.real and verdadero(c.get("activa")) and int(g.impacto or 0) >= int(c.get("impacto_minimo", 9))):
+            return False
+        return self._publicar_carrusel_noticia(post, bool(g.urgente), foto, int(c.get("max_por_dia", 1)))
+
+    def _publicar_carrusel_noticia(self, post: dict, urgente: bool, foto, tope: int) -> bool:
+        ig = self.estado.datos["ig"]
+        if not instagram.llave("ezebagnato", ig) or en_silencio(self.cfg, self.ahora):
+            return False
+        hoy = self.ahora.astimezone(zona(self.cfg)).date().isoformat()
+        mem = ig.setdefault("noticias_carrusel", {})
+        if mem.get("dia") != hoy:
+            mem["dia"], mem["hechos"] = hoy, 0
+        if int(mem.get("hechos", 0)) >= tope:
+            return False
+        try:
+            jpg, logo, credito = self._foto_para_noticia(foto)
+            laminas, texto = ig_noticias.carrusel_noticia(post, urgente, jpg, logo, credito)
+        except Exception as error:
+            log.warning("carrusel de noticia: %s", error)
+            return False
+        mem["hechos"] = int(mem.get("hechos", 0)) + 1
+        media_id = self.subir_a_instagram("ezebagnato", laminas, texto)
+        self.estado.guardar()
+        if not media_id:
+            return False
+        ig["historial"] = ([*(ig.get("historial") or []), {"fecha": self.ahora.isoformat(), "tipo": "noticia", "estilo": "titular",
+                                                            "tema": post.get("titular", ""), "palabra": "", "media_id": media_id,
+                                                            "diseno": "rojo·diagonal" if urgente else "naranja·liso"}])[-200:]
+        try:
+            telegram_album(self.token, self.chat_prueba, laminas,
+                           f"🚨 <b>Publiqué un carrusel de noticia en @ezebagnato</b>\n{html.escape(post.get('titular', ''))}")
+        except ErrorPublicacion as error:
+            log.warning("no pude mandar el aviso del carrusel de noticia: %s", error)
+        return True
+
+    def carrusel_de_noticia_pedido(self) -> bool:
+        """Modo a pedido: el carrusel de la noticia de mayor impacto de las últimas 24 horas, ya."""
+        if not self.real:
+            return False
+        recientes = []
+        for p in self.estado.datos["publicadas"]:
+            try:
+                if p.get("tipo") == "noticia" and (self.ahora - datetime.fromisoformat(p["fecha"])).total_seconds() < 86400:
+                    recientes.append(p)
+            except (KeyError, ValueError):
+                continue
+        if not recientes:
+            log.warning("carrusel a pedido: no hay noticias de las últimas 24 horas")
+            return False
+        elegida = max(recientes, key=lambda p: (int(p.get("impacto") or 0), p["fecha"]))
+        post = dict(elegida)
+        if not post.get("resumen"):
+            # Noticias publicadas antes de guardar el resumen: se arma solo con sus titulares originales.
+            datos = ia.resumen_de_titulos(self.cerebro, post.get("titular", ""), post.get("titulos_originales") or [])
+            if not datos:
+                log.warning("carrusel a pedido: la IA no pudo resumir los titulares")
+                return False
+            post.update(datos)
+        return self._publicar_carrusel_noticia(post, True, None, 99)
+
+    def tal_vez_carrusel_semanal(self, forzar: bool = False) -> bool:
+        """Los domingos: el resumen de la semana (las noticias más importantes) como carrusel en @comunidad_inversores_ok."""
+        c = (self.cfg.get("instagram") or {}).get("semanal") or {}
+        if not (self.real and verdadero(c.get("activa"))):
+            return False
+        ig = self.estado.datos["ig"]
+        if not instagram.llave("comunidad", ig):
+            return False
+        local = self.ahora.astimezone(zona(self.cfg))
+        semana = f"{local.isocalendar()[0]}-{local.isocalendar()[1]}"
+        hora = a_hora(c.get("hora") or "19:00")
+        if not forzar and (local.weekday() != int(c.get("dia", 6)) or (hora and local.time() < hora) or ig.get("semanal") == semana):
+            return False
+        top = ig_noticias.semana_top(self.estado.datos["publicadas"], self.ahora - timedelta(days=7), self.ahora, int(c.get("cantidad", 5)))
+        if len(top) < 3:
+            log.info("Resumen semanal: hay menos de 3 noticias, no se arma.")
+            return False
+        ig["semanal"] = semana
+        meses = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"]
+        try:
+            laminas, texto = ig_noticias.carrusel_semana(top, f"{local.day} de {meses[local.month - 1]}")
+        except Exception as error:
+            log.warning("resumen semanal: %s", error)
+            return False
+        media_id = self.subir_a_instagram("comunidad", laminas, texto)
+        self.estado.guardar()
+        if media_id:
+            try:
+                telegram_album(self.token, self.chat_prueba, laminas, "📰 <b>Publiqué el resumen de la semana en @comunidad_inversores_ok</b>")
+            except ErrorPublicacion as error:
+                log.warning("no pude mandar el aviso del resumen semanal: %s", error)
+        return bool(media_id)
 
     def foto_para_carrusel(self, consulta: str):
         """Foto real (Wikimedia) o logo oficial para una lámina: (jpg/png, es_logo, crédito) o None."""
@@ -1654,31 +1781,35 @@ class Corrida:
         hoy = local.date().isoformat()
         try:
             eventos = cal.leer(self.cfg, self.ahora) if verdadero((self.cfg.get("calendario") or {}).get("activa")) else []
-            # 1) Agenda del día
-            hora_agenda = a_hora(cfg_h.get("agenda_hora") or "07:45")
-            if mem.get("agenda") != hoy and hora_agenda and local.time() >= hora_agenda:
-                mem["agenda"] = hoy
-                de_hoy = [ev for ev in cal.de_hoy(eventos, self.cfg, self.ahora) if ev["fecha"] > self.ahora]
-                if de_hoy:
-                    filas = [{"hora": f"{ev['fecha']:%H:%M}", "pais": ev["pais"], "nombre": ev["nombre"],
-                              "prevision": ev["prevision"], "anterior": ev["anterior"]} for ev in de_hoy]
-                    meses = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"]
-                    dias = ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"]
-                    fecha = f"{dias[local.weekday()]} {local.day} de {meses[local.month - 1]}"
-                    self.subir_historia("ezebagnato", historias.html_agenda(filas, fecha, "@ezebagnato"), "agenda")
-                    return
-            # 2) Aviso antes de un dato fuerte
-            avisados = mem.setdefault("avisos", [])
-            proximos = [ev for ev in cal.proximos(eventos, self.ahora, 20, 75) if ev["clave"] not in avisados]
-            if proximos:
-                ev = proximos[0]
-                avisados.extend(x["clave"] for x in proximos)
-                mem["avisos"] = avisados[-50:]
-                minutos = round((ev["fecha"] - self.ahora).total_seconds() / 60 / 5) * 5
-                cuando = "EN 1 HORA" if minutos >= 55 else f"EN {minutos} MIN"
-                self.subir_historia("ezebagnato", historias.html_aviso(cuando, f"{ev['fecha']:%H:%M}", ev["pais"], ev["nombre"],
-                                                                       ev["prevision"], ev["anterior"], "@ezebagnato"), "aviso")
-                return
+            # La agenda y los avisos de datos salen en las dos cuentas (cada una con su propia anotación).
+            for cuenta, usuario, k_agenda, k_avisos in (("ezebagnato", "@ezebagnato", "agenda", "avisos"),
+                                                        ("comunidad", "@comunidad_inversores_ok", "agenda_comunidad", "avisos_comunidad")):
+                if cuenta == "comunidad" and not verdadero(cfg_h.get("agenda_comunidad", True)):
+                    continue
+                # 1) Agenda del día
+                hora_agenda = a_hora(cfg_h.get("agenda_hora") or "07:45")
+                if mem.get(k_agenda) != hoy and hora_agenda and local.time() >= hora_agenda:
+                    mem[k_agenda] = hoy
+                    de_hoy = [ev for ev in cal.de_hoy(eventos, self.cfg, self.ahora) if ev["fecha"] > self.ahora]
+                    if de_hoy:
+                        filas = [{"hora": f"{ev['fecha']:%H:%M}", "pais": ev["pais"], "nombre": ev["nombre"],
+                                  "prevision": ev["prevision"], "anterior": ev["anterior"]} for ev in de_hoy]
+                        meses = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"]
+                        dias = ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"]
+                        fecha = f"{dias[local.weekday()]} {local.day} de {meses[local.month - 1]}"
+                        self.subir_historia(cuenta, historias.html_agenda(filas, fecha, usuario), "agenda")
+                        continue
+                # 2) Aviso antes de un dato fuerte
+                avisados = mem.setdefault(k_avisos, [])
+                proximos = [ev for ev in cal.proximos(eventos, self.ahora, 20, 75) if ev["clave"] not in avisados]
+                if proximos:
+                    ev = proximos[0]
+                    avisados.extend(x["clave"] for x in proximos)
+                    mem[k_avisos] = avisados[-50:]
+                    minutos = round((ev["fecha"] - self.ahora).total_seconds() / 60 / 5) * 5
+                    cuando = "EN 1 HORA" if minutos >= 55 else f"EN {minutos} MIN"
+                    self.subir_historia(cuenta, historias.html_aviso(cuando, f"{ev['fecha']:%H:%M}", ev["pais"], ev["nombre"],
+                                                                      ev["prevision"], ev["anterior"], usuario), "aviso")
         except Exception as error:                 # las historias son un extra: nunca frenan al resto
             log.warning("historias (calendario): %s", error)
         # 3) Promo cada N días
@@ -1765,12 +1896,19 @@ class Corrida:
                 datos = b.getvalue()
             resumen = str(post.get("resumen") or "")
             bajada = re.split(r"(?<=[.!?])\s", resumen)[0][:170] if resumen else ""
-            pagina = historias.html_noticia(post.get("titular", ""), bajada, datos, es_logo, credito, g.categoria,
-                                            g.urgente, post.get("fuente", ""), "@comunidad_inversores_ok",
-                                            # Un solo llamado por historia, rotando: una lleva a Telegram, la siguiente a X.
-                                            red=("telegram", "x")[int(self.estado.datos["ig"].get("historias", {}).get("vuelta_red", 0)) % 2])
+            red = ("telegram", "x")[int(self.estado.datos["ig"].get("historias", {}).get("vuelta_red", 0)) % 2]   # una lleva a Telegram, la siguiente a X
             self.estado.datos["ig"].setdefault("historias", {})["vuelta_red"] = int(self.estado.datos["ig"]["historias"].get("vuelta_red", 0)) + 1
-            self.subir_historia("comunidad", pagina, "noticia")
+            self.subir_historia("comunidad", historias.html_noticia(post.get("titular", ""), bajada, datos, es_logo, credito, g.categoria,
+                                                                    g.urgente, post.get("fuente", ""), "@comunidad_inversores_ok", red=red), "noticia")
+            # En @ezebagnato solo las más importantes (máximo 3 por día).
+            ne = cfg_h.get("noticias_ezebagnato") or {}
+            mem = self.estado.datos["ig"]["historias"]
+            hoy = self.ahora.astimezone(zona(self.cfg)).date().isoformat()
+            hechas = sum(1 for h in mem.get("hechas", []) if h.get("cuenta") == "ezebagnato" and h.get("tipo") == "noticia"
+                         and datetime.fromisoformat(h["fecha"]).astimezone(zona(self.cfg)).date().isoformat() == hoy)
+            if verdadero(ne.get("activa", True)) and int(g.impacto or 0) >= int(ne.get("impacto_minimo", 8)) and hechas < int(ne.get("max_por_dia", 3)):
+                self.subir_historia("ezebagnato", historias.html_noticia(post.get("titular", ""), bajada, datos, es_logo, credito, g.categoria,
+                                                                         g.urgente, post.get("fuente", ""), "@ezebagnato", red=red), "noticia")
         except Exception as error:
             log.warning("historia de la noticia: %s", error)
 
