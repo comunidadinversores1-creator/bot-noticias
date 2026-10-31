@@ -953,7 +953,7 @@ ia:
 instagram:
   carruseles: true
   carrusel_noticias:              # una noticia muy fuerte (ej. un hackeo enorme) sale también como carrusel en @ezebagnato
-    activa: true
+    activa: false                 # APAGADO (30/10): salían láminas que repetían frases; vuelve cuando cada lámina se escriba con información distinta y la revises antes
     impacto_minimo: 9
     max_por_dia: 1
   semanal:                        # el resumen de la semana, en @comunidad_inversores_ok
