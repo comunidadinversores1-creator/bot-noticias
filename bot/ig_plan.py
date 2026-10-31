@@ -70,9 +70,16 @@ Postura de Eze sobre dónde guardar cripto: para empezar, un exchange grande y r
 Los números siempre con cifras (21 millones, no "veintiún millones"). Nunca pongas estadísticas del tipo "el 70% de los traders pierde": no se pueden verificar. En la caja "dato" va un hecho comprobable, una cuenta (ej.: 2% de riesgo por 10 pérdidas seguidas deja la cuenta en 82%) o un tip práctico.
 Marcá entre *asteriscos* la palabra o frase corta más importante de cada titular y de cada texto (se pinta de color).
 
+CALIDAD (lo más importante, Eze borra los carruseles flojos):
+- Cada lámina dice UNA idea distinta. Prohibido repetir una frase, un dato o la misma idea con otras palabras en dos láminas, y prohibido que el texto repita el titular de su lámina.
+- Armá una progresión: portada que engancha → qué es o cuál es el problema → cómo funciona → un ejemplo con números concretos → el error más común → qué hacer / idea para llevarse. Cada lámina aporta algo nuevo que la anterior no dijo.
+- Al menos 2 láminas con un número o ejemplo concreto de la vida real (ej. "con USD 1.000 y un riesgo de 1%, perdés como máximo USD 10 por operación"). Nada de frases vagas como "es muy importante" o "tenés que estar atento".
+- Los textos son cortos y de lectura rápida en el celular: 20 a 32 palabras, oraciones completas, sin relleno.
+- El titular de cada lámina es una afirmación concreta (no "Cómo funciona" a secas) y la etiqueta es solo el rótulo.
+
 ESTILO:
 - titular: portada {"tipo":"portada","etiqueta":"2-3 palabras","titulo":"máx. 6 palabras, con *clave*","bajada":"máx. 12 palabras","foto":"búsqueda EN INGLÉS de una foto real del tema (ej. 'Bitcoin mining farm', 'New York Stock Exchange')"}.
-  Después 4 a 5 láminas {"tipo":"paso","etiqueta":"1-3 palabras (ej. 'Cómo funciona')","titulo":"máx. 6 palabras, con *clave*","texto":"30 a 45 palabras, con un dato o ejemplo","dato":"opcional: un hecho o número verificable en 1 oración","foto":"opcional: búsqueda en inglés de una foto real (solo en 1 o 2 láminas)"}.
+  Después 4 a 5 láminas {"tipo":"paso","etiqueta":"1-3 palabras (ej. 'Cómo funciona')","titulo":"máx. 6 palabras, con *clave*","texto":"20 a 32 palabras, con un dato o ejemplo concreto","dato":"opcional: un hecho o número verificable en 1 oración","foto":"opcional: búsqueda en inglés de una foto real (solo en 1 o 2 láminas)"}.
 - editorial: portada {"tipo":"portada","numero":"cuántos puntos","titulo":"máx. 5 palabras","banda":"la frase clave con *resaltado*","foto":"búsqueda en inglés"}.
   Después 5 láminas {"tipo":"punto","titulo":"máx. 5 palabras con punto final y *clave*","lista":["2 o 3 renglones de máx. 7 palabras, concretos"],"banda":"una frase que remata con *resaltado*"}.
 - partida: 4 láminas de contraste {"arriba":"lo que hace la mayoría (máx. 8 palabras, con *clave*)","abajo":"lo que hace el trader que dura (máx. 8 palabras, con *clave*)"}. Ej.: arriba "Culpar al *mercado* cuando perdés", abajo "Revisar *qué hiciste vos* mal".
@@ -96,6 +103,26 @@ def que_toca(memoria: dict) -> tuple[str, str, str]:
     return tipo, estilo, libres[0] if tipo == "ensenanza" else random.choice(libres)
 
 
+def _repetidas(laminas: list[dict]) -> bool:
+    """¿Hay dos láminas que dicen casi lo mismo (o un texto que repite su titular)?"""
+    def fichas(t: str) -> set[str]:
+        return {w for w in re.findall(r"[a-záéíóúñ0-9]{4,}", sin_tildes(str(t).lower().replace("*", "")))}
+    cuerpos = []
+    for l in laminas:
+        texto = " ".join(str(v) for k, v in l.items() if k in ("texto", "dato") and isinstance(v, str))
+        titulo = fichas(l.get("titulo", ""))
+        ft = fichas(texto)
+        if titulo and ft and len(titulo & ft) / len(titulo) >= 0.8 and len(titulo) >= 3:
+            return True                              # el texto repite el titular
+        if ft:
+            cuerpos.append(ft)
+    for i, a in enumerate(cuerpos):
+        for b in cuerpos[i + 1:]:
+            if len(a & b) / max(1, min(len(a), len(b))) >= 0.6:
+                return True
+    return False
+
+
 def _sin_problemas(textos: list[str]) -> list[str]:
     from .texto import promesas_charla
     problemas = []
@@ -116,7 +143,7 @@ def redactar(cerebro, tipo: str, estilo: str, tema: str) -> dict | None:
     """Pide el contenido a la IA (hasta 2 intentos) y lo devuelve listo para ig_carruseles."""
     cantidad = {"titular": "portada + 5 pasos", "editorial": "portada + 5 puntos", "partida": "4 láminas de contraste"}[estilo]
     correccion = ""
-    for _ in range(2):
+    for _ in range(3):
         usuario = f"ESTILO: {estilo}\nTIPO: {tipo}\nTEMA: {tema}\nCANTIDAD: {cantidad}"
         if correccion:
             usuario += f"\n\nATENCIÓN: tu intento anterior no sirve: {correccion}."
@@ -128,6 +155,8 @@ def redactar(cerebro, tipo: str, estilo: str, tema: str) -> dict | None:
         textos = [str(v) for l in laminas for v in l.values() if isinstance(v, str)]
         textos += [str(x) for l in laminas for x in (l.get("lista") or [])] + [str(crudo.get("texto_post") or "")]
         problemas = _sin_problemas(textos)
+        if _repetidas(laminas):
+            problemas.append("repetís frases o ideas entre láminas (cada lámina tiene que decir algo distinto y el texto no puede repetir el titular)")
         if len(laminas) >= 2 and not problemas:
             palabra = re.sub(r"[^\wÁÉÍÓÚÑáéíóúñ]", "", str(crudo.get("palabra") or PALABRAS_CIERRE[tipo])).upper()[:10] or PALABRAS_CIERRE[tipo]
             return {"laminas": laminas, "texto_post": str(crudo.get("texto_post") or "").strip(), "palabra": palabra}

@@ -194,10 +194,13 @@ def titular(laminas: list[dict], palabra: str, con_guia: bool, usuario: str = "@
                       f'<h1 style="margin-top:30px">{resaltar(l.get("titulo"), "verde")}</h1>{bajada}')
             secciones.append(f'<section class="l">{fondo}<div class="pad" style="padding-bottom:190px">{cuerpo}</div>{_pie(i, total, usuario, True)}</section>')
             continue
+        # Sin caja de dato ni foto, el texto va grande y centrado (se lee mejor en el celular).
+        l = {**l, "grande": l.get("grande", not l.get("dato") and not l.get("_foto"))}
+        grande = l["grande"]
         dato = (f'<div class="dato"><div class="dt">{e(l.get("dato_titulo") or "DATO")}</div><div class="dc">{resaltar(l["dato"], "verde")}</div></div>'
                 if l.get("dato") else "")
         cuerpo = (f'<span class="tag{" n" if i % 2 == 0 else ""}">{e(l.get("etiqueta") or f"Paso {i}")}</span>'
-                  f'<h2>{resaltar(l.get("titulo"))}</h2><p{" style=\"font-size:58px; line-height:1.38\"" if l.get("grande") else ""}>{resaltar(l.get("texto"), "verde")}</p>{dato}')
+                  f'<h2>{resaltar(l.get("titulo"))}</h2><p{" style=\"font-size:58px; line-height:1.38\"" if grande else ""}>{resaltar(l.get("texto"), "verde")}</p>{dato}')
         arriba, relleno = "", ""
         if l.get("_foto"):
             # Foto real arriba, que se funde con el fondo (como la lámina 2 del carrusel de Bitcoin).
