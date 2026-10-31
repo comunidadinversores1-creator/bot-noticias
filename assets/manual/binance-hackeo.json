@@ -1,0 +1,65 @@
+{
+ "cuenta": "ezebagnato",
+ "usuario": "@ezebagnato",
+ "diseno": "rojo·diagonal",
+ "logo_tema": "Binance",
+ "laminas": [
+  {
+   "tipo": "portada",
+   "etiqueta": "Última hora",
+   "titulo": "*Hackeo a Binance:* USD 6.300 millones",
+   "bajada": "El mayor robo de la historia cripto"
+  },
+  {
+   "tipo": "paso",
+   "etiqueta": "El golpe",
+   "titulo": "En 20 minutos",
+   "texto": "Salieron *USD 6.300 millones* de billeteras de Binance, en 10 blockchains. El récord anterior era el de Bybit en 2025: USD 1.500 millones.",
+   "grande": true
+  },
+  {
+   "tipo": "paso",
+   "etiqueta": "Cómo habría empezado",
+   "titulo": "La laptop de un ingeniero",
+   "texto": "Según la investigación inicial, el ataque pudo empezar con la *laptop comprometida* de un ingeniero de DevOps. Binance halló después más puntos de brecha.",
+   "grande": true
+  },
+  {
+   "tipo": "paso",
+   "etiqueta": "Lo congelado",
+   "titulo": "USD 3.000 millones",
+   "texto": "Cerca de *USD 3.000 millones* fueron congelados con ayuda de Tether, Circle y otros socios. Ojo: congelado no significa recuperado.",
+   "grande": true
+  },
+  {
+   "tipo": "paso",
+   "etiqueta": "Quién estaría detrás",
+   "titulo": "Corea del Norte",
+   "texto": "TRM Labs y Chainalysis apuntan a *TraderTraitor*, un grupo norcoreano. Binance no acusa a nadie y Corea del Norte niega estos ataques.",
+   "grande": true
+  },
+  {
+   "tipo": "paso",
+   "etiqueta": "El mercado",
+   "titulo": "Bitcoin se sacudió",
+   "texto": "Bitcoin tocó *USD 76.368*, su mínimo en 6 semanas. Ether cayó más de 3% y las acciones de Coinbase, 4,8%.",
+   "grande": true
+  },
+  {
+   "tipo": "paso",
+   "etiqueta": "Los usuarios",
+   "titulo": "Qué dice Binance",
+   "texto": "Dice que los fondos de los usuarios están a salvo y que cubrirá las pérdidas. Su fondo SAFU tiene *USD 1.000 millones*: menos de la sexta parte.",
+   "grande": true
+  },
+  {
+   "tipo": "paso",
+   "etiqueta": "Y vos",
+   "titulo": "¿Qué pensás?",
+   "texto": "¿Dónde guardás *tus criptomonedas*?",
+   "grande": true
+  }
+ ],
+ "texto_post": "🚨 Hackeo a Binance: USD 6.300 millones, el mayor robo de la historia cripto\n\n1️⃣ En unos 20 minutos salieron USD 6.300 millones de sus billeteras\n2️⃣ Cerca de USD 3.000 millones fueron congelados, pero congelado no es recuperado\n3️⃣ TRM Labs y Chainalysis apuntan a un grupo norcoreano; Binance no acusa a nadie\n4️⃣ Binance dice que cubrirá las pérdidas con su fondo SAFU y recursos propios\n\n👇 ¿Dónde guardás tus criptomonedas?\n\n📌 Guardalo\n✈️ Mandáselo a alguien que invierta\n🔔 Seguime para enterarte primero\n\nFuentes: Reuters, Al Jazeera, TRM Labs, Help Net Security",
+ "tema": "Hackeo a Binance"
+}

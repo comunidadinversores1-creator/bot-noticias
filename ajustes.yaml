@@ -957,7 +957,7 @@ instagram:
     impacto_minimo: 9
     max_por_dia: 1
   semanal:                        # el resumen de la semana, en @comunidad_inversores_ok
-    activa: true
+    activa: false                 # APAGADO (30/10) hasta rediseñarlo y que Eze lo revise antes
     dia: 6                        # 0 = lunes ... 6 = domingo
     hora: "19:00"
     cantidad: 5

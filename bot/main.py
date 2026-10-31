@@ -650,6 +650,10 @@ class Corrida:
                 salio = self.carrusel_de_noticia_pedido(self.promo_pedida.partition(":")[2].strip().lower())
                 self.estado.guardar()
                 return self.cerrar(1 if salio else 0)
+            if self.promo_pedida.lower().startswith("carrusel_manual:"):
+                salio = self.publicar_carrusel_manual(self.promo_pedida.partition(":")[2].strip())
+                self.estado.guardar()
+                return self.cerrar(1 if salio else 0)
             if self.promo_pedida.lower() == "carrusel_semana":
                 salio = self.tal_vez_carrusel_semanal(forzar=True)
                 self.estado.guardar()
@@ -1591,6 +1595,40 @@ class Corrida:
                            f"🚨 <b>Publiqué un carrusel de noticia en @ezebagnato</b>\n{html.escape(post.get('titular', ''))}")
         except ErrorPublicacion as error:
             log.warning("no pude mandar el aviso del carrusel de noticia: %s", error)
+        return True
+
+    def publicar_carrusel_manual(self, nombre: str) -> bool:
+        """Publica un carrusel escrito a mano (y aprobado por Eze) que está en assets/manual/<nombre>.json."""
+        import json as _json
+        if not self.real:
+            return False
+        try:
+            datos = _json.loads((RAIZ / "assets" / "manual" / f"{nombre}.json").read_text(encoding="utf-8"))
+        except (OSError, ValueError) as error:
+            log.warning("carrusel manual: no pude leerlo (%s)", error)
+            return False
+        logo = None
+        if datos.get("logo_tema"):
+            img = ig_plan.logo_del_tema(datos["logo_tema"])
+            if img is not None:
+                b = io.BytesIO(); img.save(b, "PNG"); logo = b.getvalue()
+        carrusel_html.usar_diseno(datos.get("diseno"))
+        try:
+            laminas = carrusel_html.sacar_fotos(carrusel_html.titular(datos["laminas"], "", False, datos.get("usuario", "@ezebagnato"), logo=logo))
+        finally:
+            carrusel_html.usar_diseno(None)
+        cuenta = datos.get("cuenta", "ezebagnato")
+        media_id = self.subir_a_instagram(cuenta, laminas, datos["texto_post"])
+        if not media_id:
+            return False
+        g = self.estado.datos["ig"]
+        g["historial"] = ([*(g.get("historial") or []), {"fecha": self.ahora.isoformat(), "tipo": "noticia", "estilo": "titular",
+                                                          "tema": datos.get("tema", nombre), "palabra": "", "media_id": media_id,
+                                                          "diseno": datos.get("diseno", "")}])[-200:]
+        try:
+            telegram_album(self.token, self.chat_prueba, laminas, f"✅ <b>Publiqué el carrusel «{html.escape(datos.get('tema', nombre))}» en @{cuenta}</b>")
+        except ErrorPublicacion as error:
+            log.warning("no pude mandar el aviso: %s", error)
         return True
 
     def carrusel_de_noticia_pedido(self, palabra: str = "") -> bool:
