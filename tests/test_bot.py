@@ -1474,7 +1474,7 @@ def test_asi_vienen_los_ajustes(cfg):
     c = main.Corrida("prueba", 1, False)
     c.ahora = AHORA
     assert [p["id"] for p in c.promos_activas()] == [
-        "exness-un-clic", "binance-tarjeta-octubre", "binance-tarjeta"]
+        "binance-tarjeta-octubre", "binance-tarjeta"]
     hoy = AHORA.date()
     for promo in c.promos_activas():
         assert main.imagen_propia(promo["imagen"]) is not None, promo["id"]      # cada una con su imagen
@@ -2189,6 +2189,7 @@ def test_campana_del_video_sale_cada_dos_dias_rotando_la_miniatura(corrida, red,
     def campana(ahora):
         c = corrida(imagen="ninguna", ahora=ahora)
         c.cfg["campana_video"]["activa"] = True
+        c.cfg["campana_video"]["cada_dias"] = 2
         c.cfg["promos"] = []
         c.cfg["instagram"] = {"historias": {"activa": False}}
         assert c.correr() == 0

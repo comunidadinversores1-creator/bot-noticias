@@ -306,7 +306,7 @@ enlace_general: "https://linktr.ee/comunidadinversores"
 campana_video:
   activa: true
   id: video-reversion-z
-  cada_dias: 2
+  cada_dias: 1                    # todos los días (2/11: Eze pidió que se promocione su bot en lugar de Exness)
   desde: "11:30"                  # no sale antes de esta hora (hora Argentina); el bot corre cerca de :35 de cada hora
   vence: "2026-11-26"
   ctas_historia:                  # el cartel de las historias (en @ezebagnato y en @comunidad_inversores_ok): rota entre estos
@@ -448,7 +448,7 @@ promos:
       ⚠️ Operar con apalancamiento implica riesgo.
 
   - id: exness-un-clic
-    activa: true
+    activa: false                 # pausada (2/11): era la única promo activa y salía 3 veces por día; Eze quiere promocionar su bot Reversión Z
     socio: exness
     nombre: "Exness: operar con un solo clic"
     imagen: assets/promos/exness-un-clic.jpg
