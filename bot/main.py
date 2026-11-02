@@ -650,6 +650,10 @@ class Corrida:
                 salio = self.carrusel_de_noticia_pedido(self.promo_pedida.partition(":")[2].strip().lower())
                 self.estado.guardar()
                 return self.cerrar(1 if salio else 0)
+            if self.promo_pedida.lower().startswith("post_manual:"):
+                salio = self.publicar_post_manual(self.promo_pedida.partition(":")[2].strip())
+                self.estado.guardar()
+                return self.cerrar(1 if salio else 0)
             if self.promo_pedida.lower().startswith("carrusel_manual:"):
                 salio = self.publicar_carrusel_manual(self.promo_pedida.partition(":")[2].strip())
                 self.estado.guardar()
@@ -1596,6 +1600,27 @@ class Corrida:
         except ErrorPublicacion as error:
             log.warning("no pude mandar el aviso del carrusel de noticia: %s", error)
         return True
+
+    def publicar_post_manual(self, nombre: str) -> bool:
+        """Publica en Telegram y X un post escrito a mano y aprobado por Eze (assets/manual/<nombre>.json), tal cual."""
+        import json as _json
+        if not self.real:
+            return False
+        try:
+            datos = _json.loads((RAIZ / "assets" / "manual" / f"{nombre}.json").read_text(encoding="utf-8"))
+        except (OSError, ValueError) as error:
+            log.warning("post manual: no pude leerlo (%s)", error)
+            return False
+        imagen = imagen_propia(str(datos.get("imagen") or ""))
+        jpg = tal_cual(imagen) if imagen is not None else None
+        para_telegram = texto_propio_telegram(datos["texto"])
+        para_x = texto_propio_x(str(datos.get("texto_x") or ""), datos["texto"], self.cfg["x"])
+        registro = {
+            "fecha": self.ahora.isoformat(), "tipo": "promo", "promo_id": str(datos.get("id") or nombre),
+            "titular": datos["texto"].splitlines()[0][:200], "categoria": "PROMO", "impacto": 0, "fuente": "",
+            "foto": str(datos.get("imagen") or ""), "socio": "", "llamado": False, "titulos_originales": [], "telegram": None, "x": None,
+        }
+        return self.entregar(90, jpg, para_telegram, para_x, registro, publicidad=False, original=datos["texto"]) == "ok"
 
     def publicar_carrusel_manual(self, nombre: str) -> bool:
         """Publica un carrusel escrito a mano (y aprobado por Eze) que está en assets/manual/<nombre>.json."""

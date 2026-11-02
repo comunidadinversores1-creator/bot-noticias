@@ -1,0 +1,6 @@
+{
+ "id": "reversion-z-dia8",
+ "imagen": "assets/manual/reversion-z-dia8.jpg",
+ "texto": "📊 PRUEBA REAL DEL BOT REVERSIÓN Z · DÍA 8 DE 30\n\nVa en negativo, pero poco: arrancó con USD 100 y hoy la cuenta está en USD 98,96 (−1%) después de 4 operaciones.\n\n1️⃣ AUD/CAD venta: cerró en 0 (el bot pasó el stop a la entrada)\n2️⃣ AUD/CAD venta: −USD 0,01\n3️⃣ EUR/AUD compra: −USD 1,15\n4️⃣ EUR/AUD venta: +USD 0,10\n\nℹ️ Es una cuenta cent: en la captura los montos aparecen en centavos (9.895 = USD 98,95).\n\n4 operaciones es muy poco para sacar conclusiones. Sigo hasta el día 30 y lo muestro tal cual salga.\n\n⚠️ Operar con apalancamiento implica riesgo de perder tu capital.",
+ "texto_x": "📊 prueba real del bot Reversión Z · día 8 de 30\n\nva en negativo, pero poco: arrancó con USD 100 y hoy la cuenta está en USD 98,96. son −USD 1,06 en 4 operaciones.\n\n1️⃣ AUD/CAD: cerró en 0 (el bot movió el stop a la entrada)\n2️⃣ AUD/CAD: −USD 0,01\n3️⃣ EUR/AUD: −USD 1,15\n4️⃣ EUR/AUD: +USD 0,10\n\n4 operaciones es muy poco para juzgar un bot. la prueba es de 30 días y la muestro salga como salga.\n\n👇 ¿lo seguirías corriendo o lo apagarías?"
+}

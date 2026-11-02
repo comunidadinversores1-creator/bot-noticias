@@ -729,7 +729,8 @@ def texto_propio_x(texto_x: str, texto_largo: str, cfg_x: dict) -> str:
         donde = sin_links(str(cfg_x.get("texto_sin_link") or "el link está en mi perfil"))
         corto = f"{primera}\n\n👉 {donde[:1].upper()}{donde[1:]}"
     corto = sin_links(_LINK_MD.sub(r"\1", corto))
-    return recortar_x(corto)
+    # Con X Premium entran posts largos: no se corta (antes se cortaba en 280 y quedaba a medias).
+    return recortar_x(corto, 4000) if x_premium(cfg_x) else recortar_x(corto)
 
 
 # ------------------------------------------------ X Premium: posts largos
