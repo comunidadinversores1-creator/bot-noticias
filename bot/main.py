@@ -650,6 +650,10 @@ class Corrida:
                 salio = self.carrusel_de_noticia_pedido(self.promo_pedida.partition(":")[2].strip().lower())
                 self.estado.guardar()
                 return self.cerrar(1 if salio else 0)
+            if self.promo_pedida.lower().startswith("historia_manual:"):
+                salio = self.publicar_historia_manual(self.promo_pedida.partition(":")[2].strip())
+                self.estado.guardar()
+                return self.cerrar(1 if salio else 0)
             if self.promo_pedida.lower().startswith("post_manual:"):
                 salio = self.publicar_post_manual(self.promo_pedida.partition(":")[2].strip())
                 self.estado.guardar()
@@ -1600,6 +1604,24 @@ class Corrida:
         except ErrorPublicacion as error:
             log.warning("no pude mandar el aviso del carrusel de noticia: %s", error)
         return True
+
+    def publicar_historia_manual(self, nombre: str) -> bool:
+        """Sube a las historias de IG una imagen con título (assets/manual/<nombre>.json), aprobada por Eze."""
+        import json as _json
+        if not self.historias_activas():
+            return False
+        try:
+            datos = _json.loads((RAIZ / "assets" / "manual" / f"{nombre}.json").read_text(encoding="utf-8"))
+            imagen = (RAIZ / datos["imagen"]).read_bytes()
+        except (OSError, ValueError, KeyError) as error:
+            log.warning("historia manual: no pude leerla (%s)", error)
+            return False
+        usuarios = {"ezebagnato": "@ezebagnato", "comunidad": "@comunidad_inversores_ok"}
+        hechas = 0
+        for cuenta in datos.get("cuentas") or ["ezebagnato"]:
+            pagina = historias.html_promo(imagen, datos.get("titulo", ""), usuarios.get(cuenta, "@ezebagnato"), cta=datos.get("cta") or "El link está en mi perfil ↑")
+            hechas += 1 if self.subir_historia(cuenta, pagina, "manual") else 0
+        return hechas > 0
 
     def publicar_post_manual(self, nombre: str) -> bool:
         """Publica en Telegram y X un post escrito a mano y aprobado por Eze (assets/manual/<nombre>.json), tal cual."""
