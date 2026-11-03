@@ -2030,7 +2030,7 @@ def test_carrusel_rota_estilos_y_te_llega_por_privado(corrida, red, tmp_path):
     assert "Carrusel para Instagram" in red.telegram_albumes[0]["texto"]
     assert any("Texto para el post" in m["text"] for m in _al_privado(red))
     ig = _memoria(tmp_path)["ig"]
-    assert ig["vuelta"] == 1 and ig["historial"][0]["estilo"] == "caricatura" and ig["temas_usados"] == ["¿Qué es Bitcoin?"]
+    assert ig["vuelta"] == 1 and ig["historial"][0]["estilo"] == "caricatura" and ig["temas_usados"] == [__import__("bot.ig_plan", fromlist=["x"]).TEMAS["ensenanza"][0]]
     # El mismo día no se repite.
     c = corrida(imagen="ninguna", ahora=lunes + timedelta(hours=1))
     c.cfg["instagram"] = {"carruseles": True, "dias_carrusel": [0], "hora_carrusel": "18:00"}
@@ -2043,8 +2043,8 @@ def test_rueda_de_carruseles_pasa_por_todos_los_estilos():
     estilos = {e for _, e in ig_plan.RUEDA}
     tipos = {t for t, _ in ig_plan.RUEDA}
     assert estilos == {"caricatura"} and {"ensenanza", "errores", "habitos", "mentalidad", "bots"} <= tipos   # desde nov-2026: estilo caricatura con el robot
-    assert ig_plan.que_toca({})[2] == "¿Qué es Bitcoin?"
-    assert ig_plan.que_toca({"temas_usados": ["¿Qué es Bitcoin?"]})[2] == "¿Qué es la blockchain?"
+    assert ig_plan.que_toca({})[2] == ig_plan.TEMAS["ensenanza"][0]
+    assert ig_plan.que_toca({"temas_usados": [ig_plan.TEMAS["ensenanza"][0]]})[2] == ig_plan.TEMAS["ensenanza"][1]
 
 
 def test_carrusel_con_plata_se_reescribe(red):
@@ -2173,7 +2173,7 @@ def test_carrusel_se_prepara_el_dia_anterior_y_se_puede_cancelar(corrida, red, t
     c.cfg["instagram"] = {"carruseles": True, "dias_carrusel": [0], "hora_carrusel": "18:00", "hora_preparar": "12:00"}
     assert c.correr() == 0
     prep = _memoria(tmp_path)["ig"]["preparados"]["2026-10-26"]
-    assert prep["tema"] == "¿Qué es Bitcoin?" or prep["urls"]
+    assert prep["tema"] == __import__("bot.ig_plan", fromlist=["x"]).TEMAS["ensenanza"][0] or prep["urls"]
     assert any("Carrusel de mañana" in a["texto"] for a in red.telegram_albumes)
     # Eze escribe "no carrusel" -> el del lunes queda cancelado
     red.actualizaciones = [{"update_id": 50, "message": {"message_id": 9, "chat": {"id": 555}, "text": "no carrusel"}}]
