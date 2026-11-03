@@ -713,6 +713,8 @@ class Corrida:
                         resultados.append(f"{prov['nombre']}/{modelo}: FALLA ({str(error)[:80]})")
             log.warning("Prueba de IA: %s", " | ".join(resultados))
             return self.cerrar(1)
+        if not self.real and self.promo_pedida.lower().startswith("preparar_manual:"):
+            return self.cerrar(1 if self.preparar_carrusel_manual(self.promo_pedida.partition(":")[2].strip()) else 0)
         if not self.real and self.promo_pedida.lower() == "muestra_caricatura":
             return self.cerrar(1 if self.muestra_caricatura() else 0)
         if not self.real and self.promo_pedida.lower() == "mascota":
@@ -1734,6 +1736,49 @@ class Corrida:
         }
         return self.entregar(90, jpg, para_telegram, para_x, registro, publicidad=False, original=datos["texto"]) == "ok"
 
+    def _laminas_manual(self, datos: dict) -> list[bytes]:
+        """Las láminas de un carrusel escrito a mano: caricatura (robot + ilustraciones con IA) o el negro y verde."""
+        if datos.get("estilo") == "caricatura":
+            from .mascota import ilustrar
+            laminas = [dict(l) for l in datos["laminas"]]
+            for l in laminas:
+                if str(l.get("escena") or "").strip():
+                    img = ilustrar(str(l["escena"]))
+                    if img:
+                        l["_ilustracion"] = img
+            return carrusel_html.sacar_fotos(carrusel_html.caricatura(laminas, "", False, datos.get("usuario", "@ezebagnato")))
+        logo = None
+        if datos.get("logo_tema"):
+            img = ig_plan.logo_del_tema(datos["logo_tema"])
+            if img is not None:
+                b = io.BytesIO(); img.save(b, "PNG"); logo = b.getvalue()
+        carrusel_html.usar_diseno(datos.get("diseno"))
+        try:
+            return carrusel_html.sacar_fotos(carrusel_html.titular(datos["laminas"], "", False, datos.get("usuario", "@ezebagnato"), logo=logo))
+        finally:
+            carrusel_html.usar_diseno(None)
+
+    def preparar_carrusel_manual(self, nombre: str) -> bool:
+        """Arma un carrusel escrito a mano, lo guarda tal cual (para que se publique ese mismo) y te lo manda para revisar."""
+        import json as _json
+        try:
+            datos = _json.loads((RAIZ / "assets" / "manual" / f"{nombre}.json").read_text(encoding="utf-8"))
+        except (OSError, ValueError) as error:
+            log.warning("carrusel manual: no pude leerlo (%s)", error)
+            return False
+        laminas = self._laminas_manual(datos)
+        try:
+            urls = instagram.subir_imagenes(laminas, f"manual/{nombre}")
+            log.warning("Carrusel manual %s: %s", nombre, " ".join(urls))
+        except Exception as error:
+            log.warning("carrusel manual: no pude guardarlo (%s)", error)
+        try:
+            telegram_album(self.token, self.chat_prueba, laminas, f"👀 <b>Carrusel para revisar</b> · {html.escape(datos.get('tema', nombre))}\n\nDecile a Claude si lo publica.")
+            telegram_mensaje(self.token, self.chat_prueba, "📝 Texto del post:\n\n<code>" + html.escape(datos["texto_post"]) + "</code>", html=True)
+        except ErrorPublicacion as error:
+            log.warning("carrusel manual: %s", error)
+        return True
+
     def publicar_carrusel_manual(self, nombre: str) -> bool:
         """Publica un carrusel escrito a mano (y aprobado por Eze) que está en assets/manual/<nombre>.json."""
         import json as _json
@@ -1744,16 +1789,19 @@ class Corrida:
         except (OSError, ValueError) as error:
             log.warning("carrusel manual: no pude leerlo (%s)", error)
             return False
-        logo = None
-        if datos.get("logo_tema"):
-            img = ig_plan.logo_del_tema(datos["logo_tema"])
-            if img is not None:
-                b = io.BytesIO(); img.save(b, "PNG"); logo = b.getvalue()
-        carrusel_html.usar_diseno(datos.get("diseno"))
-        try:
-            laminas = carrusel_html.sacar_fotos(carrusel_html.titular(datos["laminas"], "", False, datos.get("usuario", "@ezebagnato"), logo=logo))
-        finally:
-            carrusel_html.usar_diseno(None)
+        # Si ya se preparó (y Eze lo revisó), sale exactamente ese; si no, se arma ahora.
+        laminas = []
+        repo = os.environ.get("GITHUB_REPOSITORY", "")
+        for i in range(1, 21):
+            try:
+                r = requests.get(f"https://raw.githubusercontent.com/{repo}/{instagram.RAMA}/ig/manual/{nombre}/{i:02d}.jpg", timeout=30)
+            except requests.RequestException:
+                break
+            if r.status_code != 200:
+                break
+            laminas.append(r.content)
+        if not laminas:
+            laminas = self._laminas_manual(datos)
         cuenta = datos.get("cuenta", "ezebagnato")
         media_id = self.subir_a_instagram(cuenta, laminas, datos["texto_post"])
         if not media_id:

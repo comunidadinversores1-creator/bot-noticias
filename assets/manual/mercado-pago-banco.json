@@ -1,0 +1,54 @@
+{
+ "cuenta": "ezebagnato",
+ "usuario": "@ezebagnato",
+ "estilo": "caricatura",
+ "laminas": [
+  {
+   "tipo": "portada",
+   "etiqueta": "Noticia",
+   "titulo": "¿Mercado Pago va a ser *banco*?",
+   "bajada": "El BCRA ya dio el visto bueno técnico. Te explico qué cambia.",
+   "escena": "a smartphone shaped like a classic bank building with columns, gold coins and a credit card floating around it, a green check mark"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "El *visto bueno* técnico",
+   "texto": "El Banco Central aprobó la parte técnica del pedido. Falta el sí final de su Directorio, que se espera antes de fin de año.",
+   "pose": "lupa",
+   "objeto": "banco"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "Se llamaría *Mercado Banco*",
+   "texto": "Así lo adelantó Juan Curutchet, superintendente del BCRA. Hoy la billetera tiene más de 20 millones de cuentas en Argentina.",
+   "escena": "a smartphone app transforming into a bank building, sparkles and a green check mark, crowd of tiny phone icons around"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "Podrías cobrar el *sueldo*",
+   "texto": "Hoy solo los bancos pueden acreditar sueldos. Con la licencia también podría hacerlo, y las cuentas pasarían de CVU a CBU.",
+   "pose": "dinero",
+   "objeto": "billete"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "Plazos fijos y *créditos*",
+   "texto": "Podría tomar plazos fijos y prestar ese dinero, como cualquier banco. Hoy presta solo con fondos propios.",
+   "escena": "a piggy bank next to a calendar and a growing stack of gold coins with a green arrow pointing up"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "Lo que *preocupa*",
+   "texto": "Al BCRA le preocupa que se forme un jugador dominante. Podría ponerle condiciones al dar la licencia definitiva.",
+   "pose": "pensando"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "¿Y *vos*?",
+   "texto": "¿Pasarías tu sueldo a Mercado Pago si se convierte en banco? Te leo en los comentarios.",
+   "pose": "celular"
+  }
+ ],
+ "texto_post": "🏦 ¿Mercado Pago va a ser banco?\n\nEl Banco Central ya le dio la aprobación técnica. Falta el sí final de su Directorio, que se espera antes de fin de año.\n\n1️⃣ Se llamaría \"Mercado Banco\"\n2️⃣ Podría acreditar sueldos y pasar de CVU a CBU\n3️⃣ Podría tomar plazos fijos y dar créditos con esos depósitos\n4️⃣ Al BCRA le preocupa que se forme un jugador dominante\n\n👇 ¿Pasarías tu sueldo a Mercado Pago si se convierte en banco?\n\n📌 Guardalo\n✈️ Mandáselo a alguien que use Mercado Pago\n🔔 Seguime para más\n\nFuentes: Diario Río Negro, Cadena 3, iProfesional",
+ "tema": "Mercado Pago banco"
+}
