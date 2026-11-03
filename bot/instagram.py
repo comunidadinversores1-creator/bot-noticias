@@ -218,8 +218,12 @@ def subir_imagenes(jpgs: list[bytes], carpeta: str) -> list[str]:
     urls = []
     for i, b in enumerate(jpgs, 1):
         ruta = f"ig/{carpeta}/{i:02d}.jpg"
+        extra = {}
+        previa = _gh("GET", f"contents/{ruta}?ref={RAMA}")
+        if previa.status_code == 200:               # ya existía (ej. un carrusel que se volvió a armar): se reemplaza
+            extra["sha"] = previa.json().get("sha")
         r = _gh("PUT", f"contents/{ruta}", message="Imagen para Instagram", branch=RAMA,
-                content=base64.b64encode(b).decode())
+                content=base64.b64encode(b).decode(), **extra)
         if r.status_code not in (200, 201):
             raise ErrorInstagram(f"No pude subir la imagen {i} ({r.status_code}).")
         urls.append(f"https://raw.githubusercontent.com/{repo}/{RAMA}/{ruta}")
