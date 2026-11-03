@@ -28,7 +28,7 @@ MODELOS = ["gemini-3.1-flash-lite-image", "gemini-2.5-flash-image", "gemini-3-pr
 def _por_interacciones(pedido: str, clave: str, modelo: str) -> tuple[bytes | None, str]:
     r = requests.post(INTERACCIONES, headers={"x-goog-api-key": clave, "Content-Type": "application/json"},
                       json={"model": modelo, "input": [{"type": "text", "text": pedido}],
-                            "response_format": {"type": "image", "mime_type": "image/png", "aspect_ratio": "1:1", "image_size": "1K"}},
+                            "response_format": {"type": "image", "mime_type": "image/jpeg", "aspect_ratio": "1:1", "image_size": "1K"}},
                       timeout=120)
     if r.status_code != 200:
         return None, f"interactions {r.status_code}: {r.text[:160]}"
