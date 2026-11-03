@@ -1615,7 +1615,7 @@ class Corrida:
                  "holding a magnifying glass and looking through it, curious"]
         hechas = []
         for pose in poses:
-            img, informe = mascota.dibujar(pose, clave)
+            img, informe = mascota.dibujar(pose, clave, clave_openai=os.environ.get("OPENAI_API_KEY", ""))
             log.warning("Mascota (%s): %s", pose[:30], informe[:900])
             if img:
                 hechas.append(img)

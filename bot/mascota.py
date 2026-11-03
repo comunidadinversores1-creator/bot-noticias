@@ -52,10 +52,37 @@ def _por_generate(pedido: str, clave: str, modelo: str) -> tuple[bytes | None, s
     return None, "generateContent: sin imagen"
 
 
-def dibujar(pose: str, clave: str, modelos: list[str] | None = None) -> tuple[bytes | None, str]:
-    """(png, informe). Prueba cada modelo y cada forma de pedirlo hasta que uno devuelva la imagen."""
+def _por_openai(pedido: str, clave: str, modelo: str) -> tuple[bytes | None, str]:
+    """La misma IA de imágenes que usa ChatGPT (necesita una clave de la API de OpenAI con saldo)."""
+    r = requests.post("https://api.openai.com/v1/images/generations",
+                      headers={"Authorization": f"Bearer {clave}", "Content-Type": "application/json"},
+                      json={"model": modelo, "prompt": pedido, "size": "1024x1024", "quality": "medium", "n": 1},
+                      timeout=180)
+    if r.status_code != 200:
+        return None, f"openai {modelo} {r.status_code}: {r.text[:200]}"
+    for d in r.json().get("data") or []:
+        if d.get("b64_json"):
+            return base64.b64decode(d["b64_json"]), "ok"
+    return None, f"openai {modelo}: sin imagen"
+
+
+def dibujar(pose: str, clave: str, modelos: list[str] | None = None, clave_openai: str = "") -> tuple[bytes | None, str]:
+    """(png, informe). Primero la IA de imágenes de ChatGPT (si hay clave), después las de Google."""
     pedido = f"{PERSONAJE} Pose: {pose}. {ESTILO}"
     informe = []
+    if clave_openai:
+        for modelo in ("gpt-image-1", "gpt-image-1-mini"):
+            try:
+                img, nota = _por_openai(pedido, clave_openai, modelo)
+            except requests.RequestException as error:
+                img, nota = None, f"openai {modelo}: {type(error).__name__}"
+            informe.append(nota)
+            if img:
+                return img, " | ".join(informe)
+    else:
+        informe.append("openai: no hay OPENAI_API_KEY")
+    if not clave:
+        return None, " | ".join(informe)
     for modelo in modelos or MODELOS:
         for forma in (_por_generate, _por_interacciones):
             try:
