@@ -26,6 +26,10 @@ RUEDA = [
 
 TEMAS = {
     "ensenanza": [
+        # Pedidos por Eze (nov-2026), primero en la fila.
+        "¿Qué es el dinero y por qué pierde valor?", "¿Qué es Ethereum? Ventajas y desventajas",
+        "¿Qué es BNB y para qué sirve?", "Bitcoin: ventajas y desventajas",
+        "¿Cómo comprar tu primera cripto fácil y seguro?", "¿Qué es GESARA/NESARA y por qué es una estafa?",
         "¿Qué es Bitcoin?", "¿Qué es la blockchain?", "¿Qué es USDT y para qué sirve una stablecoin?",
         "¿Qué es una criptomoneda?", "¿Qué es una billetera cripto (wallet) y cuál conviene?",
         "¿Qué es la frase semilla (seed phrase) y por qué nunca hay que compartirla?",
@@ -54,6 +58,7 @@ TEMAS = {
         "aprender vs. buscar atajos", "ganar rápido vs. durar en el mercado",
     ],
     "bots": [
+        "los avances de la IA que cambian cómo invertimos", "qué hace un bot de trading que opera solo en MetaTrader 5",
         "cómo decide un bot de trading cuándo entrar", "qué mira un bot antes de operar EUR/AUD y AUD/CAD",
         "lo que un bot hace mejor que una persona (y lo que no)", "cómo usar la IA para analizar el mercado",
     ],
@@ -164,7 +169,7 @@ def redactar(cerebro, tipo: str, estilo: str, tema: str) -> dict | None:
         if estilo == "caricatura":
             escenas = sum(1 for l in laminas if l.get("tipo") != "portada" and str(l.get("escena") or "").strip())
             pasos = sum(1 for l in laminas if l.get("tipo") != "portada")
-            if escenas < 2 or escenas >= pasos:
+            if pasos >= 4 and (escenas < 2 or escenas >= pasos):
                 problemas.append(f"pusiste 'escena' en {escenas} láminas: tienen que ser entre 2 y 3 (además de la portada), y en las demás va el robot")
             largos = [l.get("titulo", "") for l in laminas if len(str(l.get("texto") or l.get("bajada") or "").split()) > 26]
             if largos:
