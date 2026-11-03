@@ -82,7 +82,7 @@ ESTILO:
 - titular: portada {"tipo":"portada","etiqueta":"2-3 palabras","titulo":"máx. 6 palabras, con *clave*","bajada":"máx. 12 palabras","foto":"búsqueda EN INGLÉS de una foto real del tema (ej. 'Bitcoin mining farm', 'New York Stock Exchange')"}.
   Después 4 a 5 láminas {"tipo":"paso","etiqueta":"1-3 palabras (ej. 'Cómo funciona')","titulo":"máx. 6 palabras, con *clave*","texto":"20 a 32 palabras, con un dato o ejemplo concreto","dato":"opcional: un hecho o número verificable en 1 oración","foto":"opcional: búsqueda en inglés de una foto real (solo en 1 o 2 láminas)"}.
 - caricatura: portada {"tipo":"portada","etiqueta":"2-3 palabras","titulo":"máx. 6 palabras, con *clave*, ideal una pregunta que enganche","bajada":"máx. 14 palabras: qué va a aprender","pose":"una de las POSES"}.
-  Después 5 láminas {"tipo":"paso","titulo":"máx. 4 palabras, con *clave* (una afirmación, ej. 'El *stop loss* manda')","texto":"14 a 24 palabras, con un dato o ejemplo concreto, con *clave*","pose":"una de las POSES, la que mejor muestra la idea (no repitas la misma pose seguida)"}.
+  Después 5 láminas {"tipo":"paso","titulo":"máx. 4 palabras, con *clave* (una afirmación, ej. 'El *stop loss* manda')","texto":"14 a 24 palabras (nunca más de 24), con un dato o ejemplo concreto y UNA sola *clave*","pose":"una de las POSES, la que mejor muestra la idea (no repitas la misma pose seguida)"}.
   La portada y como mucho 2 láminas más llevan "escena": una ilustración del tema, EN INGLÉS, que muestre la idea con objetos concretos y sin personas reales ni el robot (ej. "an open wallet with coins falling out and a red chart pointing down", "a big gold bitcoin coin on top of a stack of coins next to a laptop with a green chart"). En esas láminas no va el robot. En las demás va el robot con su pose y su objeto.
   Cada lámina puede llevar además "objeto": el objeto del tema que acompaña al robot, o "" si no hace falta. OBJETOS: bitcoin, ethereum, usdt (stablecoins), computadora (tecnología, IA, programar), hackeo (hackeos, estafas, robos), candado (seguridad, contraseñas, 2FA), banco (bancos, plazo fijo, inflación), billete (dinero, sueldo, ahorro), grafico (análisis, velas, mercado). Usalo cuando el tema lo pida (si habla de bitcoin, que aparezca bitcoin).
   POSES: saludo (bienvenida), pensando (preguntas, dudas, mitos), lupa (analizar, detectar), festejo (logros, crecimiento), alerta (errores, riesgos, caídas), celular (apps, exchanges, operar), escudo (stop loss, seguridad, riesgo), dinero (ahorro, sueldo, dinero).
@@ -161,6 +161,12 @@ def redactar(cerebro, tipo: str, estilo: str, tema: str) -> dict | None:
         textos = [str(v) for l in laminas for v in l.values() if isinstance(v, str)]
         textos += [str(x) for l in laminas for x in (l.get("lista") or [])] + [str(crudo.get("texto_post") or "")]
         problemas = _sin_problemas(textos)
+        if estilo == "caricatura":
+            largos = [l.get("titulo", "") for l in laminas if len(str(l.get("texto") or l.get("bajada") or "").split()) > 26]
+            if largos:
+                problemas.append("hay textos de más de 26 palabras (en este estilo van de 14 a 24 palabras, cortos y al grano)")
+            if any(str(l.get("texto") or l.get("bajada") or "").count("*") > 2 for l in laminas):
+                problemas.append("marcaste más de una palabra clave en un texto (va UNA sola entre asteriscos por texto)")
         if _repetidas(laminas):
             problemas.append("repetís frases o ideas entre láminas (cada lámina tiene que decir algo distinto y el texto no puede repetir el titular)")
         if len(laminas) >= 2 and not problemas:
