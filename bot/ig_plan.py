@@ -83,7 +83,7 @@ ESTILO:
   Después 4 a 5 láminas {"tipo":"paso","etiqueta":"1-3 palabras (ej. 'Cómo funciona')","titulo":"máx. 6 palabras, con *clave*","texto":"20 a 32 palabras, con un dato o ejemplo concreto","dato":"opcional: un hecho o número verificable en 1 oración","foto":"opcional: búsqueda en inglés de una foto real (solo en 1 o 2 láminas)"}.
 - caricatura: portada {"tipo":"portada","etiqueta":"2-3 palabras","titulo":"máx. 6 palabras, con *clave*, ideal una pregunta que enganche","bajada":"máx. 14 palabras: qué va a aprender","pose":"una de las POSES"}.
   Después 5 láminas {"tipo":"paso","titulo":"máx. 4 palabras, con *clave* (una afirmación, ej. 'El *stop loss* manda')","texto":"14 a 24 palabras (nunca más de 24), con un dato o ejemplo concreto y UNA sola *clave*","pose":"una de las POSES, la que mejor muestra la idea (no repitas la misma pose seguida)"}.
-  La portada y como mucho 2 láminas más llevan "escena": una ilustración del tema, EN INGLÉS, que muestre la idea con objetos concretos y sin personas reales ni el robot (ej. "an open wallet with coins falling out and a red chart pointing down", "a big gold bitcoin coin on top of a stack of coins next to a laptop with a green chart"). En esas láminas no va el robot. En las demás va el robot con su pose y su objeto.
+  La portada y ENTRE 2 Y 3 láminas más (no todas, alternadas con las del robot, para que el carrusel tenga variedad) llevan "escena": una ilustración del tema, EN INGLÉS, que muestre la idea con objetos concretos y sin personas reales ni el robot (ej. "an open wallet with coins falling out and a red chart pointing down", "a big gold bitcoin coin on top of a stack of coins next to a laptop with a green chart"). En esas láminas no va el robot. En las demás va el robot con su pose y su objeto.
   Cada lámina puede llevar además "objeto": el objeto del tema que acompaña al robot, o "" si no hace falta. OBJETOS: bitcoin, ethereum, usdt (stablecoins), computadora (tecnología, IA, programar), hackeo (hackeos, estafas, robos), candado (seguridad, contraseñas, 2FA), banco (bancos, plazo fijo, inflación), billete (dinero, sueldo, ahorro), grafico (análisis, velas, mercado). Usalo cuando el tema lo pida (si habla de bitcoin, que aparezca bitcoin).
   POSES: saludo (bienvenida), pensando (preguntas, dudas, mitos), lupa (analizar, detectar), festejo (logros, crecimiento), alerta (errores, riesgos, caídas), celular (apps, exchanges, operar), escudo (stop loss, seguridad, riesgo), dinero (ahorro, sueldo, dinero).
 - editorial: portada {"tipo":"portada","numero":"cuántos puntos","titulo":"máx. 5 palabras","banda":"la frase clave con *resaltado*","foto":"búsqueda en inglés"}.
@@ -162,6 +162,10 @@ def redactar(cerebro, tipo: str, estilo: str, tema: str) -> dict | None:
         textos += [str(x) for l in laminas for x in (l.get("lista") or [])] + [str(crudo.get("texto_post") or "")]
         problemas = _sin_problemas(textos)
         if estilo == "caricatura":
+            escenas = sum(1 for l in laminas if l.get("tipo") != "portada" and str(l.get("escena") or "").strip())
+            pasos = sum(1 for l in laminas if l.get("tipo") != "portada")
+            if escenas < 2 or escenas >= pasos:
+                problemas.append(f"pusiste 'escena' en {escenas} láminas: tienen que ser entre 2 y 3 (además de la portada), y en las demás va el robot")
             largos = [l.get("titulo", "") for l in laminas if len(str(l.get("texto") or l.get("bajada") or "").split()) > 26]
             if largos:
                 problemas.append("hay textos de más de 26 palabras (en este estilo van de 14 a 24 palabras, cortos y al grano)")
@@ -240,7 +244,7 @@ def armar_html(contenido: dict, estilo: str, con_guia: bool, buscar=None, fotos_
             if l.get("objeto") not in OBJETOS:
                 l["objeto"] = ""
         from .mascota import ilustrar
-        con_escena = [l for l in laminas if str(l.get("escena") or "").strip()][:3]
+        con_escena = [l for l in laminas if str(l.get("escena") or "").strip()][:4]
         for l in con_escena:
             img = ilustrar(str(l["escena"]))
             if img:
