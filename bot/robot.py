@@ -49,7 +49,75 @@ def _moneda(x: int, y: int, r: int = 34) -> str:
             f'<text x="{x}" y="{y + r * 0.42:.0f}" text-anchor="middle" font-family="Luck, Arial Black" font-size="{r * 1.2:.0f}" fill="#111">$</text>')
 
 
-def svg(pose: str, ancho: int = 760) -> str:
+# Objetos que acompañan al robot según el tema (cada uno dibujado alrededor de (0, 0), unos 150 px).
+def _o_moneda(color: str, simbolo: str) -> str:
+    return (f'<circle cx="0" cy="0" r="66" fill="{color}" {K}/><circle cx="0" cy="0" r="48" fill="none" stroke="#111" stroke-width="5" opacity=".35"/>'
+            f'<text x="0" y="27" text-anchor="middle" font-family="Arial Black, Arial" font-weight="900" font-size="78" fill="#fff" '
+            f'stroke="#111" stroke-width="5" paint-order="stroke">{simbolo}</text>')
+
+
+def _o_eth() -> str:
+    return (f'<circle cx="0" cy="0" r="66" fill="#627eea" {K}/>'
+            f'<path d="M0 -46 L28 2 L0 18 L-28 2 Z" fill="#fff" stroke="#111" stroke-width="5" stroke-linejoin="round"/>'
+            f'<path d="M0 26 L28 10 L0 48 L-28 10 Z" fill="#c7d2fe" stroke="#111" stroke-width="5" stroke-linejoin="round"/>')
+
+
+def _o_compu(roja: bool = False) -> str:
+    pantalla = ROJO if roja else "#111"
+    dentro = (f'<circle cx="0" cy="-40" r="24" fill="#fff" stroke="#111" stroke-width="5"/><circle cx="-9" cy="-42" r="6" fill="#111"/>'
+              f'<circle cx="9" cy="-42" r="6" fill="#111"/><rect x="-12" y="-20" width="24" height="12" rx="3" fill="#fff" stroke="#111" stroke-width="5"/>'
+              if roja else
+              f'<line x1="-58" y1="-62" x2="-10" y2="-62" stroke="{VERDE_CLARO}" stroke-width="8" stroke-linecap="round"/>'
+              f'<line x1="-58" y1="-42" x2="30" y2="-42" stroke="{VERDE_CLARO}" stroke-width="8" stroke-linecap="round"/>'
+              f'<line x1="-58" y1="-22" x2="0" y2="-22" stroke="{VERDE_CLARO}" stroke-width="8" stroke-linecap="round"/>')
+    return (f'<rect x="-80" y="-88" width="160" height="104" rx="12" fill="{pantalla}" {K}/>{dentro}'
+            f'<path d="M-100 16 L100 16 L116 42 L-116 42 Z" fill="#9ca3af" {K}/>')
+
+
+def _o_candado() -> str:
+    return (f'<path d="M-36 -10 L-36 -40 Q-36 -78 0 -78 Q36 -78 36 -40 L36 -10" fill="none" stroke="#111" stroke-width="16" stroke-linecap="round"/>'
+            f'<rect x="-60" y="-14" width="120" height="96" rx="16" fill="{AMARILLO}" {K}/>'
+            f'<circle cx="0" cy="24" r="12" fill="#111"/><rect x="-5" y="28" width="10" height="28" rx="4" fill="#111"/>')
+
+
+def _o_banco() -> str:
+    columnas = "".join(f'<rect x="{x}" y="-30" width="20" height="80" fill="#fff" stroke="#111" stroke-width="6"/>' for x in (-62, -22, 18, 52))
+    return (f'<path d="M-90 -36 L0 -88 L90 -36 Z" fill="#d1d5db" {K}/>{columnas}'
+            f'<rect x="-96" y="50" width="192" height="24" rx="6" fill="#d1d5db" {K}/>'
+            f'<text x="0" y="-44" text-anchor="middle" font-family="Arial Black, Arial" font-size="34" fill="#111">$</text>')
+
+
+def _o_billete() -> str:
+    return (f'<g transform="rotate(-12)"><rect x="-95" y="-50" width="190" height="100" rx="12" fill="#86efac" {K}/>'
+            f'<circle cx="0" cy="0" r="30" fill="none" stroke="#111" stroke-width="7"/>'
+            f'<text x="0" y="16" text-anchor="middle" font-family="Arial Black, Arial" font-size="44" fill="#111">$</text></g>')
+
+
+def _o_grafico() -> str:
+    barras = "".join(f'<rect x="{x}" y="{y}" width="26" height="{50 - y}" fill="{c}" stroke="#111" stroke-width="5"/>'
+                     for x, y, c in ((-62, 10, ROJO), (-26, -14, VERDE), (10, -6, ROJO), (46, -40, VERDE)))
+    return f'<rect x="-90" y="-80" width="180" height="150" rx="14" fill="#fff" {K}/>{barras}'
+
+
+OBJETOS = {
+    "bitcoin": lambda: _o_moneda("#f7931a", "₿"),
+    "ethereum": _o_eth,
+    "usdt": lambda: _o_moneda("#26a17b", "₮"),
+    "computadora": lambda: _o_compu(False),
+    "hackeo": lambda: _o_compu(True),
+    "candado": _o_candado,
+    "banco": _o_banco,
+    "billete": _o_billete,
+    "grafico": _o_grafico,
+}
+
+
+def _objeto(nombre: str, x: int, y: int, escala: float = 1.0) -> str:
+    dibujo = OBJETOS.get(nombre)
+    return f'<g transform="translate({x} {y}) scale({escala})">{dibujo()}</g>' if dibujo else ""
+
+
+def svg(pose: str, ancho: int = 760, objeto: str = "") -> str:
     pose = pose if pose in POSES else "saludo"
     izq_abajo = _brazo((255, 410), (170, 420), (160, 500))
     der_abajo = _brazo((505, 410), (590, 420), (600, 500))
@@ -68,7 +136,11 @@ def svg(pose: str, ancho: int = 760) -> str:
                  f'<path d="M660 230 Q672 212 694 210" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round"/>')
     elif pose == "festejo":
         brazos = _brazo((255, 410), (180, 350), (175, 255)) + _brazo((505, 410), (580, 350), (585, 255))
-        extra = _moneda(95, 330) + _moneda(668, 360, 30) + _moneda(120, 470, 26) + _moneda(650, 480, 24)
+        if objeto in ("bitcoin", "ethereum", "usdt"):
+            extra = _objeto(objeto, 70, 320, .95) + _objeto(objeto, 690, 350, .85) + _objeto(objeto, 95, 500, .6) + _objeto(objeto, 670, 510, .55)
+            objeto = ""
+        else:
+            extra = _moneda(95, 330) + _moneda(668, 360, 30) + _moneda(120, 470, 26) + _moneda(650, 480, 24)
     elif pose == "alerta":
         baja = True
         brazos = _brazo((255, 410), (150, 340), (205, 270)) + _brazo((505, 410), (610, 340), (555, 270))
@@ -92,6 +164,10 @@ def svg(pose: str, ancho: int = 760) -> str:
                  f'<circle cx="660" cy="445" r="30" fill="none" stroke="#111" stroke-width="7"/>'
                  f'<text x="660" y="461" text-anchor="middle" font-family="Luck, Arial Black" font-size="44" fill="#111">$</text></g>'
                  f'<circle cx="605" cy="460" r="30" fill="{VERDE}" {K}/>')
-    alto = round(ancho * 640 / 760)
-    return (f'<svg width="{ancho}" height="{alto}" viewBox="0 0 760 640" xmlns="http://www.w3.org/2000/svg">'
-            f'{_rayitos(pose not in ("pensando", "alerta", "lupa"))}{_cuerpo(baja)}{brazos}{extra}</svg>')
+    # El objeto del tema va del lado libre: a la izquierda, o a la derecha si el escudo ocupa la izquierda.
+    cosa = ""
+    if objeto:
+        cosa = _objeto(objeto, 700, 490, 1.15) if pose == "escudo" else _objeto(objeto, 60, 460, 1.15)
+    alto = round(ancho * 640 / 900)
+    return (f'<svg width="{ancho}" height="{alto}" viewBox="-70 0 900 640" xmlns="http://www.w3.org/2000/svg">'
+            f'{_rayitos(pose not in ("pensando", "alerta", "lupa") and not objeto)}{_cuerpo(baja)}{cosa}{brazos}{extra}</svg>')

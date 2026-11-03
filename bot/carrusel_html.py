@@ -312,10 +312,10 @@ def caricatura(laminas: list[dict], palabra: str, con_guia: bool, usuario: str =
         n = f'<div class="n">{i + 1}/{total}</div>'
         if l.get("tipo") == "portada":
             chip = f'<div class="chip">{e(l.get("etiqueta") or "Guía rápida")}</div>' if l.get("etiqueta") else ""
-            cuerpo = (f'{chip}<h1>{resaltar(l.get("titulo"), "v")}</h1><div class="dib">{svg(l.get("pose") or "saludo", 780)}</div>'
+            cuerpo = (f'{chip}<h1>{resaltar(l.get("titulo"), "v")}</h1><div class="dib">{svg(l.get("pose") or "saludo", 820, l.get("objeto") or "")}</div>'
                       f'<div class="txt">{resaltar(l.get("bajada") or "Deslizá →", "v")}</div>{yo}')
         else:
-            cuerpo = (f'<h2>{resaltar(l.get("titulo"), "v")}</h2><div class="dib">{svg(l.get("pose") or "pensando", 760)}</div>'
+            cuerpo = (f'<h2>{resaltar(l.get("titulo"), "v")}</h2><div class="dib">{svg(l.get("pose") or "pensando", 800, l.get("objeto") or "")}</div>'
                       f'<div class="txt">{resaltar(l.get("texto"), "v")}</div>{yo}')
         secciones.append(f'<section class="l c">{n}{cuerpo}</section>')
     n = f'<div class="n">{total}/{total}</div>'

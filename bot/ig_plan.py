@@ -83,6 +83,7 @@ ESTILO:
   Después 4 a 5 láminas {"tipo":"paso","etiqueta":"1-3 palabras (ej. 'Cómo funciona')","titulo":"máx. 6 palabras, con *clave*","texto":"20 a 32 palabras, con un dato o ejemplo concreto","dato":"opcional: un hecho o número verificable en 1 oración","foto":"opcional: búsqueda en inglés de una foto real (solo en 1 o 2 láminas)"}.
 - caricatura: portada {"tipo":"portada","etiqueta":"2-3 palabras","titulo":"máx. 6 palabras, con *clave*, ideal una pregunta que enganche","bajada":"máx. 14 palabras: qué va a aprender","pose":"una de las POSES"}.
   Después 5 láminas {"tipo":"paso","titulo":"máx. 4 palabras, con *clave* (una afirmación, ej. 'El *stop loss* manda')","texto":"14 a 24 palabras, con un dato o ejemplo concreto, con *clave*","pose":"una de las POSES, la que mejor muestra la idea (no repitas la misma pose seguida)"}.
+  Cada lámina puede llevar además "objeto": el objeto del tema que acompaña al robot, o "" si no hace falta. OBJETOS: bitcoin, ethereum, usdt (stablecoins), computadora (tecnología, IA, programar), hackeo (hackeos, estafas, robos), candado (seguridad, contraseñas, 2FA), banco (bancos, plazo fijo, inflación), billete (dinero, sueldo, ahorro), grafico (análisis, velas, mercado). Usalo cuando el tema lo pida (si habla de bitcoin, que aparezca bitcoin).
   POSES: saludo (bienvenida), pensando (preguntas, dudas, mitos), lupa (analizar, detectar), festejo (logros, crecimiento), alerta (errores, riesgos, caídas), celular (apps, exchanges, operar), escudo (stop loss, seguridad, riesgo), dinero (ahorro, sueldo, dinero).
 - editorial: portada {"tipo":"portada","numero":"cuántos puntos","titulo":"máx. 5 palabras","banda":"la frase clave con *resaltado*","foto":"búsqueda en inglés"}.
   Después 5 láminas {"tipo":"punto","titulo":"máx. 5 palabras con punto final y *clave*","lista":["2 o 3 renglones de máx. 7 palabras, concretos"],"banda":"una frase que remata con *resaltado*"}.
@@ -225,10 +226,12 @@ def armar_html(contenido: dict, estilo: str, con_guia: bool, buscar=None, fotos_
             return None
 
     if estilo == "caricatura":
-        from .robot import POSES
+        from .robot import OBJETOS, POSES
         for l in laminas:
             if l.get("pose") not in POSES:
                 l["pose"] = "saludo" if l.get("tipo") == "portada" else "pensando"
+            if l.get("objeto") not in OBJETOS:
+                l["objeto"] = ""
         return ch.sacar_fotos(ch.caricatura(laminas, palabra, con_guia, usuario))
     if estilo == "partida":
         return ch.sacar_fotos(ch.partida(laminas, palabra, con_guia, list(fotos_eze or []), usuario))
