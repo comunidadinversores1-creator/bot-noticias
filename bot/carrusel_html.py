@@ -302,12 +302,38 @@ CSS_CARICATURA = """
 """
 
 
+def _logo_marca(nombre: str) -> bytes | None:
+    """El logo oficial guardado en assets/marcas (mercadopago, binance, bitcoin...)."""
+    if not nombre:
+        return None
+    try:
+        from .imagen import logo_guardado
+        foto = logo_guardado(str(nombre))
+    except Exception:
+        foto = None
+    if foto is None or foto.imagen is None:
+        return None
+    import io as _io
+    b = _io.BytesIO(); foto.imagen.convert("RGBA").save(b, "PNG")
+    return b.getvalue()
+
+
 def _dibujo(l: dict, pose: str, ancho: int) -> str:
-    """La ilustración de la lámina: una imagen hecha con IA si la tiene, si no el robot de Eze en SVG."""
+    """La ilustración de la lámina: una imagen hecha con IA si la tiene, si no el robot de Eze en SVG.
+    Si la lámina nombra una marca ('logo'), su logo oficial va en un círculo blanco al costado."""
     from .robot import svg
     if l.get("_ilustracion"):
-        return f'<img src="{_datos(l["_ilustracion"])}" style="max-width:{ancho}px; max-height:100%; object-fit:contain; mix-blend-mode:multiply">'
-    return svg(l.get("pose") or pose, ancho, l.get("objeto") or "")
+        dibujo = f'<img src="{_datos(l["_ilustracion"])}" style="max-width:{ancho}px; max-height:100%; object-fit:contain; mix-blend-mode:multiply">'
+    else:
+        dibujo = svg(l.get("pose") or pose, ancho, l.get("objeto") or "")
+    logo = l.get("_logo") or _logo_marca(l.get("logo") or "")
+    if not logo:
+        return dibujo
+    tam = 230 if l.get("tipo") == "portada" else 190
+    insignia = (f'<div style="position:absolute; right:10px; top:0; width:{tam}px; height:{tam}px; border-radius:50%; background:#fff; '
+                f'border:7px solid #111; box-shadow:8px 8px 0 #111; display:flex; align-items:center; justify-content:center; overflow:hidden">'
+                f'<img src="{_datos(logo, "image/png")}" style="width:78%; height:78%; object-fit:contain"></div>')
+    return f'<div style="position:relative; display:flex; align-items:center; justify-content:center; height:100%">{dibujo}{insignia}</div>'
 
 
 def caricatura(laminas: list[dict], palabra: str, con_guia: bool, usuario: str = "@ezebagnato", cierre_img: bytes | None = None) -> str:

@@ -89,6 +89,7 @@ ESTILO:
 - caricatura: portada {"tipo":"portada","etiqueta":"2-3 palabras","titulo":"máx. 6 palabras, con *clave*, ideal una pregunta que enganche","bajada":"máx. 14 palabras: qué va a aprender","pose":"una de las POSES"}.
   Después 5 láminas {"tipo":"paso","titulo":"máx. 4 palabras, con *clave* (una afirmación, ej. 'El *stop loss* manda')","texto":"14 a 24 palabras (nunca más de 24), con un dato o ejemplo concreto y UNA sola *clave*","pose":"una de las POSES, la que mejor muestra la idea (no repitas la misma pose seguida)"}.
   La portada y ENTRE 2 Y 3 láminas más (no todas, alternadas con las del robot, para que el carrusel tenga variedad) llevan "escena": una ilustración del tema, EN INGLÉS, que muestre la idea con objetos concretos y sin personas reales ni el robot (ej. "an open wallet with coins falling out and a red chart pointing down", "a big gold bitcoin coin on top of a stack of coins next to a laptop with a green chart"). En esas láminas no va el robot. En las demás va el robot con su pose y su objeto.
+  Si una lámina habla de una empresa, exchange o moneda concreta (Mercado Pago, Binance, Bitcoin, Ethereum, Tether, Coinbase, PayPal, Visa...), poné su nombre en "logo" y aparece su logo oficial.
   Cada lámina puede llevar además "objeto": el objeto del tema que acompaña al robot, o "" si no hace falta. OBJETOS: bitcoin, ethereum, usdt (stablecoins), computadora (tecnología, IA, programar), hackeo (hackeos, estafas, robos), candado (seguridad, contraseñas, 2FA), banco (bancos, plazo fijo, inflación), billete (dinero, sueldo, ahorro), grafico (análisis, velas, mercado). Usalo cuando el tema lo pida (si habla de bitcoin, que aparezca bitcoin).
   POSES: saludo (bienvenida), pensando (preguntas, dudas, mitos), lupa (analizar, detectar), festejo (logros, crecimiento), alerta (errores, riesgos, caídas), celular (apps, exchanges, operar), escudo (stop loss, seguridad, riesgo), dinero (ahorro, sueldo, dinero).
 - editorial: portada {"tipo":"portada","numero":"cuántos puntos","titulo":"máx. 5 palabras","banda":"la frase clave con *resaltado*","foto":"búsqueda en inglés"}.
@@ -248,6 +249,11 @@ def armar_html(contenido: dict, estilo: str, con_guia: bool, buscar=None, fotos_
                 l["pose"] = "saludo" if l.get("tipo") == "portada" else "pensando"
             if l.get("objeto") not in OBJETOS:
                 l["objeto"] = ""
+        # El logo oficial de la marca o moneda del tema (si está guardado) va en la portada.
+        portada = next((l for l in laminas if l.get("tipo") == "portada"), None)
+        logo_img = logo_del_tema(tema) if tema else None
+        if portada is not None and logo_img is not None and not portada.get("logo"):
+            b = _io.BytesIO(); logo_img.convert("RGBA").save(b, "PNG"); portada["_logo"] = b.getvalue()
         from .mascota import ilustrar
         con_escena = [l for l in laminas if str(l.get("escena") or "").strip()][:4]
         for l in con_escena:
