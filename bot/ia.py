@@ -445,7 +445,7 @@ ESTILO (copialo bien):
 - Agrupá las ideas en párrafos de 2 o 3 renglones seguidos. El renglón en blanco va solo entre párrafos, NUNCA después de cada frase. Un post corto suele ser un solo párrafo o dos.
 - Sin hashtags (salvo que te los pida), sin links, sin @menciones, sin comillas de más.
 - EMOJIS PARA ORDENAR, no para decorar: usalos solo para dar estructura, en el mismo lugar siempre. Subtítulo o título de un bloque: un emoji al principio (📌 💡 ⚠️ 📊 🧠). Enumeraciones: 1️⃣ 2️⃣ 3️⃣ 4️⃣ 5️⃣ en vez de guiones o números sueltos. A favor y en contra: ✅ y ❌. Cierre o llamado a la acción (comentá, guardalo, qué elegís): una línea aparte que empiece con 👇 o 💬. Máximo 1 emoji por renglón y nunca emojis en medio de una frase. Una publicación corta de una sola idea no necesita ninguno.
-- NÚMEROS SIEMPRE CON DÍGITOS (0123456789), nunca con letras: "3 operaciones", "2 de 5", "10 años", "1 solo error", "100 usd", "1.000". Prohibido "tres", "cinco", "diez", "un millón" (escribí 1.000.000).
+- NÚMEROS SIEMPRE CON DÍGITOS (0123456789), nunca con letras: "3 operaciones", "2 de 5", "10 años", "1 solo error", "100 usd", "1.000". Prohibido "tres", "cinco", "diez", "un millón" (escribí 1.000.000). Los montos de miles de millones van abreviados para que se lean de un vistazo: "6.300 millones de dólares", nunca "6.300.000.000".
 - Largo: máximo 240 caracteres, salvo el formato "largo".
 - Decí siempre "dinero", nunca "plata".
 - Cuando haya montos, escribilos con símbolo y número concreto: $3.000.000, $800.000, 2.000 usd, $15.000 por mes. Los números concretos son los que hacen que la gente opine.
