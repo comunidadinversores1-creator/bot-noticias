@@ -713,6 +713,8 @@ class Corrida:
                         resultados.append(f"{prov['nombre']}/{modelo}: FALLA ({str(error)[:80]})")
             log.warning("Prueba de IA: %s", " | ".join(resultados))
             return self.cerrar(1)
+        if not self.real and self.promo_pedida.lower() == "mascota":
+            return self.cerrar(1 if self.prueba_mascota() else 0)
         if not self.real and self.promo_pedida.lower() == "campana":
             return self.cerrar(1 if self.muestra_campana() else 0)
         if not self.real and self.promo_pedida.lower() == "historias":
@@ -1603,6 +1605,32 @@ class Corrida:
                            f"🚨 <b>Publiqué un carrusel de noticia en @ezebagnato</b>\n{html.escape(post.get('titular', ''))}")
         except ErrorPublicacion as error:
             log.warning("no pude mandar el aviso del carrusel de noticia: %s", error)
+        return True
+
+    def prueba_mascota(self) -> bool:
+        """Prueba la IA de imágenes de Google con el robot de los carruseles en 3 poses (no publica nada)."""
+        from . import mascota
+        clave = os.environ.get("GEMINI_API_KEY", "")
+        poses = ["waving hello happily", "thinking with one hand on its chin, a big question mark next to it",
+                 "holding a magnifying glass and looking through it, curious"]
+        hechas = []
+        for pose in poses:
+            img, informe = mascota.dibujar(pose, clave)
+            log.warning("Mascota (%s): %s", pose[:30], informe[:900])
+            if img:
+                hechas.append(img)
+        if not hechas:
+            self.avisar("mascota", "La IA de imágenes de Google no pudo dibujar el robot (mirá el detalle en GitHub).")
+            return False
+        try:
+            urls = instagram.subir_imagenes(hechas, f"mascota/{self.ahora:%Y%m%d-%H%M%S}")
+            log.warning("Mascota: %s", " ".join(urls))
+        except Exception as error:
+            log.warning("mascota: no pude guardar las imágenes (%s)", error)
+        try:
+            telegram_album(self.token, self.chat_prueba, hechas, "🤖 Prueba del robot de los carruseles hecho con la IA de Google")
+        except ErrorPublicacion as error:
+            log.warning("mascota: no pude mandarlas por Telegram (%s)", error)
         return True
 
     def publicar_historia_manual(self, nombre: str) -> bool:
