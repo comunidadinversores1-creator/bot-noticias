@@ -13,12 +13,13 @@ from .imagen import INTERACCIONES, _primera_imagen
 log = logging.getLogger("bot")
 
 PERSONAJE = (
-    "A cute friendly cartoon robot mascot: square green head (#22c55e) with a big black screen as its face showing a "
-    "rising green line chart, a short antenna with a small green ball on top, a black rectangular body with a green "
-    "panel and three small lights (green, yellow, red), black tube arms with green round hands."
+    "A cute friendly cartoon robot mascot with EXACTLY two arms and two hands (never three): a square green head (#22c55e) "
+    "with a black screen as its face, on the screen two big friendly white eyes and a small green rising line chart below them, "
+    "round black ear speakers on both sides, a short antenna with a small green ball on top, a compact dark green body with a "
+    "black panel and three small lights (green, yellow, red), black flexible tube arms with green hands, short black legs and green shoes."
 )
 ESTILO = (
-    "Flat 2D cartoon sticker illustration, thick black outlines, simple shapes, bold flat colors (green, black, cream, "
+    "Clean flat 2D cartoon sticker illustration, consistent character design, thick black outlines, simple shapes, bold flat colors (green, black, cream, "
     "small touches of red and yellow), a few small black motion lines around it, plain solid cream background (#FBF6E9). "
     "No text, no letters, no numbers, no logos, no watermark, no frame."
 )
@@ -77,6 +78,15 @@ def por_cloudflare(pedido: str, cuenta: str, token: str, modelo: str = "@cf/blac
     except ValueError:
         dato = None
     return (base64.b64decode(dato), "ok") if dato else (None, "cloudflare: sin imagen")
+
+
+def escena(texto: str) -> str:
+    """Pedido para una ilustración del tema (sin el robot), en el mismo estilo."""
+    return f"Scene: {texto}. {ESTILO}"
+
+
+def con_robot(pose: str) -> str:
+    return f"{PERSONAJE} Pose and scene: {pose}. {ESTILO}"
 
 
 def dibujar(pose: str, clave: str, modelos: list[str] | None = None, clave_openai: str = "") -> tuple[bytes | None, str]:

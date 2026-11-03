@@ -713,6 +713,8 @@ class Corrida:
                         resultados.append(f"{prov['nombre']}/{modelo}: FALLA ({str(error)[:80]})")
             log.warning("Prueba de IA: %s", " | ".join(resultados))
             return self.cerrar(1)
+        if not self.real and self.promo_pedida.lower() == "muestra_caricatura":
+            return self.cerrar(1 if self.muestra_caricatura() else 0)
         if not self.real and self.promo_pedida.lower() == "mascota":
             return self.cerrar(1 if self.prueba_mascota() else 0)
         if not self.real and self.promo_pedida.lower() == "campana":
@@ -1606,6 +1608,66 @@ class Corrida:
         except ErrorPublicacion as error:
             log.warning("no pude mandar el aviso del carrusel de noticia: %s", error)
         return True
+
+    def muestra_caricatura(self) -> bool:
+        """Dos muestras del mismo carrusel (no se publican): 1) el robot fijo + ilustraciones del tema con IA,
+        2) todo dibujado con IA. Usa Cloudflare Workers AI (gratis)."""
+        import copy
+        from . import mascota
+        cuenta, token = os.environ.get("CF_ACCOUNT_ID", ""), os.environ.get("CF_API_TOKEN", "")
+        if not (cuenta and token):
+            self.avisar("muestra_caricatura", "Faltan CF_ACCOUNT_ID y CF_API_TOKEN en GitHub.")
+            return False
+
+        def ia(pedido: str) -> bytes | None:
+            img, nota = mascota.por_cloudflare(pedido, cuenta, token)
+            log.warning("Muestra caricatura: %s", nota[:200])
+            return img
+
+        base = [
+            {"tipo": "portada", "etiqueta": "Guía rápida", "titulo": "¿Qué es un *bot* de trading?",
+             "bajada": "Lo que hace, lo que no hace y el error que más dinero cuesta", "pose": "saludo",
+             "escena": "a laptop on a desk showing a green rising candlestick chart, small gears and gold coins floating around it",
+             "robot": "waving hello happily next to a laptop that shows a green rising chart"},
+            {"tipo": "paso", "titulo": "Opera *por vos*", "texto": "Sigue reglas fijas: si el precio hace *esto*, entra; si toca el stop, sale. No se cansa ni se asusta.",
+             "pose": "celular", "robot": "proudly holding a smartphone that shows a green trading chart"},
+            {"tipo": "paso", "titulo": "No es *magia*", "texto": "Si las reglas son malas, el bot pierde igual. Solo repite lo que le programaron, *más rápido*.",
+             "pose": "pensando", "escena": "a magician top hat and magic wand crossed out with a big red X, next to a clipboard with a checklist",
+             "robot": "shrugging next to a magician top hat crossed out with a red X"},
+            {"tipo": "paso", "titulo": "El *stop loss* manda", "texto": "Con USD 1.000 y 1% de riesgo, perdés como máximo *USD 10* por operación.",
+             "pose": "escudo", "objeto": "candado", "robot": "holding a big green shield with a check mark, protecting a pile of gold coins"},
+            {"tipo": "paso", "titulo": "El error *más caro*", "texto": "Prenderlo con todo tu dinero sin probarlo antes en una cuenta chica.",
+             "pose": "alerta", "escena": "an open wallet with coins falling out and a big red falling arrow chart behind it, a yellow warning sign",
+             "robot": "worried with hands on its head, next to a red falling chart and a yellow warning sign"},
+        ]
+        # Opción 1: el robot fijo en SVG + ilustraciones del tema en la portada y en 2 láminas.
+        uno = copy.deepcopy(base)
+        for l in uno:
+            if l.get("escena"):
+                l["_ilustracion"] = ia(mascota.escena(l["escena"]))
+        # Opción 2: todo dibujado con IA (el robot en cada lámina).
+        dos = copy.deepcopy(base)
+        for l in dos:
+            l["_ilustracion"] = ia(mascota.con_robot(l["robot"]))
+        cierre = ia(mascota.con_robot("waving goodbye happily, friendly"))
+        hechas = 0
+        for nombre, laminas, final in (("opcion-1", uno, None), ("opcion-2", dos, cierre)):
+            try:
+                jpgs = carrusel_html.sacar_fotos(carrusel_html.caricatura(laminas, "BOT", False, "@ezebagnato", cierre_img=final))
+            except Exception as error:
+                log.warning("muestra %s: %s", nombre, error)
+                continue
+            try:
+                urls = instagram.subir_imagenes(jpgs, f"muestras/{self.ahora:%Y%m%d-%H%M%S}-{nombre}")
+                log.warning("Muestra %s: %s", nombre, " ".join(urls))
+            except Exception as error:
+                log.warning("muestra %s: no pude guardarla (%s)", nombre, error)
+            try:
+                telegram_album(self.token, self.chat_prueba, jpgs, f"👀 Muestra del carrusel · {nombre.replace('-', ' ')} (no se publicó)")
+            except ErrorPublicacion as error:
+                log.warning("muestra %s: %s", nombre, error)
+            hechas += 1
+        return hechas > 0
 
     def prueba_mascota(self) -> bool:
         """Prueba la IA de imágenes de Google con el robot de los carruseles en 3 poses (no publica nada)."""

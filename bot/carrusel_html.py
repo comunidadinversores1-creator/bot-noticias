@@ -302,7 +302,15 @@ CSS_CARICATURA = """
 """
 
 
-def caricatura(laminas: list[dict], palabra: str, con_guia: bool, usuario: str = "@ezebagnato") -> str:
+def _dibujo(l: dict, pose: str, ancho: int) -> str:
+    """La ilustración de la lámina: una imagen hecha con IA si la tiene, si no el robot de Eze en SVG."""
+    from .robot import svg
+    if l.get("_ilustracion"):
+        return f'<img src="{_datos(l["_ilustracion"])}" style="max-width:{ancho}px; max-height:100%; object-fit:contain; border-radius:36px">'
+    return svg(l.get("pose") or pose, ancho, l.get("objeto") or "")
+
+
+def caricatura(laminas: list[dict], palabra: str, con_guia: bool, usuario: str = "@ezebagnato", cierre_img: bytes | None = None) -> str:
     """laminas: [{'tipo':'portada','etiqueta','titulo','bajada','pose'}, {'tipo':'paso','titulo','texto','pose'}, ...]"""
     from .robot import svg
     total = len(laminas) + 1
@@ -312,19 +320,19 @@ def caricatura(laminas: list[dict], palabra: str, con_guia: bool, usuario: str =
         n = f'<div class="n">{i + 1}/{total}</div>'
         if l.get("tipo") == "portada":
             chip = f'<div class="chip">{e(l.get("etiqueta") or "Guía rápida")}</div>' if l.get("etiqueta") else ""
-            cuerpo = (f'{chip}<h1>{resaltar(l.get("titulo"), "v")}</h1><div class="dib">{svg(l.get("pose") or "saludo", 820, l.get("objeto") or "")}</div>'
+            cuerpo = (f'{chip}<h1>{resaltar(l.get("titulo"), "v")}</h1><div class="dib">{_dibujo(l, "saludo", 820)}</div>'
                       f'<div class="txt">{resaltar(l.get("bajada") or "Deslizá →", "v")}</div>{yo}')
         else:
-            cuerpo = (f'<h2>{resaltar(l.get("titulo"), "v")}</h2><div class="dib">{svg(l.get("pose") or "pensando", 800, l.get("objeto") or "")}</div>'
+            cuerpo = (f'<h2>{resaltar(l.get("titulo"), "v")}</h2><div class="dib">{_dibujo(l, "pensando", 800)}</div>'
                       f'<div class="txt">{resaltar(l.get("texto"), "v")}</div>{yo}')
         secciones.append(f'<section class="l c">{n}{cuerpo}</section>')
     n = f'<div class="n">{total}/{total}</div>'
     if con_guia:
-        cierre = (f'<h2>¿Querés la <span class="v">guía completa</span>?</h2><div class="dib">{svg("saludo", 560)}</div>'
+        cierre = (f'<h2>¿Querés la <span class="v">guía completa</span>?</h2><div class="dib">{_dibujo({"_ilustracion": cierre_img}, "saludo", 560)}</div>'
                   f'<div class="txt">Comentá <span class="v">{e(palabra)}</span> y te la mando por privado.</div>{yo}')
     else:
         nombre = "Ezequiel Bagnato | Cripto & Trading" if "ezebagnato" in usuario else "Comunidad Inversores"
-        cierre = (f'<h2><span class="v">Seguime</span> y guardalo</h2><div class="dib">{svg("saludo", 520)}</div>'
+        cierre = (f'<h2><span class="v">Seguime</span> y guardalo</h2><div class="dib">{_dibujo({"_ilustracion": cierre_img}, "saludo", 520)}</div>'
                   f'<div class="tarjeta"><div style="display:flex; align-items:center; gap:26px"><img src="{_logo()}" style="width:120px; height:120px; border-radius:50%; border:5px solid #111">'
                   f'<div><div style="font-family:Archivo; font-size:40px; line-height:1.15">{e(nombre)}</div><div style="font-family:Archivo; font-size:32px; color:#555">{e(usuario)}</div></div></div>'
                   f'<div class="boton">SEGUIR<span style="position:absolute; right:110px; top:40px; font-size:110px; line-height:1">👆</span></div></div>')
