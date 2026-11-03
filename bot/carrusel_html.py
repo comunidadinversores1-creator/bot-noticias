@@ -90,9 +90,11 @@ def _fuentes() -> str:
         partes = [":root { --verde:#22c55e; --naranja:#f7931a; --rojo:#ef4444; --negro:#09090b; --texto:#e4e4e7; --gris:#a1a1aa; }",
                   "* { box-sizing: border-box; margin: 0; padding: 0; } body { background: #000; font-family: Inter; font-weight: 500; }"]
         for familia, peso, archivo in (("Anton", 400, "Anton-Regular.ttf"), ("Inter", 500, "Inter-Medium.otf"), ("Inter", 600, "Inter-SemiBold.otf"),
-                                       ("Inter", 700, "Inter-Bold.otf"), ("Serif", 400, "DMSerifDisplay-Regular.ttf")):
+                                       ("Inter", 700, "Inter-Bold.otf"), ("Serif", 400, "DMSerifDisplay-Regular.ttf"),
+                                       ("Luck", 400, "LuckiestGuy.woff2"), ("Archivo", 400, "ArchivoBlack.woff2")):
+            tipo = {"ttf": "font/ttf", "otf": "font/otf", "woff2": "font/woff2"}[archivo.rsplit(".", 1)[1]]
             try:
-                datos = _datos((RAIZ / "assets" / "fuentes_letra" / archivo).read_bytes(), "font/ttf" if archivo.endswith("ttf") else "font/otf")
+                datos = _datos((RAIZ / "assets" / "fuentes_letra" / archivo).read_bytes(), tipo)
             except OSError:
                 continue
             partes.append(f'@font-face {{ font-family: "{familia}"; font-weight: {peso}; src: url("{datos}"); }}')
@@ -274,3 +276,57 @@ def sacar_fotos(pagina_html: str) -> list[bytes]:
             return [s.screenshot(type="jpeg", quality=92) for s in pag.locator("section.l").all()]
         finally:
             nav.close()
+
+
+# ------------------------------------------------------------------ caricatura
+# Fondo crema, letras gordas, el robot de Eze en una pose distinta por lámina y poquito texto.
+CSS_CARICATURA = """
+.c { width: 1080px; height: 1440px; position: relative; overflow: hidden; background: #FBF6E9; color: #111; display: flex;
+     flex-direction: column; align-items: center; padding: 96px 70px 70px; }
+.c::before, .c::after { display: none !important; }
+.c .n { position: absolute; top: 40px; right: 52px; font-family: Archivo; font-size: 30px; }
+.c .chip { font-family: Archivo; font-size: 30px; letter-spacing: .12em; text-transform: uppercase; background: #111; color: #FBF6E9;
+           padding: 10px 28px; border-radius: 40px; margin-bottom: 26px; }
+.c h1, .c h2 { font-family: Luck; font-weight: 400; text-transform: uppercase; text-align: center; line-height: 1.02; color: #111;
+               text-shadow: 5px 5px 0 rgba(0,0,0,.08); }
+.c h1 { font-size: 132px; } .c h2 { font-size: 104px; }
+.c .v { color: #16a34a; } .c .r { color: #ef4444; }
+.c .dib { flex: 1; display: flex; align-items: center; justify-content: center; min-height: 0; }
+.c .txt { font-family: Archivo; font-size: 46px; line-height: 1.22; text-align: center; max-width: 940px; }
+.c .txt .v, .c .txt .r { color: #16a34a; }
+.c .yo { font-family: Archivo; font-size: 26px; color: #444; margin-top: 24px; display: flex; align-items: center; gap: 12px; }
+.c .yo img { width: 46px; height: 46px; border-radius: 50%; border: 3px solid #111; }
+.c .tarjeta { background: #fff; border: 6px solid #111; border-radius: 36px; padding: 34px 40px; width: 860px; box-shadow: 10px 10px 0 #111; }
+.c .boton { margin-top: 26px; background: #22c55e; border: 5px solid #111; border-radius: 22px; text-align: center; font-family: Luck;
+            font-size: 64px; padding: 14px 0 6px; position: relative; }
+"""
+
+
+def caricatura(laminas: list[dict], palabra: str, con_guia: bool, usuario: str = "@ezebagnato") -> str:
+    """laminas: [{'tipo':'portada','etiqueta','titulo','bajada','pose'}, {'tipo':'paso','titulo','texto','pose'}, ...]"""
+    from .robot import svg
+    total = len(laminas) + 1
+    yo = f'<div class="yo"><img src="{_logo()}">{e(usuario)}</div>'
+    secciones = []
+    for i, l in enumerate(laminas):
+        n = f'<div class="n">{i + 1}/{total}</div>'
+        if l.get("tipo") == "portada":
+            chip = f'<div class="chip">{e(l.get("etiqueta") or "Guía rápida")}</div>' if l.get("etiqueta") else ""
+            cuerpo = (f'{chip}<h1>{resaltar(l.get("titulo"), "v")}</h1><div class="dib">{svg(l.get("pose") or "saludo", 780)}</div>'
+                      f'<div class="txt">{resaltar(l.get("bajada") or "Deslizá →", "v")}</div>{yo}')
+        else:
+            cuerpo = (f'<h2>{resaltar(l.get("titulo"), "v")}</h2><div class="dib">{svg(l.get("pose") or "pensando", 760)}</div>'
+                      f'<div class="txt">{resaltar(l.get("texto"), "v")}</div>{yo}')
+        secciones.append(f'<section class="l c">{n}{cuerpo}</section>')
+    n = f'<div class="n">{total}/{total}</div>'
+    if con_guia:
+        cierre = (f'<h2>¿Querés la <span class="v">guía completa</span>?</h2><div class="dib">{svg("saludo", 560)}</div>'
+                  f'<div class="txt">Comentá <span class="v">{e(palabra)}</span> y te la mando por privado.</div>{yo}')
+    else:
+        nombre = "Ezequiel Bagnato | Cripto & Trading" if "ezebagnato" in usuario else "Comunidad Inversores"
+        cierre = (f'<h2><span class="v">Seguime</span> y guardalo</h2><div class="dib">{svg("saludo", 520)}</div>'
+                  f'<div class="tarjeta"><div style="display:flex; align-items:center; gap:26px"><img src="{_logo()}" style="width:120px; height:120px; border-radius:50%; border:5px solid #111">'
+                  f'<div><div style="font-family:Archivo; font-size:40px; line-height:1.15">{e(nombre)}</div><div style="font-family:Archivo; font-size:32px; color:#555">{e(usuario)}</div></div></div>'
+                  f'<div class="boton">SEGUIR<span style="position:absolute; right:110px; top:40px; font-size:110px; line-height:1">👆</span></div></div>')
+    secciones.append(f'<section class="l c">{n}{cierre}</section>')
+    return _pagina("".join(secciones)).replace("</style>", CSS_CARICATURA + "</style>", 1)

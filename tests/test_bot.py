@@ -2030,7 +2030,7 @@ def test_carrusel_rota_estilos_y_te_llega_por_privado(corrida, red, tmp_path):
     assert "Carrusel para Instagram" in red.telegram_albumes[0]["texto"]
     assert any("Texto para el post" in m["text"] for m in _al_privado(red))
     ig = _memoria(tmp_path)["ig"]
-    assert ig["vuelta"] == 1 and ig["historial"][0]["estilo"] == "titular" and ig["temas_usados"] == ["¿Qué es Bitcoin?"]
+    assert ig["vuelta"] == 1 and ig["historial"][0]["estilo"] == "caricatura" and ig["temas_usados"] == ["¿Qué es Bitcoin?"]
     # El mismo día no se repite.
     c = corrida(imagen="ninguna", ahora=lunes + timedelta(hours=1))
     c.cfg["instagram"] = {"carruseles": True, "dias_carrusel": [0], "hora_carrusel": "18:00"}
@@ -2042,7 +2042,7 @@ def test_rueda_de_carruseles_pasa_por_todos_los_estilos():
     from bot import ig_plan
     estilos = {e for _, e in ig_plan.RUEDA}
     tipos = {t for t, _ in ig_plan.RUEDA}
-    assert estilos == {"titular"} and {"ensenanza", "errores", "habitos", "mentalidad", "bots"} <= tipos   # por ahora solo negro y verde
+    assert estilos == {"caricatura"} and {"ensenanza", "errores", "habitos", "mentalidad", "bots"} <= tipos   # desde nov-2026: estilo caricatura con el robot
     assert ig_plan.que_toca({})[2] == "¿Qué es Bitcoin?"
     assert ig_plan.que_toca({"temas_usados": ["¿Qué es Bitcoin?"]})[2] == "¿Qué es la blockchain?"
 
@@ -2285,3 +2285,11 @@ def test_los_disenos_de_carrusel_van_cambiando():
     from bot import carrusel_html
     nombres = [carrusel_html.elegir_diseno(n) for n in range(12)]
     assert len(set(nombres)) == 12
+
+
+def test_carrusel_caricatura_dibuja_el_robot_en_cada_pose():
+    from bot import carrusel_html, robot
+    laminas = [{"tipo": "portada", "titulo": "¿Qué es un *bot*?", "bajada": "En 5 láminas", "pose": "saludo"}]
+    laminas += [{"tipo": "paso", "titulo": f"Idea {i}", "texto": "texto", "pose": p} for i, p in enumerate(robot.POSES)]
+    pagina = carrusel_html.caricatura(laminas, "BOT", False)
+    assert pagina.count('class="l c"') == len(laminas) + 1 and pagina.count("<svg") >= len(laminas)

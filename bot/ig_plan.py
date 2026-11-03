@@ -14,13 +14,14 @@ from . import ia
 RUEDA = [
     # Por ahora, solo el estilo negro y verde (el del carrusel de Bitcoin): los de papel y los de pantalla
     # partida con fotos de Eze quedan apagados (no le gustaron, oct-2026).
-    ("ensenanza", "titular"),
-    ("errores", "titular"),
-    ("ensenanza", "titular"),
-    ("bots", "titular"),
-    ("habitos", "titular"),
-    ("ensenanza", "titular"),
-    ("mentalidad", "titular"),
+    # Desde nov-2026: estilo caricatura (fondo crema, letras gordas y el robot de Eze en una pose por lámina).
+    ("ensenanza", "caricatura"),
+    ("errores", "caricatura"),
+    ("ensenanza", "caricatura"),
+    ("bots", "caricatura"),
+    ("habitos", "caricatura"),
+    ("ensenanza", "caricatura"),
+    ("mentalidad", "caricatura"),
 ]
 
 TEMAS = {
@@ -80,6 +81,9 @@ CALIDAD (lo más importante, Eze borra los carruseles flojos):
 ESTILO:
 - titular: portada {"tipo":"portada","etiqueta":"2-3 palabras","titulo":"máx. 6 palabras, con *clave*","bajada":"máx. 12 palabras","foto":"búsqueda EN INGLÉS de una foto real del tema (ej. 'Bitcoin mining farm', 'New York Stock Exchange')"}.
   Después 4 a 5 láminas {"tipo":"paso","etiqueta":"1-3 palabras (ej. 'Cómo funciona')","titulo":"máx. 6 palabras, con *clave*","texto":"20 a 32 palabras, con un dato o ejemplo concreto","dato":"opcional: un hecho o número verificable en 1 oración","foto":"opcional: búsqueda en inglés de una foto real (solo en 1 o 2 láminas)"}.
+- caricatura: portada {"tipo":"portada","etiqueta":"2-3 palabras","titulo":"máx. 6 palabras, con *clave*, ideal una pregunta que enganche","bajada":"máx. 14 palabras: qué va a aprender","pose":"una de las POSES"}.
+  Después 5 láminas {"tipo":"paso","titulo":"máx. 4 palabras, con *clave* (una afirmación, ej. 'El *stop loss* manda')","texto":"14 a 24 palabras, con un dato o ejemplo concreto, con *clave*","pose":"una de las POSES, la que mejor muestra la idea (no repitas la misma pose seguida)"}.
+  POSES: saludo (bienvenida), pensando (preguntas, dudas, mitos), lupa (analizar, detectar), festejo (logros, crecimiento), alerta (errores, riesgos, caídas), celular (apps, exchanges, operar), escudo (stop loss, seguridad, riesgo), dinero (ahorro, sueldo, dinero).
 - editorial: portada {"tipo":"portada","numero":"cuántos puntos","titulo":"máx. 5 palabras","banda":"la frase clave con *resaltado*","foto":"búsqueda en inglés"}.
   Después 5 láminas {"tipo":"punto","titulo":"máx. 5 palabras con punto final y *clave*","lista":["2 o 3 renglones de máx. 7 palabras, concretos"],"banda":"una frase que remata con *resaltado*"}.
 - partida: 4 láminas de contraste {"arriba":"lo que hace la mayoría (máx. 8 palabras, con *clave*)","abajo":"lo que hace el trader que dura (máx. 8 palabras, con *clave*)"}. Ej.: arriba "Culpar al *mercado* cuando perdés", abajo "Revisar *qué hiciste vos* mal".
@@ -141,7 +145,7 @@ def _sin_problemas(textos: list[str]) -> list[str]:
 
 def redactar(cerebro, tipo: str, estilo: str, tema: str) -> dict | None:
     """Pide el contenido a la IA (hasta 2 intentos) y lo devuelve listo para ig_carruseles."""
-    cantidad = {"titular": "portada + 5 pasos", "editorial": "portada + 5 puntos", "partida": "4 láminas de contraste"}[estilo]
+    cantidad = {"caricatura": "portada + 5 pasos", "titular": "portada + 5 pasos", "editorial": "portada + 5 puntos", "partida": "4 láminas de contraste"}[estilo]
     correccion = ""
     for _ in range(3):
         usuario = f"ESTILO: {estilo}\nTIPO: {tipo}\nTEMA: {tema}\nCANTIDAD: {cantidad}"
@@ -183,7 +187,7 @@ def armar(contenido: dict, estilo: str, fotos: list | None = None, usuario: str 
     laminas = [dict(l) for l in contenido["laminas"]]
     palabra = contenido["palabra"]
     logo = logo_del_tema(tema) if tema else None
-    if estilo == "titular":
+    if estilo in ("titular", "caricatura"):
         if laminas and laminas[0].get("tipo") == "portada" and logo is not None:
             laminas[0]["logo"] = logo
         laminas.append({"tipo": "cierre", "palabra": palabra, "texto": "y te mando la guía completa por privado",
@@ -220,6 +224,12 @@ def armar_html(contenido: dict, estilo: str, con_guia: bool, buscar=None, fotos_
         except Exception:
             return None
 
+    if estilo == "caricatura":
+        from .robot import POSES
+        for l in laminas:
+            if l.get("pose") not in POSES:
+                l["pose"] = "saludo" if l.get("tipo") == "portada" else "pensando"
+        return ch.sacar_fotos(ch.caricatura(laminas, palabra, con_guia, usuario))
     if estilo == "partida":
         return ch.sacar_fotos(ch.partida(laminas, palabra, con_guia, list(fotos_eze or []), usuario))
     portada = next((l for l in laminas if l.get("tipo") == "portada"), None)
