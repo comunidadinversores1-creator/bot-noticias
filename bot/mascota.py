@@ -81,8 +81,27 @@ def por_cloudflare(pedido: str, cuenta: str, token: str, modelo: str = "@cf/blac
 
 
 def escena(texto: str) -> str:
-    """Pedido para una ilustración del tema (sin el robot), en el mismo estilo."""
-    return f"Scene: {texto}. {ESTILO}"
+    """Pedido para una ilustración del tema (sin el robot), en el mismo estilo. Fondo blanco puro: en la lámina
+    se funde con el crema (multiply), así no queda un recuadro de otro color."""
+    return (f"Scene: {texto}. Clean flat 2D cartoon sticker illustration, thick black outlines, simple shapes, bold flat colors "
+            "(green, black, small touches of red, yellow and orange). If the idea is negative (losses, falls, errors, hacks), "
+            "arrows and charts point DOWN and are red. Plain pure white background, nothing else around. "
+            "No text, no letters, no numbers, no logos, no watermark, no frame.")
+
+
+def ilustrar(texto: str) -> bytes | None:
+    """La ilustración del tema con Cloudflare (gratis). None si no hay llaves o falla: va el robot en SVG."""
+    import os
+    cuenta, token = os.environ.get("CF_ACCOUNT_ID", ""), os.environ.get("CF_API_TOKEN", "")
+    if not (cuenta and token and texto):
+        return None
+    try:
+        img, nota = por_cloudflare(escena(texto), cuenta, token)
+    except requests.RequestException as error:
+        img, nota = None, type(error).__name__
+    if img is None:
+        log.warning("ilustración con IA: %s", nota[:200])
+    return img
 
 
 def con_robot(pose: str) -> str:

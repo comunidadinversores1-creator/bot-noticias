@@ -306,7 +306,7 @@ def _dibujo(l: dict, pose: str, ancho: int) -> str:
     """La ilustración de la lámina: una imagen hecha con IA si la tiene, si no el robot de Eze en SVG."""
     from .robot import svg
     if l.get("_ilustracion"):
-        return f'<img src="{_datos(l["_ilustracion"])}" style="max-width:{ancho}px; max-height:100%; object-fit:contain; border-radius:36px">'
+        return f'<img src="{_datos(l["_ilustracion"])}" style="max-width:{ancho}px; max-height:100%; object-fit:contain; mix-blend-mode:multiply">'
     return svg(l.get("pose") or pose, ancho, l.get("objeto") or "")
 
 

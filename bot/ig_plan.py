@@ -83,6 +83,7 @@ ESTILO:
   Después 4 a 5 láminas {"tipo":"paso","etiqueta":"1-3 palabras (ej. 'Cómo funciona')","titulo":"máx. 6 palabras, con *clave*","texto":"20 a 32 palabras, con un dato o ejemplo concreto","dato":"opcional: un hecho o número verificable en 1 oración","foto":"opcional: búsqueda en inglés de una foto real (solo en 1 o 2 láminas)"}.
 - caricatura: portada {"tipo":"portada","etiqueta":"2-3 palabras","titulo":"máx. 6 palabras, con *clave*, ideal una pregunta que enganche","bajada":"máx. 14 palabras: qué va a aprender","pose":"una de las POSES"}.
   Después 5 láminas {"tipo":"paso","titulo":"máx. 4 palabras, con *clave* (una afirmación, ej. 'El *stop loss* manda')","texto":"14 a 24 palabras, con un dato o ejemplo concreto, con *clave*","pose":"una de las POSES, la que mejor muestra la idea (no repitas la misma pose seguida)"}.
+  La portada y como mucho 2 láminas más llevan "escena": una ilustración del tema, EN INGLÉS, que muestre la idea con objetos concretos y sin personas reales ni el robot (ej. "an open wallet with coins falling out and a red chart pointing down", "a big gold bitcoin coin on top of a stack of coins next to a laptop with a green chart"). En esas láminas no va el robot. En las demás va el robot con su pose y su objeto.
   Cada lámina puede llevar además "objeto": el objeto del tema que acompaña al robot, o "" si no hace falta. OBJETOS: bitcoin, ethereum, usdt (stablecoins), computadora (tecnología, IA, programar), hackeo (hackeos, estafas, robos), candado (seguridad, contraseñas, 2FA), banco (bancos, plazo fijo, inflación), billete (dinero, sueldo, ahorro), grafico (análisis, velas, mercado). Usalo cuando el tema lo pida (si habla de bitcoin, que aparezca bitcoin).
   POSES: saludo (bienvenida), pensando (preguntas, dudas, mitos), lupa (analizar, detectar), festejo (logros, crecimiento), alerta (errores, riesgos, caídas), celular (apps, exchanges, operar), escudo (stop loss, seguridad, riesgo), dinero (ahorro, sueldo, dinero).
 - editorial: portada {"tipo":"portada","numero":"cuántos puntos","titulo":"máx. 5 palabras","banda":"la frase clave con *resaltado*","foto":"búsqueda en inglés"}.
@@ -232,6 +233,12 @@ def armar_html(contenido: dict, estilo: str, con_guia: bool, buscar=None, fotos_
                 l["pose"] = "saludo" if l.get("tipo") == "portada" else "pensando"
             if l.get("objeto") not in OBJETOS:
                 l["objeto"] = ""
+        from .mascota import ilustrar
+        con_escena = [l for l in laminas if str(l.get("escena") or "").strip()][:3]
+        for l in con_escena:
+            img = ilustrar(str(l["escena"]))
+            if img:
+                l["_ilustracion"] = img
         return ch.sacar_fotos(ch.caricatura(laminas, palabra, con_guia, usuario))
     if estilo == "partida":
         return ch.sacar_fotos(ch.partida(laminas, palabra, con_guia, list(fotos_eze or []), usuario))
