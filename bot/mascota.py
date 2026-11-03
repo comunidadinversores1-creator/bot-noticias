@@ -66,10 +66,34 @@ def _por_openai(pedido: str, clave: str, modelo: str) -> tuple[bytes | None, str
     return None, f"openai {modelo}: sin imagen"
 
 
+def por_cloudflare(pedido: str, cuenta: str, token: str, modelo: str = "@cf/black-forest-labs/flux-1-schnell") -> tuple[bytes | None, str]:
+    """Cloudflare Workers AI (cupo gratis diario, sin tarjeta): Flux dibuja la imagen y la devuelve en base64."""
+    r = requests.post(f"https://api.cloudflare.com/client/v4/accounts/{cuenta}/ai/run/{modelo}",
+                      headers={"Authorization": f"Bearer {token}"}, json={"prompt": pedido[:2000], "steps": 8}, timeout=120)
+    if r.status_code != 200:
+        return None, f"cloudflare {r.status_code}: {r.text[:200]}"
+    try:
+        dato = (r.json().get("result") or {}).get("image")
+    except ValueError:
+        dato = None
+    return (base64.b64decode(dato), "ok") if dato else (None, "cloudflare: sin imagen")
+
+
 def dibujar(pose: str, clave: str, modelos: list[str] | None = None, clave_openai: str = "") -> tuple[bytes | None, str]:
     """(png, informe). Primero la IA de imágenes de ChatGPT (si hay clave), después las de Google."""
     pedido = f"{PERSONAJE} Pose: {pose}. {ESTILO}"
     informe = []
+    import os
+    if os.environ.get("CF_API_TOKEN") and os.environ.get("CF_ACCOUNT_ID"):
+        try:
+            img, nota = por_cloudflare(pedido, os.environ["CF_ACCOUNT_ID"], os.environ["CF_API_TOKEN"])
+        except requests.RequestException as error:
+            img, nota = None, f"cloudflare: {type(error).__name__}"
+        informe.append(nota)
+        if img:
+            return img, " | ".join(informe)
+    else:
+        informe.append("cloudflare: faltan CF_API_TOKEN / CF_ACCOUNT_ID")
     if clave_openai:
         for modelo in ("gpt-image-1", "gpt-image-1-mini"):
             try:
