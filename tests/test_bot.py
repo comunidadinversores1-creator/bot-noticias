@@ -358,7 +358,7 @@ def test_busqueda_de_foto_filtra_y_elige(red):
     # si la IA dice que ninguna tiene relación, no se pone foto
     assert imagen.buscar_foto(["Jerome Powell"], "x", lambda t: False, elegir=lambda t, o: -1) is None
 
-    logo = imagen.buscar_foto(["Exness logo"], "x", lambda t: False, elegir=lambda t, o: 0)
+    assert logo.es_logo and logo.titulo == "marca:exness.png" and logo.origen == "marca"     # el logo de Exness ya está guardado
     assert logo.es_logo and logo.titulo == "File:Bitcoin logo.svg" and logo.origen == "wikimedia"
 
 
