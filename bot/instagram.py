@@ -142,7 +142,16 @@ def publicar_carrusel(token: str, urls: list[str], texto: str) -> str:
     yo = quien_soy(token)["user_id"]
     hijos = []
     for url in urls[:20]:
-        c = _pedir("POST", f"{yo}/media", token, image_url=url, is_carousel_item="true")["id"]
+        # Si Instagram no pudo bajar la imagen todavía ("Only photo or video..."), se espera y se reintenta.
+        for intento in range(3):
+            try:
+                c = _pedir("POST", f"{yo}/media", token, image_url=url, is_carousel_item="true")["id"]
+                break
+            except ErrorInstagram as error:
+                if intento < 2 and ("Only photo or video" in str(error) or "does not exist" in str(error)):
+                    time.sleep(15)
+                    continue
+                raise
         hijos.append(c)
     for c in hijos:
         _esperar(c, token)
@@ -227,6 +236,16 @@ def subir_imagenes(jpgs: list[bytes], carpeta: str) -> list[str]:
         if r.status_code not in (200, 201):
             raise ErrorInstagram(f"No pude subir la imagen {i} ({r.status_code}).")
         urls.append(f"https://raw.githubusercontent.com/{repo}/{RAMA}/{ruta}")
+    # Que cada imagen ya se pueda bajar del link público antes de pasársela a Instagram.
+    for url in urls:
+        for _ in range(10):
+            try:
+                r = requests.get(url, timeout=20)
+                if r.status_code == 200 and r.headers.get("content-type", "").startswith("image"):
+                    break
+            except requests.RequestException:
+                pass
+            time.sleep(3)
     return urls
 
 
