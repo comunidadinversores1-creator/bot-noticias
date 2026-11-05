@@ -231,8 +231,15 @@ def subir_imagenes(jpgs: list[bytes], carpeta: str) -> list[str]:
         previa = _gh("GET", f"contents/{ruta}?ref={RAMA}")
         if previa.status_code == 200:               # ya existía (ej. un carrusel que se volvió a armar): se reemplaza
             extra["sha"] = previa.json().get("sha")
-        r = _gh("PUT", f"contents/{ruta}", message="Imagen para Instagram", branch=RAMA,
-                content=base64.b64encode(b).decode(), **extra)
+        for intento in range(4):                    # GitHub a veces responde 500/502: se reintenta
+            r = _gh("PUT", f"contents/{ruta}", message="Imagen para Instagram", branch=RAMA,
+                    content=base64.b64encode(b).decode(), **extra)
+            if r.status_code in (200, 201) or r.status_code < 500:
+                break
+            time.sleep(4 * (intento + 1))
+            previa = _gh("GET", f"contents/{ruta}?ref={RAMA}")
+            if previa.status_code == 200:
+                extra["sha"] = previa.json().get("sha")
         if r.status_code not in (200, 201):
             raise ErrorInstagram(f"No pude subir la imagen {i} ({r.status_code}).")
         urls.append(f"https://raw.githubusercontent.com/{repo}/{RAMA}/{ruta}")
@@ -259,7 +266,14 @@ def subir_imagenes_en(dato: bytes, ruta: str) -> str:
     previa = _gh("GET", f"contents/{completa}?ref={RAMA}")
     if previa.status_code == 200:
         extra["sha"] = previa.json().get("sha")
-    r = _gh("PUT", f"contents/{completa}", message="Imagen", branch=RAMA, content=base64.b64encode(dato).decode(), **extra)
+    for intento in range(4):
+        r = _gh("PUT", f"contents/{completa}", message="Imagen", branch=RAMA, content=base64.b64encode(dato).decode(), **extra)
+        if r.status_code in (200, 201) or r.status_code < 500:
+            break
+        time.sleep(4 * (intento + 1))
+        previa = _gh("GET", f"contents/{completa}?ref={RAMA}")
+        if previa.status_code == 200:
+            extra["sha"] = previa.json().get("sha")
     if r.status_code not in (200, 201):
         raise ErrorInstagram(f"No pude subir {ruta} ({r.status_code}).")
     return f"https://raw.githubusercontent.com/{repo}/{RAMA}/{completa}"
