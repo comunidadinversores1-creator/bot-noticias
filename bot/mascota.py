@@ -86,7 +86,7 @@ def escena(texto: str) -> str:
     return (f"Scene: {texto}. Clean flat 2D cartoon sticker illustration, thick black outlines, simple shapes, bold flat colors "
             "(green, black, small touches of red, yellow and orange). If the idea is negative (losses, falls, errors, hacks), "
             "arrows and charts point DOWN and are red. Plain pure white background, nothing else around. "
-            "No text, no letters, no numbers, no logos, no watermark, no frame.")
+            "Absolutely no written words anywhere: no text, no letters, no numbers, no labels, no papers with writing, no logos, no watermark, no frame.")
 
 
 def ilustrar(texto: str) -> bytes | None:
