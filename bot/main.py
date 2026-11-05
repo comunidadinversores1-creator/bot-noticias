@@ -1395,17 +1395,22 @@ class Corrida:
         manana = (local + timedelta(days=1)).date()
         hora_prep = a_hora(c.get("hora_preparar") or "12:00")
         preparados = g.setdefault("preparados", {})
-        if (manana.weekday() in dias and hora_prep and local.time() >= hora_prep and manana.isoformat() not in preparados
+        # Fechas reservadas para un carrusel hecho a mano y aprobado (ajustes: instagram.manuales {fecha: nombre}).
+        manuales = {str(k): str(v) for k, v in (c.get("manuales") or {}).items()}
+        if (manana.weekday() in dias and manana.isoformat() not in manuales and hora_prep and local.time() >= hora_prep and manana.isoformat() not in preparados
                 and not (g.get("proximo") or {}).get("archivos") and not en_silencio(self.cfg, self.ahora)):
             preparados[manana.isoformat()] = {"pendiente": True}
             self.estado.guardar()
             self.hacer_carrusel(preparar_para=manana.isoformat())
-        if local.weekday() not in dias or hora is None or local.time() < hora:
+        hoy_iso = local.date().isoformat()
+        if (local.weekday() not in dias and hoy_iso not in manuales) or hora is None or local.time() < hora:
             return False
-        if g.get("ultimo") == local.date().isoformat():
+        if g.get("ultimo") == hoy_iso:
             return False
-        g["ultimo"] = local.date().isoformat()
+        g["ultimo"] = hoy_iso
         self.estado.guardar()
+        if hoy_iso in manuales:
+            return self.publicar_carrusel_manual(manuales[hoy_iso])
         return self.hacer_carrusel()
 
     def hacer_carrusel(self, estilo_pedido: str = "", preparar: bool = False, preparar_para: str = "") -> bool:
