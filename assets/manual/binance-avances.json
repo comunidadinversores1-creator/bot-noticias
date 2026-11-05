@@ -1,0 +1,59 @@
+{
+ "cuenta": "ezebagnato",
+ "usuario": "@ezebagnato",
+ "estilo": "caricatura",
+ "laminas": [
+  {
+   "tipo": "portada",
+   "etiqueta": "Actualización",
+   "titulo": "Hackeo a *Binance*: ¿qué pasó después?",
+   "bajada": "Retiros, fondos congelados y quién pagó la pérdida.",
+   "logo": "binance",
+   "escena": "a cracked digital vault full of gold coins being repaired with bandages and tape, a green shield with a check mark next to it"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "Volvieron los *retiros*",
+   "texto": "El 1 de noviembre Binance reabrió los retiros por fases: primero bitcoin, ether, USDT, USDC, BNB y XRP.",
+   "pose": "lupa",
+   "objeto": "hackeo",
+   "logo": "binance"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "Cubrió el *95%*",
+   "texto": "Dice que ya repuso el 95% de lo robado con fondos propios, incluido su fondo de emergencia SAFU.",
+   "escena": "a big pile of gold coins refilling an almost empty vault, a green progress bar almost full"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "USD 3.000 millones *congelados*",
+   "texto": "Sobre todo en USDT y USDC, que sus emisores pueden bloquear. Bitcoin y ether no se pueden congelar así.",
+   "pose": "escudo",
+   "objeto": "candado",
+   "logo": "tether"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "¿Quién *fue*?",
+   "texto": "Empresas de análisis como TRM Labs apuntan a *TraderTraitor*, un grupo vinculado a Corea del Norte.",
+   "escena": "a dark hooded silhouette behind a laptop with a red screen and a skull icon, red warning signs and digital coins flying away"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "¿Y el *dinero* de los usuarios?",
+   "texto": "Binance dice que los saldos están respaldados al 100% y que la pérdida la absorbe la empresa, no los usuarios.",
+   "pose": "pensando",
+   "objeto": "banco"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "¿Y *vos*?",
+   "texto": "¿Dejás tus criptos en un exchange o las pasás a tu propia billetera? Te leo en los comentarios.",
+   "pose": "celular",
+   "objeto": "bitcoin"
+  }
+ ],
+ "texto_post": "🚨 Hackeo a Binance: ¿qué pasó después?\n\nEl robo de USD 6.300 millones fue el más grande de la historia cripto. Esto es lo que se sabe hasta ahora:\n\n1️⃣ El 1 de noviembre reabrió los retiros por fases (BTC, ETH, USDT, USDC, BNB y XRP primero)\n2️⃣ Dice que ya cubrió el 95% de lo robado con fondos propios y su fondo SAFU\n3️⃣ Unos USD 3.000 millones quedaron congelados, sobre todo en stablecoins\n4️⃣ TRM Labs apunta a TraderTraitor, un grupo vinculado a Corea del Norte\n\n👇 ¿Dejás tus criptos en un exchange o en tu propia billetera?\n\n📌 Guardalo\n✈️ Mandáselo a alguien que use Binance\n🔔 Seguime para más\n\nFuentes: CoinDesk, TechCrunch, CBS News",
+ "tema": "Hackeo a Binance: qué pasó después"
+}
