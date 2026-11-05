@@ -13,7 +13,7 @@
    "titulo": "¿Por qué *cae* Bitcoin hoy?",
    "bajada": "Pasó de USD 80.800 a USD 76.100 en horas. Te explico qué pasó.",
    "logo": "bitcoin",
-   "escena": "a big gold bitcoin coin tumbling down a red staircase-shaped chart, red arrows pointing down, small coins scattered"
+   "escena": "a big gold bitcoin coin falling down from the sky toward the ground with motion lines, below it a red line chart that goes steeply DOWN from top-left to bottom-right, the arrow head points DOWNWARD at the bottom right"
   },
   {
    "tipo": "paso",
@@ -27,7 +27,7 @@
    "titulo": "Arrastrado por el *Nasdaq*",
    "texto": "Las tecnológicas se desplomaron: el Nasdaq llegó a caer 3,9%, Nvidia cerca de 5% y Tesla cerca de 9%.",
    "logo": "nvidia",
-   "escena": "a big red arrow pointing down crashing through a row of computer chips and tech office buildings, red stock chart screens"
+   "escena": "a computer chip and a tech office building cracking apart, with a huge red arrow pointing straight DOWN to the floor, like a crash, red screens showing charts going down"
   },
   {
    "tipo": "paso",
@@ -40,7 +40,7 @@
    "tipo": "paso",
    "titulo": "Las *liquidaciones*",
    "texto": "Unos USD 370 millones en posiciones apalancadas se liquidaron en una hora, casi todas apuestas a la suba.",
-   "escena": "a row of dominoes made of gold crypto coins falling one after another, red warning signs, red arrows pointing down"
+   "escena": "a row of green domino tiles falling over one after another from left to right, gold coins spilling off them onto the floor"
   },
   {
    "tipo": "paso",
@@ -65,5 +65,10 @@
   }
  ],
  "texto_post": "🚨 ¿Por qué cae Bitcoin hoy?\n\nBitcoin pasó de más de USD 80.800 a unos USD 76.100 en pocas horas, una caída cercana al 5%.\n\n1️⃣ Las tecnológicas se desplomaron: el Nasdaq llegó a caer 3,9%\n2️⃣ El mercado teme que un Congreso demócrata frene la expansión de los centros de datos de IA\n3️⃣ Se liquidaron unos USD 370 millones en posiciones apalancadas en una hora\n4️⃣ Lo que viene: el dato de empleo del viernes y la Fed el 9 de diciembre\n\n⚠️ No es una recomendación de inversión. Operar con apalancamiento puede hacerte perder todo.\n\n👇 ¿Comprás en la caída, esperás o no tocás nada?\n\n📌 Guardalo\n✈️ Mandáselo a alguien que tenga bitcoin\n🔔 Seguime para más\n\nFuentes: Bitcoin Magazine, CriptoNoticias, Bloomberg",
- "tema": "Por qué cae Bitcoin hoy"
+ "tema": "Por qué cae Bitcoin hoy",
+ "rehacer": [
+  1,
+  3,
+  5
+ ]
 }
