@@ -1832,6 +1832,15 @@ class Corrida:
             laminas = self._laminas_manual(datos, nombre)
         cuenta = datos.get("cuenta", "ezebagnato")
         media_id = self.subir_a_instagram(cuenta, laminas, datos["texto_post"])
+        # También en otras cuentas (ej. @comunidad_inversores_ok), con su propio usuario en las láminas.
+        usuarios = {"ezebagnato": "@ezebagnato", "comunidad": "@comunidad_inversores_ok"}
+        for otra in [c for c in (datos.get("cuentas") or []) if c != cuenta]:
+            try:
+                otras = self._laminas_manual({**datos, "usuario": usuarios.get(otra, "@ezebagnato")}, nombre)
+                if self.subir_a_instagram(otra, otras, datos["texto_post"]):
+                    log.info("Carrusel %s publicado también en %s.", nombre, otra)
+            except Exception as error:
+                log.warning("carrusel %s en %s: %s", nombre, otra, error)
         if not media_id:
             return False
         g = self.estado.datos["ig"]
