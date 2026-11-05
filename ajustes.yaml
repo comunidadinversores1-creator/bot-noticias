@@ -990,6 +990,7 @@ instagram:
   manuales:                       # ese día, a la hora del carrusel, sale este carrusel hecho a mano (en lugar del automático)
     "2026-11-05": paciencia-impulso   # el del miércoles 4/11, que falló
     "2026-11-06": binance-avances
+    "2026-11-07": reversion-z-ig    # carrusel del bot con "Comentá BOT"
   # Guías que se mandan por DM a quien comenta la palabra del carrusel (la palabra va en mayúsculas).
   guias:
     BOT:
