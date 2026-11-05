@@ -234,9 +234,9 @@ def subir_imagenes(jpgs: list[bytes], carpeta: str) -> list[str]:
         for intento in range(4):                    # GitHub a veces responde 500/502: se reintenta
             r = _gh("PUT", f"contents/{ruta}", message="Imagen para Instagram", branch=RAMA,
                     content=base64.b64encode(b).decode(), **extra)
-            if r.status_code in (200, 201) or r.status_code < 500:
+            if r.status_code in (200, 201) or (r.status_code < 500 and r.status_code != 403):
                 break
-            time.sleep(4 * (intento + 1))
+            time.sleep(20 * (intento + 1) if r.status_code == 403 else 4 * (intento + 1))   # 403: GitHub pide frenar
             previa = _gh("GET", f"contents/{ruta}?ref={RAMA}")
             if previa.status_code == 200:
                 extra["sha"] = previa.json().get("sha")
@@ -268,9 +268,9 @@ def subir_imagenes_en(dato: bytes, ruta: str) -> str:
         extra["sha"] = previa.json().get("sha")
     for intento in range(4):
         r = _gh("PUT", f"contents/{completa}", message="Imagen", branch=RAMA, content=base64.b64encode(dato).decode(), **extra)
-        if r.status_code in (200, 201) or r.status_code < 500:
+        if r.status_code in (200, 201) or (r.status_code < 500 and r.status_code != 403):
             break
-        time.sleep(4 * (intento + 1))
+        time.sleep(20 * (intento + 1) if r.status_code == 403 else 4 * (intento + 1))
         previa = _gh("GET", f"contents/{completa}?ref={RAMA}")
         if previa.status_code == 200:
             extra["sha"] = previa.json().get("sha")
