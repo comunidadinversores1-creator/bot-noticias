@@ -13,7 +13,7 @@
    "titulo": "¿Por qué *cae* Bitcoin hoy?",
    "bajada": "Pasó de USD 80.800 a USD 76.100 en horas. Te explico qué pasó.",
    "logo": "bitcoin",
-   "escena": "a big gold bitcoin coin falling down from the sky toward the ground with motion lines, below it a red line chart that goes steeply DOWN from top-left to bottom-right, the arrow head points DOWNWARD at the bottom right"
+   "escena": "a big gold bitcoin coin with a crack across it, falling into a deep hole in the ground, dust clouds and small pebbles flying, worried sweat drops around the coin"
   },
   {
    "tipo": "paso",
@@ -67,8 +67,6 @@
  "texto_post": "🚨 ¿Por qué cae Bitcoin hoy?\n\nBitcoin pasó de más de USD 80.800 a unos USD 76.100 en pocas horas, una caída cercana al 5%.\n\n1️⃣ Las tecnológicas se desplomaron: el Nasdaq llegó a caer 3,9%\n2️⃣ El mercado teme que un Congreso demócrata frene la expansión de los centros de datos de IA\n3️⃣ Se liquidaron unos USD 370 millones en posiciones apalancadas en una hora\n4️⃣ Lo que viene: el dato de empleo del viernes y la Fed el 9 de diciembre\n\n⚠️ No es una recomendación de inversión. Operar con apalancamiento puede hacerte perder todo.\n\n👇 ¿Comprás en la caída, esperás o no tocás nada?\n\n📌 Guardalo\n✈️ Mandáselo a alguien que tenga bitcoin\n🔔 Seguime para más\n\nFuentes: Bitcoin Magazine, CriptoNoticias, Bloomberg",
  "tema": "Por qué cae Bitcoin hoy",
  "rehacer": [
-  1,
-  3,
-  5
+  1
  ]
 }
