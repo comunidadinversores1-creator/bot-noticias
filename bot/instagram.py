@@ -249,6 +249,22 @@ def subir_imagenes(jpgs: list[bytes], carpeta: str) -> list[str]:
     return urls
 
 
+def subir_imagenes_en(dato: bytes, ruta: str) -> str:
+    """Sube un archivo a ig/<ruta> en la rama de imágenes (reemplaza si ya existía) y devuelve su link público."""
+    repo = os.environ.get("GITHUB_REPOSITORY")
+    if not (repo and os.environ.get("GITHUB_TOKEN")):
+        raise ErrorInstagram("Falta GITHUB_TOKEN.")
+    completa = f"ig/{ruta}"
+    extra = {}
+    previa = _gh("GET", f"contents/{completa}?ref={RAMA}")
+    if previa.status_code == 200:
+        extra["sha"] = previa.json().get("sha")
+    r = _gh("PUT", f"contents/{completa}", message="Imagen", branch=RAMA, content=base64.b64encode(dato).decode(), **extra)
+    if r.status_code not in (200, 201):
+        raise ErrorInstagram(f"No pude subir {ruta} ({r.status_code}).")
+    return f"https://raw.githubusercontent.com/{repo}/{RAMA}/{completa}"
+
+
 def borrar_imagenes(carpeta: str, cantidad: int) -> None:
     for i in range(1, cantidad + 1):
         ruta = f"ig/{carpeta}/{i:02d}.jpg"

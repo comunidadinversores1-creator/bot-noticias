@@ -1741,16 +1741,37 @@ class Corrida:
         }
         return self.entregar(90, jpg, para_telegram, para_x, registro, publicidad=False, original=datos["texto"]) == "ok"
 
-    def _laminas_manual(self, datos: dict) -> list[bytes]:
-        """Las láminas de un carrusel escrito a mano: caricatura (robot + ilustraciones con IA) o el negro y verde."""
+    def _laminas_manual(self, datos: dict, nombre: str = "") -> list[bytes]:
+        """Las láminas de un carrusel escrito a mano: caricatura (robot + ilustraciones con IA) o el negro y verde.
+        Las ilustraciones ya hechas se reusan (quedan en ig/manual/<nombre>/ilus/); "rehacer": [números de lámina]
+        en el JSON vuelve a dibujar solo esas."""
         if datos.get("estilo") == "caricatura":
             from .mascota import ilustrar
             laminas = [dict(l) for l in datos["laminas"]]
-            for l in laminas:
-                if str(l.get("escena") or "").strip():
+            rehacer = {int(x) for x in (datos.get("rehacer") or [])}
+            repo = os.environ.get("GITHUB_REPOSITORY", "")
+            for i, l in enumerate(laminas, 1):
+                if not str(l.get("escena") or "").strip():
+                    continue
+                img = None
+                local = RAIZ / "assets" / "manual" / nombre / "ilus" / f"{i:02d}.jpg"
+                if nombre and i not in rehacer and local.exists():
+                    img = local.read_bytes()
+                if img is None and nombre and i not in rehacer:
+                    try:
+                        r = requests.get(f"https://raw.githubusercontent.com/{repo}/{instagram.RAMA}/ig/manual/{nombre}/ilus/{i:02d}.jpg", timeout=30)
+                        img = r.content if r.status_code == 200 and r.headers.get("content-type", "").startswith("image") else None
+                    except requests.RequestException:
+                        img = None
+                if img is None:
                     img = ilustrar(str(l["escena"]))
-                    if img:
-                        l["_ilustracion"] = img
+                    if img and nombre:
+                        try:
+                            instagram.subir_imagenes_en(img, f"manual/{nombre}/ilus/{i:02d}.jpg")
+                        except Exception as error:
+                            log.warning("no pude guardar la ilustración %d: %s", i, error)
+                if img:
+                    l["_ilustracion"] = img
             return carrusel_html.sacar_fotos(carrusel_html.caricatura(laminas, "", False, datos.get("usuario", "@ezebagnato")))
         logo = None
         if datos.get("logo_tema"):
@@ -1771,7 +1792,7 @@ class Corrida:
         except (OSError, ValueError) as error:
             log.warning("carrusel manual: no pude leerlo (%s)", error)
             return False
-        laminas = self._laminas_manual(datos)
+        laminas = self._laminas_manual(datos, nombre)
         try:
             urls = instagram.subir_imagenes(laminas, f"manual/{nombre}")
             log.warning("Carrusel manual %s: %s", nombre, " ".join(urls))
@@ -1808,7 +1829,7 @@ class Corrida:
                 break
             laminas.append(r.content)
         if not laminas:
-            laminas = self._laminas_manual(datos)
+            laminas = self._laminas_manual(datos, nombre)
         cuenta = datos.get("cuenta", "ezebagnato")
         media_id = self.subir_a_instagram(cuenta, laminas, datos["texto_post"])
         if not media_id:

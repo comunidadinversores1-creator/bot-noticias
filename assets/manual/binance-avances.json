@@ -9,7 +9,7 @@
    "titulo": "Cómo *hackearon* a Binance",
    "bajada": "Una entrevista de trabajo falsa, IA y USD 6.340 millones.",
    "logo": "binance",
-   "escena": "a laptop on a desk showing a video call job interview window, a red computer bug crawling out of a code file on the screen, a red warning sign"
+   "escena": "a laptop on a desk with a video call on screen showing a friendly cartoon interviewer, and a red bug virus crawling out from the side of the laptop"
   },
   {
    "tipo": "paso",
@@ -68,5 +68,8 @@
   }
  ],
  "texto_post": "🚨 Así hackearon a Binance: una entrevista de trabajo falsa, IA y USD 6.340 millones\n\nBinance publicó su informe preliminar y el ataque empezó meses antes:\n\n1️⃣ Junio: un ingeniero instaló una versión falsa de Homebrew\n2️⃣ Septiembre: a otro le ofrecieron un trabajo falso y bajó una \"prueba técnica\" con un virus\n3️⃣ 20 de octubre: usaron una herramienta interna de IA para entrar en las compus de 2 ingenieros más\n4️⃣ 29 de octubre: llegaron al sistema que firma los retiros y vaciaron billeteras\n5️⃣ El truco: con EIP-7702 de Ethereum le dieron a un contrato suyo permiso para mover una billetera\n\nBinance congeló cerca de USD 3.000 millones, dice que ya repuso el 98% y el FBI se lo atribuye a TraderTraitor (Corea del Norte). El informe todavía es preliminar: falta la revisión independiente.\n\n👇 ¿Abrirías el archivo de una prueba técnica sin revisarlo?\n\n📌 Guardalo\n✈️ Mandáselo a alguien que trabaje en tecnología\n🔔 Seguime para más\n\nFuentes: Binance (informe preliminar), Help Net Security, FBI",
- "tema": "Cómo hackearon a Binance"
+ "tema": "Cómo hackearon a Binance",
+ "rehacer": [
+  1
+ ]
 }
