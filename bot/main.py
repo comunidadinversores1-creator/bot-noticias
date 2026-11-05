@@ -720,6 +720,21 @@ class Corrida:
                         resultados.append(f"{prov['nombre']}/{modelo}: FALLA ({str(error)[:80]})")
             log.warning("Prueba de IA: %s", " | ".join(resultados))
             return self.cerrar(1)
+        if not self.real and self.promo_pedida.lower().startswith("bajar:"):
+            # Baja imágenes de internet (separadas por espacio) y las deja en ig/descargas/ para usarlas después.
+            hechas = 0
+            for i, url in enumerate(self.promo_pedida.partition(":")[2].split(), 1):
+                try:
+                    r = requests.get(url, timeout=40, headers={"User-Agent": "Mozilla/5.0"})
+                    tipo = r.headers.get("content-type", "")
+                    log.warning("bajar %s -> %s %s %d bytes", url, r.status_code, tipo, len(r.content))
+                    if r.status_code == 200 and len(r.content) > 200:
+                        ext = "svg" if "svg" in tipo else ("webp" if "webp" in tipo else ("png" if "png" in tipo else "jpg"))
+                        instagram.subir_imagenes_en(r.content, f"descargas/{i:02d}.{ext}")
+                        hechas += 1
+                except Exception as error:
+                    log.warning("bajar %s: %s", url, error)
+            return self.cerrar(hechas)
         if not self.real and self.promo_pedida.lower().startswith("preparar_manual:"):
             return self.cerrar(1 if self.preparar_carrusel_manual(self.promo_pedida.partition(":")[2].strip()) else 0)
         if not self.real and self.promo_pedida.lower() == "muestra_caricatura":
