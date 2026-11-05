@@ -1715,9 +1715,18 @@ class Corrida:
             return False
         usuarios = {"ezebagnato": "@ezebagnato", "comunidad": "@comunidad_inversores_ok"}
         hechas = 0
+        # Nunca dos veces la misma historia en la misma cuenta (si se relanza la corrida, no se repite).
+        ya = self.estado.datos["ig"].setdefault("historias_manuales", [])
         for cuenta in datos.get("cuentas") or ["ezebagnato"]:
+            if f"{nombre}:{cuenta}" in ya:
+                log.info("La historia %s ya se publicó en %s: no se repite.", nombre, cuenta)
+                continue
             pagina = historias.html_promo(imagen, datos.get("titulo", ""), usuarios.get(cuenta, "@ezebagnato"), cta=datos.get("cta") or "El link está en mi perfil ↑")
-            hechas += 1 if self.subir_historia(cuenta, pagina, "manual") else 0
+            if self.subir_historia(cuenta, pagina, "manual"):
+                hechas += 1
+                ya.append(f"{nombre}:{cuenta}")
+                self.estado.datos["ig"]["historias_manuales"] = ya[-200:]
+                self.estado.guardar()
         return hechas > 0
 
     def publicar_post_manual(self, nombre: str) -> bool:
@@ -1831,6 +1840,10 @@ class Corrida:
         if not laminas:
             laminas = self._laminas_manual(datos, nombre)
         cuenta = datos.get("cuenta", "ezebagnato")
+        g0 = self.estado.datos["ig"]
+        if any(h.get("tema") == datos.get("tema", nombre) and h.get("media_id") for h in g0.get("historial") or []):
+            log.warning("El carrusel %s ya se publicó: no se repite.", nombre)
+            return False
         media_id = self.subir_a_instagram(cuenta, laminas, datos["texto_post"])
         # También en otras cuentas (ej. @comunidad_inversores_ok), con su propio usuario en las láminas.
         usuarios = {"ezebagnato": "@ezebagnato", "comunidad": "@comunidad_inversores_ok"}
