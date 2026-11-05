@@ -32,7 +32,7 @@ from .estado import Estado
 from .filtro import Grupo, es_mala_noticia, nombra_prohibido, preparar, puntaje, ya_contada
 from .fuentes import leer_fuentes
 from .imagen import armar_placa, armar_promo, buscar_foto, generar_con_ia, logo_guardado, tal_cual
-from .publicar import ErrorPublicacion, claves_x, telegram_album, telegram_bajar, telegram_chats, telegram_novedades, telegram_mensaje, telegram_publicar, telegram_puede_publicar, x_publicar, x_quien_soy
+from .publicar import ErrorPublicacion, claves_x, telegram_album, telegram_foto, telegram_bajar, telegram_chats, telegram_novedades, telegram_mensaje, telegram_publicar, telegram_puede_publicar, x_publicar, x_quien_soy
 from .texto import (
     anio_actual, armar_llamado, enlaces_extra, faltantes, faltantes_promo, fuente_limpia, idea_de_imagen, normalizar_post, normalizar_promo,
     numeros_inventados, promesas, promo_telegram, promo_x, texto_revisable, texto_revisable_promo,
@@ -652,6 +652,10 @@ class Corrida:
                 return self.cerrar(1 if salio else 0)
             if self.promo_pedida.lower().startswith("historia_manual:"):
                 salio = self.publicar_historia_manual(self.promo_pedida.partition(":")[2].strip())
+                self.estado.guardar()
+                return self.cerrar(1 if salio else 0)
+            if self.promo_pedida.lower().startswith("telegram_manual:"):
+                salio = self.publicar_telegram_manual(self.promo_pedida.partition(":")[2].strip())
                 self.estado.guardar()
                 return self.cerrar(1 if salio else 0)
             if self.promo_pedida.lower().startswith("post_manual:"):
@@ -1728,6 +1732,27 @@ class Corrida:
                 self.estado.datos["ig"]["historias_manuales"] = ya[-200:]
                 self.estado.guardar()
         return hechas > 0
+
+    def publicar_telegram_manual(self, nombre: str) -> bool:
+        """Una sola vez: la primera lámina de assets/manual/<nombre>/ con su texto, solo en el canal de anuncios de Telegram."""
+        import json as _json
+        ya = self.estado.datos.setdefault("telegram_manuales", [])
+        if not self.real or nombre in ya:
+            log.warning("telegram manual %s: ya publicado o no es corrida real", nombre)
+            return False
+        try:
+            datos = _json.loads((RAIZ / "assets" / "manual" / f"{nombre}.json").read_text(encoding="utf-8"))
+            jpg = sorted((RAIZ / "assets" / "manual" / nombre).glob("*.jpg"))[0].read_bytes()
+        except (OSError, ValueError, IndexError) as error:
+            log.warning("telegram manual: %s", error)
+            return False
+        try:
+            telegram_foto(self.token, self.destino, jpg, datos["texto_telegram"])
+        except ErrorPublicacion as error:
+            self.avisar("telegram_manual", f"No pude publicar {nombre} en Telegram: {error}")
+            return False
+        ya.append(nombre)
+        return True
 
     def publicar_post_manual(self, nombre: str) -> bool:
         """Publica en Telegram y X un post escrito a mano y aprobado por Eze (assets/manual/<nombre>.json), tal cual."""
