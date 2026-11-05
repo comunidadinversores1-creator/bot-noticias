@@ -1790,9 +1790,11 @@ class Corrida:
             log.warning("carrusel manual: no pude leerlo (%s)", error)
             return False
         # Si ya se preparó (y Eze lo revisó), sale exactamente ese; si no, se arma ahora.
-        laminas = []
+        # Láminas ya hechas guardadas en el repo (assets/manual/<nombre>/01.jpg...): salen tal cual.
+        carpeta = RAIZ / "assets" / "manual" / nombre
+        laminas = [f.read_bytes() for f in sorted(carpeta.glob("*.jpg"))] if carpeta.is_dir() else []
         repo = os.environ.get("GITHUB_REPOSITORY", "")
-        for i in range(1, 21):
+        for i in range(1, 21 if not laminas else 1):
             try:
                 r = requests.get(f"https://raw.githubusercontent.com/{repo}/{instagram.RAMA}/ig/manual/{nombre}/{i:02d}.jpg", timeout=30)
             except requests.RequestException:

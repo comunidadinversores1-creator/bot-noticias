@@ -143,7 +143,7 @@ def _sin_problemas(textos: list[str]) -> list[str]:
     # Estadísticas de "cuántos traders pierden" y similares: suenan a dato pero casi siempre son inventadas.
     if any(re.search(r"(?i)(\d+\s*%|por ciento)\s+de\s+(los\s+|las\s+)?(traders|personas|inversores|principiantes|usuarios|argentinos)", t) for t in textos):
         problemas.append("pusiste una estadística de cuánta gente hace o pierde algo (no se puede verificar: sacala)")
-    if any(re.search(r"(?i)\b(veinti|treinta|cuarenta|cincuenta|sesenta|setenta|ochenta|noventa)\w*\b|\b(dos|tres|cinco|diez) por ciento\b", t) for t in textos):
+    if any(re.search(r"(?i)\b(veinti|treinta|cuarenta|cincuenta|sesenta|setenta|ochenta|noventa)\w*\b|\bpor ciento\b", t) for t in textos):
         problemas.append("escribiste números con letras (van con cifras: 2%, 21 millones)")
     malas = [m for t in textos for m in promesas_charla(t)]
     if malas:
