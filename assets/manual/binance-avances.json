@@ -5,55 +5,68 @@
  "laminas": [
   {
    "tipo": "portada",
-   "etiqueta": "Actualización",
-   "titulo": "Hackeo a *Binance*: ¿qué pasó después?",
-   "bajada": "Retiros, fondos congelados y quién pagó la pérdida.",
+   "etiqueta": "Así fue",
+   "titulo": "Cómo *hackearon* a Binance",
+   "bajada": "Una entrevista de trabajo falsa, IA y USD 6.340 millones.",
    "logo": "binance",
-   "escena": "a cracked digital vault full of gold coins being repaired with bandages and tape, a green shield with a check mark next to it"
+   "escena": "a laptop on a desk showing a video call job interview window, a red computer bug crawling out of a code file on the screen, a red warning sign"
   },
   {
    "tipo": "paso",
-   "titulo": "Volvieron los *retiros*",
-   "texto": "El 1 de noviembre Binance reabrió los retiros por fases: primero bitcoin, ether, USDT, USDC, BNB y XRP.",
+   "titulo": "Junio: el *primer paso*",
+   "texto": "Un ingeniero de Binance instaló una versión falsa de Homebrew, una herramienta para programadores. Ahí empezó todo.",
    "pose": "lupa",
    "objeto": "hackeo",
    "logo": "binance"
   },
   {
    "tipo": "paso",
-   "titulo": "Cubrió el *95%*",
-   "texto": "Dice que ya repuso el 95% de lo robado con fondos propios, incluido su fondo de emergencia SAFU.",
-   "escena": "a big pile of gold coins refilling an almost empty vault, a green progress bar almost full"
+   "titulo": "Septiembre: la *entrevista falsa*",
+   "texto": "A otro ingeniero le ofrecieron un trabajo que no existía. Para la prueba técnica bajó un código con un virus escondido.",
+   "escena": "a job offer letter with a fake smiling mask on top, next to a laptop whose code file hides a red bug virus"
   },
   {
    "tipo": "paso",
-   "titulo": "USD 3.000 millones *congelados*",
-   "texto": "Sobre todo en USDT y USDC, que sus emisores pueden bloquear. Bitcoin y ether no se pueden congelar así.",
+   "titulo": "20 de octubre: usaron *IA*",
+   "texto": "Desde esa compu usaron una herramienta interna de IA de Binance para entrar en las de 2 ingenieros más.",
+   "pose": "pensando",
+   "objeto": "computadora"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "29 de octubre: el *robo*",
+   "texto": "Llegaron al sistema que firma los retiros y salieron unos USD 6.340 millones de las billeteras de Binance.",
+   "escena": "a digital vault door wide open with gold coins and crypto coins flying out of it, red arrows pointing down"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "El truco: un *permiso*",
+   "texto": "Con una función de Ethereum llamada EIP-7702 le dieron a un contrato suyo permiso para mover una billetera de Binance.",
+   "pose": "alerta",
+   "objeto": "ethereum"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "Lo que hizo *Binance*",
+   "texto": "Al día siguiente borró ese permiso. Congeló cerca de USD 3.000 millones y dice que ya repuso el 98%.",
    "pose": "escudo",
    "objeto": "candado",
-   "logo": "tether"
+   "logo": "binance"
   },
   {
    "tipo": "paso",
    "titulo": "¿Quién *fue*?",
-   "texto": "Empresas de análisis como TRM Labs apuntan a *TraderTraitor*, un grupo vinculado a Corea del Norte.",
-   "escena": "a dark hooded silhouette behind a laptop with a red screen and a skull icon, red warning signs and digital coins flying away"
-  },
-  {
-   "tipo": "paso",
-   "titulo": "¿Y el *dinero* de los usuarios?",
-   "texto": "Binance dice que los saldos están respaldados al 100% y que la pérdida la absorbe la empresa, no los usuarios.",
-   "pose": "pensando",
-   "objeto": "banco"
+   "texto": "El FBI se lo atribuye a TraderTraitor, un grupo de Corea del Norte. El informe de Binance todavía es preliminar.",
+   "pose": "lupa",
+   "objeto": "computadora"
   },
   {
    "tipo": "paso",
    "titulo": "¿Y *vos*?",
-   "texto": "¿Dejás tus criptos en un exchange o las pasás a tu propia billetera? Te leo en los comentarios.",
-   "pose": "celular",
-   "objeto": "bitcoin"
+   "texto": "¿Abrirías el archivo de una prueba técnica sin revisarlo? Contame en los comentarios.",
+   "pose": "celular"
   }
  ],
- "texto_post": "🚨 Hackeo a Binance: ¿qué pasó después?\n\nEl robo de USD 6.300 millones fue el más grande de la historia cripto. Esto es lo que se sabe hasta ahora:\n\n1️⃣ El 1 de noviembre reabrió los retiros por fases (BTC, ETH, USDT, USDC, BNB y XRP primero)\n2️⃣ Dice que ya cubrió el 95% de lo robado con fondos propios y su fondo SAFU\n3️⃣ Unos USD 3.000 millones quedaron congelados, sobre todo en stablecoins\n4️⃣ TRM Labs apunta a TraderTraitor, un grupo vinculado a Corea del Norte\n\n👇 ¿Dejás tus criptos en un exchange o en tu propia billetera?\n\n📌 Guardalo\n✈️ Mandáselo a alguien que use Binance\n🔔 Seguime para más\n\nFuentes: CoinDesk, TechCrunch, CBS News",
- "tema": "Hackeo a Binance: qué pasó después"
+ "texto_post": "🚨 Así hackearon a Binance: una entrevista de trabajo falsa, IA y USD 6.340 millones\n\nBinance publicó su informe preliminar y el ataque empezó meses antes:\n\n1️⃣ Junio: un ingeniero instaló una versión falsa de Homebrew\n2️⃣ Septiembre: a otro le ofrecieron un trabajo falso y bajó una \"prueba técnica\" con un virus\n3️⃣ 20 de octubre: usaron una herramienta interna de IA para entrar en las compus de 2 ingenieros más\n4️⃣ 29 de octubre: llegaron al sistema que firma los retiros y vaciaron billeteras\n5️⃣ El truco: con EIP-7702 de Ethereum le dieron a un contrato suyo permiso para mover una billetera\n\nBinance congeló cerca de USD 3.000 millones, dice que ya repuso el 98% y el FBI se lo atribuye a TraderTraitor (Corea del Norte). El informe todavía es preliminar: falta la revisión independiente.\n\n👇 ¿Abrirías el archivo de una prueba técnica sin revisarlo?\n\n📌 Guardalo\n✈️ Mandáselo a alguien que trabaje en tecnología\n🔔 Seguime para más\n\nFuentes: Binance (informe preliminar), Help Net Security, FBI",
+ "tema": "Cómo hackearon a Binance"
 }
