@@ -154,6 +154,15 @@ x_charla:
     - producto: "Exness Terminal: operar con un clic, stop loss y take profit desde el gráfico, hasta 8 gráficos y calendario económico"
       datos: "Exness Terminal tiene One-Click Trading, más de 100 indicadores, hasta 8 gráficos a la vez, SL y TP desde el gráfico y calendario económico integrado."
       respuesta: "yo opero desde Exness Terminal: un clic para entrar, stop loss y take profit desde el gráfico, y el calendario económico a la vista.\n\nsi querés probarlo, mi link está en el perfil. operar con apalancamiento implica riesgo."
+    - producto: "Exness Terminal: operar desde el navegador o el celular sin instalar MetaTrader 5"
+      datos: "Exness Terminal es la plataforma propia de Exness: se usa desde el navegador o la app, sin instalar MetaTrader 5. Para alguien que recién empieza es más simple. Eze opera desde ahí."
+      respuesta: "por eso arranqué a operar desde Exness Terminal: entrás desde el navegador o el celu, sin instalar MetaTrader.\n\ntoda la info y el registro, en el link de mi perfil 👆 operar con apalancamiento implica riesgo."
+    - producto: "un broker simple para traders que recién empiezan, con el 20% de cashback que Eze devuelve"
+      datos: "Eze usa Exness. A quien se registra con su link le devuelve el 20% de cashback de lo que paga en comisiones y le da acceso a sus herramientas y bots. Exness tiene su propia plataforma simple (Exness Terminal)."
+      respuesta: "yo uso Exness, y a los que se registran con mi link les devuelvo el 20% de cashback y les doy acceso a mis herramientas y bots.\n\ntoda la info y el registro, en el link de mi perfil 👆 operar con apalancamiento implica riesgo."
+    - producto: "el bot Reversión Z: un bot gratis que opera solo en MetaTrader 5 con Exness"
+      datos: "Reversión Z es el bot de Eze: opera solo en MetaTrader 5 con una cuenta de Exness y la licencia es gratis. Eze lo está probando 30 días en una cuenta real con USD 100 y muestra los resultados, buenos o malos. No garantiza ganancias."
+      respuesta: "por eso armé Reversión Z, un bot que opera solo en MetaTrader 5. lo estoy probando 30 días con USD 100 reales y muestro todo, salga como salga.\n\nla licencia es gratis: video, licencia y registro en el link de mi perfil 👆 operar con apalancamiento implica riesgo."
 
 # ------------------------------------------------------------
 #  ENSEÑANZA: 3 por día, en Telegram (canal y tema del grupo) y en X.
@@ -165,6 +174,11 @@ ensenanza:
   activa: true
   horarios: ["08:00", "13:00", "18:00"]
   temas:
+    - {pregunta: "¿Se puede hacer trading sin instalar MetaTrader 5?", datos: "Sí: Exness Terminal es la plataforma propia de Exness y se usa desde el navegador o desde la app, sin instalar MetaTrader 5. Para alguien que recién empieza suele ser más simple: menos configuración y todo en una pantalla. Eze opera desde ahí. Cerrá con este renglón aparte: 👉 Toda la info y el registro, en el link de mi perfil."}
+    - {pregunta: "¿Qué es el swap en trading y cómo te afecta?", datos: "El swap es un costo (o a veces un pago) por dejar una operación abierta de un día para el otro. En operaciones de varios días puede comerse parte del resultado. Exness ofrece operar sin swap en muchos instrumentos, según la cuenta y las condiciones de cada cliente: hay que revisarlo en la plataforma. Cerrá con este renglón aparte: 👉 Toda la info y el registro, en el link de mi perfil."}
+    - {pregunta: "¿Qué es el cashback en trading?", datos: "Es la devolución de una parte de lo que pagás en comisiones al operar. Eze les devuelve el 20% de cashback a quienes abren su cuenta de Exness con su link, y además les da acceso a sus herramientas y bots. Cerrá con este renglón aparte: 👉 Toda la info y el registro, en el link de mi perfil."}
+    - {pregunta: "¿Qué broker usar si recién empezás en trading?", datos: "Hay que mirar que esté regulado, que tenga costos claros (spread y comisiones), una plataforma fácil y retiros rápidos. Eze usa Exness: tiene una plataforma propia simple (Exness Terminal) y a quienes se registran con su link les devuelve el 20% de cashback y les da acceso a sus herramientas y bots. Ningún broker elimina el riesgo de perder dinero. Cerrá con este renglón aparte: 👉 Toda la info y el registro, en el link de mi perfil."}
+    - {pregunta: "¿Qué es un bot que opera solo en MetaTrader 5?", datos: "Es un programa (Expert Advisor) que abre y cierra operaciones solo, siguiendo reglas fijas, mientras MetaTrader 5 está abierto. Eze tiene uno, Reversión Z: la licencia es gratis con una cuenta de Exness y lo está probando 30 días en una cuenta real con USD 100, mostrando los resultados buenos y malos. Un bot no garantiza ganancias. Cerrá con este renglón aparte: 👉 Toda la info y el registro, en el link de mi perfil."}
     - "¿Qué es Bitcoin y cómo funciona?"
     - {pregunta: "¿Cómo se usa el trading con un clic en Exness Terminal?", datos: "Exness Terminal tiene One-Click Trading: permite abrir y cerrar operaciones de mercado con un solo clic, sin una ventana adicional de confirmación. Puede servir para scalping o para operar noticias, donde la velocidad importa. Operar con apalancamiento implica riesgo de perder el capital."}
     - "¿Qué es la blockchain, explicado fácil?"
@@ -309,6 +323,10 @@ campana_video:
   cada_dias: 1                    # todos los días (2/11: Eze pidió que se promocione su bot en lugar de Exness)
   desde: "11:30"                  # no sale antes de esta hora (hora Argentina); el bot corre cerca de :35 de cada hora
   vence: "2026-11-26"
+  historias_extra:                # más imágenes para las historias de la campaña (rotan con las 3 miniaturas)
+    - {imagen: assets/manual/reversion-z-grafico.jpg, titulo: "Así opera mi bot en MetaTrader 5"}
+    - {imagen: assets/manual/reversion-z-dia8-celu.jpg, titulo: "La prueba real, operación por operación"}
+    - {imagen: assets/manual/reversion-z-robot.jpg, titulo: "Un bot gratis que opera solo"}
   ctas_historia:                  # el cartel de las historias (en @ezebagnato y en @comunidad_inversores_ok): rota entre estos
     - "Link en el perfil ↑"
     - "Video completo en YouTube · link en el perfil ↑"
@@ -338,11 +356,11 @@ campana_video:
       texto_x: |
         🤖 Un bot operando solo en una cuenta real con USD 100.
 
-        Ya está el video: cómo instalar y activar gratis el bot Reversión Z en MetaTrader 5 con Exness, paso a paso.
+        Ya está el video para instalar y activar gratis el bot Reversión Z en MetaTrader 5 con Exness.
 
-        La prueba de 30 días ya está corriendo. Sin promesas de rentabilidad y sin humo.
+        La prueba de 30 días ya está corriendo. Sin promesas y sin humo.
 
-        ▶️ El video está en mi perfil
+        👉 Video, licencia y registro en el link de mi perfil
     - imagen: assets/promos/reversion-z-2.jpg
       titulo_historia: "USD 100 en real: ¿qué hace el bot?"
       texto: |
@@ -372,7 +390,7 @@ campana_video:
 
         Lo vamos a ver en 30 días. Sin resultados finales todavía y sin promesas de rentabilidad.
 
-        ▶️ El video está en mi perfil
+        👉 Video, licencia y registro en el link de mi perfil
 
         ¿Te animarías o preferís operar manualmente?
     - imagen: assets/promos/reversion-z-3.jpg
@@ -401,11 +419,11 @@ campana_video:
       texto_x: |
         🎁 Bot gratis para MetaTrader 5: Reversión Z.
 
-        Salió el video con el paso a paso para instalarlo y activar la licencia gratuita con Exness, aunque nunca hayas usado un bot.
+        Salió el video para instalarlo y activar la licencia gratis con Exness, aunque nunca hayas usado un bot.
 
         Es una prueba real de 30 días, sin promesas de rentabilidad y sin humo.
 
-        ▶️ El video está en mi perfil
+        👉 Video, licencia y registro en el link de mi perfil
 
 promos:
   # ===== Con TU texto (sale tal cual, la IA no lo toca) =====
@@ -974,6 +992,11 @@ instagram:
     "2026-11-06": binance-avances
   # Guías que se mandan por DM a quien comenta la palabra del carrusel (la palabra va en mayúsculas).
   guias:
+    BOT:
+      link: "https://linktr.ee/comunidadinversores"
+      mensaje: "¡Hola! 🤖 Acá tenés todo para usar mi bot Reversión Z:\n\n💻 Licencia gratis: https://drive.google.com/file/d/1H98WoqlU1LFoPUJyzsXI3E5X1prWVnc7/view?usp=sharing\n▶️ Video paso a paso: https://youtu.be/icTdEFD-d6c\n✅ Abrí tu cuenta de Exness con mi link: https://one.exnessonelink.com/a/ptf6lzlrc8\n\nY todo junto acá: {link}\n\nOperar con apalancamiento implica riesgo de perder tu capital."
+      respuesta: "¡Listo! Te mandé todo por DM 📩"
+      respuesta_sin_dm: "¡Gracias! En un rato te lo mando por DM 📩"
     BITCOIN:
       link: "https://github.com/comunidadinversores1-creator/bot-noticias/blob/main/guias/que-es-bitcoin.pdf"
       mensaje: "¡Hola! 🙌 Acá tenés la guía «¿Qué es Bitcoin?»: 14 páginas con todo explicado, cómo comprar, dónde guardarlo y el whitepaper de Satoshi.\n\n👉 {link}\n\nSi te sirve, seguime acá y en mis otras redes para más: https://linktr.ee/comunidadinversores"

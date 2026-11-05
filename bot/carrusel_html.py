@@ -322,7 +322,15 @@ def _dibujo(l: dict, pose: str, ancho: int) -> str:
     """La ilustración de la lámina: una imagen hecha con IA si la tiene, si no el robot de Eze en SVG.
     Si la lámina nombra una marca ('logo'), su logo oficial va en un círculo blanco al costado."""
     from .robot import svg
-    if l.get("_ilustracion"):
+    if l.get("imagen") and not l.get("_ilustracion"):
+        # Una captura o foto real (ej. MetaTrader): va con marco, sin fundirse con el fondo.
+        try:
+            real = (RAIZ / str(l["imagen"])).read_bytes()
+            dibujo = (f'<img src="{_datos(real)}" style="max-width:{ancho}px; max-height:640px; object-fit:contain; '
+                      f'border:6px solid #111; border-radius:24px; box-shadow:10px 10px 0 #111">')
+        except OSError:
+            dibujo = svg(l.get("pose") or pose, ancho, l.get("objeto") or "")
+    elif l.get("_ilustracion"):
         dibujo = f'<img src="{_datos(l["_ilustracion"])}" style="max-width:{ancho}px; max-height:100%; object-fit:contain; mix-blend-mode:multiply">'
     else:
         dibujo = svg(l.get("pose") or pose, ancho, l.get("objeto") or "")
@@ -354,8 +362,8 @@ def caricatura(laminas: list[dict], palabra: str, con_guia: bool, usuario: str =
         secciones.append(f'<section class="l c">{n}{cuerpo}</section>')
     n = f'<div class="n">{total}/{total}</div>'
     if con_guia:
-        cierre = (f'<h2>¿Querés la <span class="v">guía completa</span>?</h2><div class="dib">{_dibujo({"_ilustracion": cierre_img}, "saludo", 560)}</div>'
-                  f'<div class="txt">Comentá <span class="v">{e(palabra)}</span> y te la mando por privado.</div>{yo}')
+        cierre = (f'<h2>Comentá <span class="v">{e(palabra)}</span></h2><div class="dib">{_dibujo({"_ilustracion": cierre_img}, "saludo", 560)}</div>'
+                  f'<div class="txt">y te mando todo por privado. También está en el link de mi perfil.</div>{yo}')
     else:
         nombre = "Ezequiel Bagnato | Cripto & Trading" if "ezebagnato" in usuario else "Comunidad Inversores"
         cierre = (f'<h2><span class="v">Seguime</span> y guardalo</h2><div class="dib">{_dibujo({"_ilustracion": cierre_img}, "saludo", 520)}</div>'

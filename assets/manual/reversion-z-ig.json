@@ -1,0 +1,52 @@
+{
+ "cuenta": "ezebagnato",
+ "usuario": "@ezebagnato",
+ "estilo": "caricatura",
+ "palabra": "BOT",
+ "laminas": [
+  {
+   "tipo": "portada",
+   "etiqueta": "Bot gratis",
+   "titulo": "Un *bot* que opera solo",
+   "bajada": "Lo estoy probando con USD 100 reales. Te muestro todo.",
+   "pose": "saludo",
+   "objeto": "computadora"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "Qué *hace*",
+   "texto": "Reversión Z opera solo en MetaTrader 5 con tu cuenta de Exness: entra, pone stop loss y take profit, y cierra.",
+   "pose": "celular",
+   "objeto": "grafico"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "La prueba *real*",
+   "texto": "Una cuenta real con USD 100 durante 30 días. El bot opera AUD/CAD y EUR/AUD en MetaTrader 5.",
+   "imagen": "assets/manual/reversion-z-grafico.jpg"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "Cómo *va*",
+   "texto": "Día 8: 4 operaciones y la cuenta 1% abajo. Es muy poco para juzgar: la sigo hasta el día 30.",
+   "imagen": "assets/manual/reversion-z-dia8-celu.jpg"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "La licencia es *gratis*",
+   "texto": "Solo necesitás una cuenta de Exness abierta con mi link. En el video te muestro cómo instalarlo paso a paso.",
+   "pose": "lupa",
+   "objeto": "computadora",
+   "logo": "exness"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "Sin *humo*",
+   "texto": "Un bot no garantiza ganancias y también puede perder. Por eso muestro los resultados buenos y los malos.",
+   "pose": "escudo",
+   "objeto": "candado"
+  }
+ ],
+ "texto_post": "🤖 Un bot que opera solo: Reversión Z\n\nLo estoy probando 30 días en una cuenta real con USD 100 y muestro todo, salga como salga.\n\n1️⃣ Opera solo en MetaTrader 5 con tu cuenta de Exness\n2️⃣ Cada operación lleva stop loss y take profit\n3️⃣ La licencia es gratis\n4️⃣ Día 8: 4 operaciones y la cuenta 1% abajo. Muy poco para juzgar\n\n💬 Comentá BOT y te mando por privado la licencia, el video paso a paso y el link para abrir tu cuenta.\n👉 También está todo en el link de mi perfil.\n\n⚠️ No garantiza ganancias. Operar con apalancamiento implica riesgo de perder tu capital.",
+ "tema": "Bot Reversión Z: opera solo"
+}

@@ -546,9 +546,12 @@ class Corrida:
         mem["ultima"], mem["vuelta"] = self.ahora.isoformat(), vuelta + 1
         self.estado.guardar()
         # Historias: la misma miniatura en las dos cuentas (cada una respeta su tope diario).
-        ruta = RAIZ / str(v.get("imagen") or "")
+        # La imagen de la historia rota entre las miniaturas y otras imágenes del bot (capturas reales, el robot...).
+        pool = [(str(x.get("imagen") or ""), str(x.get("titulo_historia") or "")) for x in variantes]
+        pool += [(str(x.get("imagen") or ""), str(x.get("titulo") or "")) for x in (c.get("historias_extra") or []) if isinstance(x, dict)]
+        img_hist, titulo = pool[vuelta % len(pool)]
+        ruta = RAIZ / img_hist
         if self.historias_activas() and ruta.exists():
-            titulo = str(v.get("titulo_historia") or "")
             foto = ruta.read_bytes()
             # El cartel de abajo rota: "link en el perfil" y "video completo en YouTube" (siempre con el link en el perfil).
             ctas = [str(x) for x in (c.get("ctas_historia") or []) if str(x).strip()] or ["Link en el perfil ↑"]
@@ -1806,7 +1809,8 @@ class Corrida:
                             log.warning("no pude guardar la ilustración %d: %s", i, error)
                 if img:
                     l["_ilustracion"] = img
-            return carrusel_html.sacar_fotos(carrusel_html.caricatura(laminas, "", False, datos.get("usuario", "@ezebagnato")))
+            palabra = str(datos.get("palabra") or "")
+            return carrusel_html.sacar_fotos(carrusel_html.caricatura(laminas, palabra, bool(palabra), datos.get("usuario", "@ezebagnato")))
         logo = None
         if datos.get("logo_tema"):
             img = ig_plan.logo_del_tema(datos["logo_tema"])
@@ -1883,7 +1887,7 @@ class Corrida:
             return False
         g = self.estado.datos["ig"]
         g["historial"] = ([*(g.get("historial") or []), {"fecha": self.ahora.isoformat(), "tipo": "noticia", "estilo": "titular",
-                                                          "tema": datos.get("tema", nombre), "palabra": "", "media_id": media_id,
+                                                          "tema": datos.get("tema", nombre), "palabra": str(datos.get("palabra") or ""), "media_id": media_id,
                                                           "diseno": datos.get("diseno", "")}])[-200:]
         try:
             telegram_album(self.token, self.chat_prueba, laminas, f"✅ <b>Publiqué el carrusel «{html.escape(datos.get('tema', nombre))}» en @{cuenta}</b>")
