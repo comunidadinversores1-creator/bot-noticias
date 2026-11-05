@@ -21,6 +21,13 @@
   },
   {
    "tipo": "paso",
+   "titulo": "Los *números*",
+   "texto": "Primer mes de señales (16/09 al 16/10, cuenta demo): 35 señales, 27 sin pérdida, +4,9% y máxima caída de 2,8%.",
+   "pose": "lupa",
+   "objeto": "grafico"
+  },
+  {
+   "tipo": "paso",
    "titulo": "La prueba *real*",
    "texto": "Una cuenta real con USD 100 durante 30 días. El bot opera AUD/CAD y EUR/AUD en MetaTrader 5.",
    "imagen": "assets/manual/reversion-z-grafico.jpg"
@@ -47,6 +54,6 @@
    "objeto": "candado"
   }
  ],
- "texto_post": "🤖 Un bot que opera solo: Reversión Z\n\nLo estoy probando 30 días en una cuenta real con USD 100 y muestro todo, salga como salga.\n\n1️⃣ Opera solo en MetaTrader 5 con tu cuenta de Exness\n2️⃣ Cada operación lleva stop loss y take profit\n3️⃣ La licencia es gratis\n4️⃣ Día 8: 4 operaciones y la cuenta 1% abajo. Muy poco para juzgar\n\n💬 Comentá BOT y te mando por privado la licencia, el video paso a paso y el link para abrir tu cuenta.\n👉 También está todo en el link de mi perfil.\n\n⚠️ No garantiza ganancias. Operar con apalancamiento implica riesgo de perder tu capital.",
+ "texto_post": "🤖 Un bot que opera solo: Reversión Z\n\nOpera AUD/CAD y EUR/AUD en MetaTrader 5 con tu cuenta de Exness, siempre con stop loss y take profit. La licencia es gratis.\n\n📊 Primer mes de señales en vivo (16/09 al 16/10, cuenta demo):\n1️⃣ 35 señales cerradas\n2️⃣ 27 sin pérdida (22 ganadas y 5 en cero)\n3️⃣ +4,9% sobre la cuenta\n4️⃣ Máxima caída: 2,8%\n\n🧪 Ahora lo estoy probando 30 días en una cuenta real con USD 100. Día 8: 4 operaciones y la cuenta 1% abajo. Muy poco para juzgar: lo muestro salga como salga.\n\n💬 Comentá BOT y te mando por privado la licencia, el video paso a paso y el link para abrir tu cuenta.\n👉 También está todo en el link de mi perfil.\n\n⚠️ Resultados pasados no garantizan resultados futuros. Operar con apalancamiento implica riesgo de perder tu capital.",
  "tema": "Bot Reversión Z: opera solo"
 }
