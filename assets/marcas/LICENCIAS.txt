@@ -23,3 +23,5 @@ Los archivos PNG de esta carpeta se generaron a partir de dos colecciones abiert
 Importante: los logos son marcas registradas de sus dueños. Acá se usan solo para ilustrar
 noticias sobre esas empresas. Si una marca pide que no se use su logo, se borra el archivo
 y la línea correspondiente de indice.json.
+
+exness.png / exness-texto.png: logo de Exness (marca registrada de Exness). Se usa como socio/afiliado de Eze, sin modificarlo.

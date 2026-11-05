@@ -10,7 +10,8 @@
    "titulo": "Un *bot* que opera solo",
    "bajada": "Lo estoy probando con USD 100 reales. Te muestro todo.",
    "pose": "saludo",
-   "objeto": "computadora"
+   "objeto": "computadora",
+   "sponsor": "exness"
   },
   {
    "tipo": "paso",
@@ -44,7 +45,8 @@
    "texto": "Solo necesitás una cuenta de Exness abierta con mi link. En el video te muestro cómo instalarlo paso a paso.",
    "pose": "lupa",
    "objeto": "computadora",
-   "logo": "exness"
+   "logo": "exness",
+   "sponsor": "exness"
   },
   {
    "tipo": "paso",

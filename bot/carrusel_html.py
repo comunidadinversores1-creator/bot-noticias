@@ -296,6 +296,9 @@ CSS_CARICATURA = """
 .c .txt .v, .c .txt .r { color: #16a34a; }
 .c .yo { font-family: Archivo; font-size: 26px; color: #444; margin-top: 24px; display: flex; align-items: center; gap: 12px; }
 .c .yo img { width: 46px; height: 46px; border-radius: 50%; border: 3px solid #111; }
+.c .sponsor { display: flex; align-items: center; gap: 18px; margin-top: 22px; background: #fff; border: 5px solid #111; border-radius: 99px;
+              padding: 10px 30px; font-family: Archivo; font-size: 26px; letter-spacing: .08em; text-transform: uppercase; box-shadow: 6px 6px 0 #111; }
+.c .sponsor img { height: 44px; }
 .c .tarjeta { background: #fff; border: 6px solid #111; border-radius: 36px; padding: 34px 40px; width: 860px; box-shadow: 10px 10px 0 #111; }
 .c .boton { margin-top: 26px; background: #22c55e; border: 5px solid #111; border-radius: 22px; text-align: center; font-family: Luck;
             font-size: 64px; padding: 14px 0 6px; position: relative; }
@@ -352,13 +355,20 @@ def caricatura(laminas: list[dict], palabra: str, con_guia: bool, usuario: str =
     secciones = []
     for i, l in enumerate(laminas):
         n = f'<div class="n">{i + 1}/{total}</div>'
+        sponsor = ""
+        if l.get("sponsor"):
+            try:
+                marca = (RAIZ / "assets" / "marcas" / f"{l['sponsor']}-texto.png").read_bytes()
+                sponsor = f'<div class="sponsor">Sponsor <img src="{_datos(marca, "image/png")}"></div>'
+            except OSError:
+                sponsor = ""
         if l.get("tipo") == "portada":
             chip = f'<div class="chip">{e(l.get("etiqueta") or "Guía rápida")}</div>' if l.get("etiqueta") else ""
             cuerpo = (f'{chip}<h1>{resaltar(l.get("titulo"), "v")}</h1><div class="dib">{_dibujo(l, "saludo", 820)}</div>'
-                      f'<div class="txt">{resaltar(l.get("bajada") or "Deslizá →", "v")}</div>{yo}')
+                      f'<div class="txt">{resaltar(l.get("bajada") or "Deslizá →", "v")}</div>{sponsor}{yo}')
         else:
             cuerpo = (f'<h2>{resaltar(l.get("titulo"), "v")}</h2><div class="dib">{_dibujo(l, "pensando", 800)}</div>'
-                      f'<div class="txt">{resaltar(l.get("texto"), "v")}</div>{yo}')
+                      f'<div class="txt">{resaltar(l.get("texto"), "v")}</div>{sponsor}{yo}')
         secciones.append(f'<section class="l c">{n}{cuerpo}</section>')
     n = f'<div class="n">{total}/{total}</div>'
     if con_guia:

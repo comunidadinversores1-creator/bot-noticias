@@ -258,5 +258,9 @@
  "xrp": {
   "archivo": "xrp.png",
   "descripcion": "XRP (criptomoneda de Ripple)"
+ },
+ "exness": {
+  "archivo": "exness.png",
+  "descripcion": "Exness (broker)"
  }
 }
