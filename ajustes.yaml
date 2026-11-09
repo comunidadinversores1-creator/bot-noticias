@@ -270,7 +270,7 @@ socios:
     enlace: "https://one.exnessonelink.com/a/ptf6lzlrc8"
     aviso: "Operar con apalancamiento implica riesgo de perder tu capital."
   binance:
-    activo: true
+    activo: false                 # 9/11/2026: Eze ya no trabaja con Binance (sin promos, sin llamados, sin búsquedas dedicadas)
     nombre: "Binance"
     alias: ["Binance"]
     llamado: "Abrí tu cuenta en Binance con mi link"
@@ -588,7 +588,7 @@ promos:
   # El llamado sale en 2 pasos: 1) registrarse con tu link (así queda como tu referido)
   # y 2) entrar a la página de la campaña.
   - id: binance-tarjeta-octubre
-    activa: true                  # datos de la página oficial de la campaña (leída el 9/10/2026)
+    activa: false                 # datos de la página oficial de la campaña (leída el 9/10/2026)
     socio: binance
     etiqueta: "PROMO"
     nombre: "Cashback de octubre con la Binance Card"
@@ -632,7 +632,7 @@ promos:
       Según los términos de Binance, participan los usuarios con la identidad verificada que recibieron el aviso de la campaña (en la app o por mail). Los cupos son limitados.
 
   - id: binance-tarjeta
-    activa: true                  # datos de la página oficial del lanzamiento (leída el 9/10/2026)
+    activa: false                 # datos de la página oficial del lanzamiento (leída el 9/10/2026)
     socio: binance
     etiqueta: "PROMO"
     nombre: "Tarjeta física de Binance"

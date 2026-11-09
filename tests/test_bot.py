@@ -630,10 +630,10 @@ def test_lo_urgente_sale_aunque_el_dia_vaya_adelantado(corrida, red, tmp_path):
 
 
 def test_detecta_a_los_socios_y_las_malas_noticias(cfg):
-    assert detectar_socio("Binance lanza una tarjeta física", cfg) == "binance"
+    assert detectar_socio("Binance lanza una tarjeta física", cfg) == ""        # Binance ya no es socio (9/11/2026)
     assert detectar_socio("Exness suma nuevos instrumentos | otra cosa", cfg) == "exness"
     assert detectar_socio("El BCRA compró dólares", cfg) == ""
-    assert detectar_socio("Los traders de binancecoin", cfg) == ""
+    assert detectar_socio("Exness llega a nuevos países", cfg) == "exness"
     for mala in ("Hackean a Binance", "Binance fined $4 billion", "Multa récord al exchange", "El broker suspende retiros",
                  "Quiebra el exchange", "SEC sues the exchange", "Roban USD 351 millones"):
         assert es_mala_noticia(mala), mala
@@ -1464,7 +1464,7 @@ def test_solo_texto_con_un_canal_caido_no_duplica(corrida, red, tmp_path):
 
 def test_asi_vienen_los_ajustes(cfg):
     from bot.util import socios_activos
-    assert list(socios_activos(cfg)) == ["exness", "binance"]                  # Pionex está apagado por ahora
+    assert list(socios_activos(cfg)) == ["exness"]                             # Pionex y Binance apagados (Binance: 9/11/2026)
     assert cfg["socios"]["exness"]["enlace"] == "https://one.exnessonelink.com/a/ptf6lzlrc8"
     assert cfg["socios"]["binance"]["enlace"] == "https://www.binance.com/join?ref=202718448"
     assert cfg["x"]["poner_links"] is False and cfg["encendido"] is True and cfg["x"]["premium"] is True
@@ -1473,8 +1473,7 @@ def test_asi_vienen_los_ajustes(cfg):
     assert cfg["imagen"]["idea_para_chatgpt"] is False and cfg["grok"]["activa"] is True
     c = main.Corrida("prueba", 1, False)
     c.ahora = AHORA
-    assert [p["id"] for p in c.promos_activas()] == [
-        "binance-tarjeta-octubre", "binance-tarjeta"]
+    assert [p["id"] for p in c.promos_activas()] == []                         # hoy no hay promos propias activas
     hoy = AHORA.date()
     for promo in c.promos_activas():
         assert main.imagen_propia(promo["imagen"]) is not None, promo["id"]      # cada una con su imagen
