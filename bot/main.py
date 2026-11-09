@@ -2602,7 +2602,7 @@ class Corrida:
             if lugar:
                 linea = telegram_puede_publicar(self.token, lugar)
                 lineas.append("• Telegram " + linea)
-                (log.error if linea.startswith("❌") else log.info)("Telegram %s", linea)
+                (log.error if linea.startswith("❌") else log.warning)("Telegram %s", linea)   # warning: queda a la vista en GitHub
         # Si están las llaves de X, se comprueban (sin publicar nada).
         if self.claves_x:
             try:
@@ -2614,12 +2614,14 @@ class Corrida:
         if lineas:
             aviso = ("¡Hola! Ya estoy funcionando. Estos son los lugares donde estoy y su código "
                      "(mandale una captura de esto a Claude):\n\n" + "\n".join(lineas))
-            for c in chats:
-                if c["tipo"] == "private":
-                    try:
-                        telegram_mensaje(self.token, str(c["id"]), aviso)
-                    except ErrorPublicacion as error:
-                        log.warning("no pude mandarle la lista a %s: %s", c["nombre"], error)
+            privados = {str(c["id"]) for c in chats if c["tipo"] == "private"}
+            if self.chat_prueba:
+                privados.add(str(self.chat_prueba))       # siempre a tu chat privado con el bot
+            for destino in privados:
+                try:
+                    telegram_mensaje(self.token, destino, aviso)
+                except ErrorPublicacion as error:
+                    log.warning("no pude mandarle la lista a %s: %s", destino, error)
         return 0
 
 
