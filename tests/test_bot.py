@@ -1469,7 +1469,7 @@ def test_asi_vienen_los_ajustes(cfg):
     assert cfg["socios"]["binance"]["enlace"] == "https://www.binance.com/join?ref=202718448"
     assert cfg["x"]["poner_links"] is False and cfg["encendido"] is True and cfg["x"]["premium"] is True
     assert cfg["telegram"]["destino"] == "@comunidad_inversores_anuncios"
-    assert cfg["telegram"]["tambien_en"] == ["@Tu_Comunidad_Inversores/150910"]
+    assert cfg["telegram"]["tambien_en"] == ["@Tu_Comunidad_Inversores/150910", "-1003846761811/12"]
     assert cfg["imagen"]["idea_para_chatgpt"] is False and cfg["grok"]["activa"] is True
     c = main.Corrida("prueba", 1, False)
     c.ahora = AHORA
