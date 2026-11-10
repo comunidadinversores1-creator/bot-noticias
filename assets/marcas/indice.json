@@ -262,5 +262,13 @@
  "exness": {
   "archivo": "exness.png",
   "descripcion": "Exness (broker)"
+ },
+ "mexc": {
+  "archivo": "mexc.png",
+  "descripcion": "MEXC (exchange)"
+ },
+ "mexc global": {
+  "archivo": "mexc.png",
+  "descripcion": "MEXC (exchange)"
  }
 }

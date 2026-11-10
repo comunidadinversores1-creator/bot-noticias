@@ -211,6 +211,10 @@ SÍ es noticia de impacto:
 - Empresas: resultados de gigantes, quiebras, fusiones, hackeos, fraudes, salidas a bolsa grandes.
 - Exchanges y brokers (cualquiera): hackeos y robos, retiros suspendidos, caídas del servicio, cierres, quiebras, multas o sanciones fuertes, compras y fusiones, e hitos históricos (récord de usuarios o de volumen, salida a bolsa, una licencia clave).
 - MARCAS CON FOCO (SOCIOS): además de todo lo anterior, de estas marcas también interesan los productos nuevos y las campañas (por ejemplo una tarjeta, una herramienta nueva, una promoción para usuarios nuevos). A esas novedades poneles impacto MINIMO aunque no muevan el mercado.
+- Prop firms (empresas de fondeo como FTMO, Funding Pips, The5ers, Topstep): cierres, cuentas o pagos congelados, cambios de reglas, multas, compras y problemas con plataformas.
+- Gobiernos contra exchanges o brokers: sanciones, órdenes del Tesoro de EE.UU. (FinCEN, OFAC), causas judiciales, prohibiciones en un país.
+- Hackers y ciberataques grandes (robos de cripto, ransomware, ataques a bancos o empresas, grupos de Corea del Norte).
+- Inteligencia artificial: lanzamientos o avances grandes (OpenAI, Google, Anthropic, Meta, xAI), chips y Nvidia, inversiones o leyes de IA que muevan empresas o mercados, IA usada en trading o en estafas.
 - Movimientos fuertes de precio (acciones, bonos, dólar, petróleo, oro, Bitcoin) con causa clara.
 - Argentina: dólar, reservas, riesgo país, deuda, FMI, medidas económicas, inflación del INDEC.
 
@@ -225,7 +229,7 @@ Si dos candidatos cuentan LA MISMA noticia (aunque uno esté en inglés y otro e
 Escala de impacto (1 a 10):
 10 = hecho histórico (guerra entre potencias, quiebra sistémica, cambio de régimen monetario).
 9 = decisión de tasas, dato macro clave muy lejos de lo esperado, escalada bélica que sacude al petróleo, hackeo o quiebra gigante.
-8 = ley o regulación importante aprobada, resultados de una empresa gigante, hackeo o cierre de un exchange o broker conocido, movimiento brusco de Bitcoin o de los índices, medida económica fuerte en Argentina.
+8 = ley o regulación importante aprobada, resultados de una empresa gigante, hackeo, cierre o sanción de un exchange, broker o prop firm conocido, lanzamiento grande de IA, movimiento brusco de Bitcoin o de los índices, medida económica fuerte en Argentina.
 7 = noticia relevante que un inversor tiene que conocer hoy.
 6 = noticia interesante pero no imprescindible: solo sirve para un día con pocas noticias.
 5 o menos = relleno, no vale la pena publicarla.

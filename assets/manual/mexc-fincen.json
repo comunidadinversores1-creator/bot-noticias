@@ -1,0 +1,71 @@
+{
+ "cuenta": "ezebagnato",
+ "usuario": "@ezebagnato",
+ "estilo": "caricatura",
+ "cuentas": ["comunidad"],
+ "laminas": [
+  {
+   "tipo": "portada",
+   "etiqueta": "Urgente",
+   "titulo": "EE.UU. le *cortó* el dinero a MEXC",
+   "bajada": "El Tesoro dice que movió USD 16.000 millones ligados a Rusia, Irán y Corea del Norte.",
+   "logo": "mexc",
+   "escena": "a big classical government building with columns and a huge red barrier gate in front of it blocking a stream of gold crypto coins, red stop sign"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "Qué *pasó*",
+   "texto": "El 6 de noviembre, FinCEN (del Tesoro de EE.UU.) dictó una orden: los bancos de EE.UU. ya no pueden mandarle ni recibirle dinero.",
+   "pose": "lupa",
+   "objeto": "banco"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "El motivo: *USD 16.000 millones*",
+   "texto": "Según el Tesoro, entre 2021 y 2026 pasaron por MEXC fondos ligados a sanciones, ransomware, estafas y mercados de la web oscura.",
+   "escena": "a giant magnifying glass over a pile of gold coins and banknotes, with a red warning triangle and red arrows pointing down"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "Rusia e *Irán*",
+   "texto": "Unos USD 1.500 millones ligados a Rusia y USD 1.000 millones en operaciones con más de 40 exchanges iraníes.",
+   "pose": "alerta",
+   "objeto": "hackeo"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "No es un exchange *chico*",
+   "texto": "MEXC está entre los 20 más grandes del mundo: más de 3.000 criptos y unos USD 5.000 millones en reservas.",
+   "pose": "pensando",
+   "objeto": "bitcoin",
+   "logo": "mexc"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "¿Qué dice *MEXC*?",
+   "texto": "Que opera normal y que los fondos están seguros. Su CEO, Vugar Usi, dice que los retiros siguen, aunque subieron.",
+   "pose": "celular"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "La gente *retira*",
+   "texto": "En 24 horas salieron USD 126 millones netos. Y usuarios cuentan que otros exchanges grandes revisan los depósitos que llegan desde MEXC.",
+   "escena": "crypto coins flying out of the open door of a bank vault into the distance, red arrows pointing down"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "¿Desde *cuándo*?",
+   "texto": "La orden arranca 30 días después de publicarse en el boletín oficial de EE.UU. No congela las cuentas de los usuarios.",
+   "pose": "escudo",
+   "objeto": "candado"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "La *lección*",
+   "texto": "No dejes todo tu dinero en un solo exchange. ¿Vos tenés cripto en MEXC? Contame en los comentarios.",
+   "pose": "saludo"
+  }
+ ],
+ "texto_post": "🚨 EE.UU. le cortó el acceso al sistema financiero a MEXC, uno de los 20 exchanges más grandes del mundo\n\nEl 6 de noviembre, FinCEN (el Tesoro de EE.UU.) dictó una orden: los bancos de EE.UU. ya no van a poder mandarle ni recibirle dinero.\n\n📌 Por qué, según el Tesoro:\n1️⃣ USD 16.000 millones ligados a sanciones, ransomware y estafas (2021-2026)\n2️⃣ Unos USD 1.500 millones ligados a Rusia\n3️⃣ Unos USD 1.000 millones con más de 40 exchanges de Irán\n\n💬 MEXC dice que opera normal y que los fondos están seguros. Igual, en 24 horas salieron USD 126 millones netos.\n\n⚠️ La orden arranca 30 días después de publicarse y no congela cuentas. La lección de siempre: no dejes todo tu dinero en un solo exchange.\n\n👇 ¿Tenés cripto en MEXC? ¿La sacarías?\n\n📌 Guardalo\n✈️ Mandáselo a quien use MEXC\n🔔 Seguime para más\n\nFuentes: Tesoro de EE.UU. (FinCEN), The Block, CryptoSlate",
+ "tema": "EE.UU. corta a MEXC"
+}

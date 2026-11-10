@@ -29,6 +29,7 @@ EMOJI_CATEGORIA = {
     "GEOPOLÍTICA": "🌍",
     "REGULACIÓN": "⚖️",
     "ARGENTINA": "🇦🇷",
+    "TECNOLOGÍA": "🤖",
 }
 
 # ------------------------------------------------------------------ links

@@ -253,6 +253,7 @@ categorias:
   - GEOPOLÍTICA
   - REGULACIÓN
   - ARGENTINA
+  - TECNOLOGÍA
 
 # ------------------------------------------------------------
 #  SOCIOS: las marcas con las que trabajás. Sus noticias tienen prioridad
@@ -996,6 +997,17 @@ palabras_clave:
   - milei
   - caputo
   - trump
+  - prop firm
+  - fondeo
+  - ftmo
+  - fincen
+  - ofac
+  - ciberataque
+  - ransomware
+  - inteligencia artificial
+  - artificial intelligence
+  - openai
+  - nvidia
 
 # ------------------------------------------------------------
 #  FUENTES.  peso: 2 = oficial o muy confiable, 1 = normal.
@@ -1013,6 +1025,14 @@ fuentes:
   # --- Exchanges y brokers: hackeos, cierres, multas, hitos ---
   - {nombre: "Google Noticias",  url: "https://news.google.com/rss/search?q=(exchange%20OR%20broker)%20(hackeo%20OR%20hackeado%20OR%20quiebra%20OR%20%22suspende%20retiros%22%20OR%20multa%20OR%20cierra)%20when%3A6h&hl=es-419&gl=AR&ceid=AR:es-419", idioma: es, peso: 1.1, tema: EXCHANGES}
   - {nombre: "Google Noticias",  url: "https://news.google.com/rss/search?q=(exchange%20OR%20broker)%20(hacked%20OR%20hack%20OR%20bankruptcy%20OR%20%22halts%20withdrawals%22%20OR%20%22shuts%20down%22%20OR%20fined)%20when%3A6h&hl=en-US&gl=US&ceid=US:en", idioma: en, peso: 1.1, tema: EXCHANGES}
+  # --- 10/11/2026: Eze quiere estar a la vanguardia en exchanges, brokers, prop firms, sanciones, hackers e IA ---
+  - {nombre: "Google Noticias",  url: "https://news.google.com/rss/search?q=(Coinbase%20OR%20Bybit%20OR%20OKX%20OR%20Kraken%20OR%20MEXC%20OR%20Bitget%20OR%20KuCoin%20OR%20Bitunix%20OR%20Hyperliquid)%20when%3A12h&hl=en-US&gl=US&ceid=US:en", idioma: en, peso: 1.1, tema: EXCHANGES, horas: 12}
+  - {nombre: "Google Noticias",  url: "https://news.google.com/rss/search?q=(%22prop%20firm%22%20OR%20%22prop%20trading%22%20OR%20FTMO%20OR%20%22Funding%20Pips%22%20OR%20The5ers%20OR%20Topstep)%20when%3A1d&hl=en-US&gl=US&ceid=US:en", idioma: en, peso: 1.1, tema: BROKERS, horas: 24}
+  - {nombre: "Google Noticias",  url: "https://news.google.com/rss/search?q=(%22prop%20firm%22%20OR%20%22cuentas%20fondeadas%22%20OR%20FTMO%20OR%20%22empresa%20de%20fondeo%22)%20when%3A2d&hl=es-419&gl=AR&ceid=AR:es-419", idioma: es, peso: 1.0, tema: BROKERS, horas: 48}
+  - {nombre: "Google Noticias",  url: "https://news.google.com/rss/search?q=(FinCEN%20OR%20OFAC%20OR%20%22Justice%20Department%22%20OR%20SEC%20OR%20CFTC)%20(crypto%20OR%20exchange%20OR%20broker)%20when%3A12h&hl=en-US&gl=US&ceid=US:en", idioma: en, peso: 1.2, tema: REGULACIÓN, horas: 12}
+  - {nombre: "Google Noticias",  url: "https://news.google.com/rss/search?q=(hackers%20OR%20ciberataque%20OR%20ransomware%20OR%20%22robo%20de%20criptomonedas%22)%20when%3A12h&hl=es-419&gl=AR&ceid=AR:es-419", idioma: es, peso: 1.0, tema: TECNOLOGÍA, horas: 12}
+  - {nombre: "Google Noticias",  url: "https://news.google.com/rss/search?q=(OpenAI%20OR%20Anthropic%20OR%20Nvidia%20OR%20%22Google%20DeepMind%22%20OR%20xAI%20OR%20%22inteligencia%20artificial%22)%20when%3A12h&hl=es-419&gl=AR&ceid=AR:es-419", idioma: es, peso: 1.0, tema: TECNOLOGÍA, horas: 12}
+  - {nombre: "Google Noticias",  url: "https://news.google.com/rss/search?q=(OpenAI%20OR%20Anthropic%20OR%20Nvidia%20OR%20%22artificial%20intelligence%22)%20(launch%20OR%20model%20OR%20deal%20OR%20billion)%20when%3A12h&hl=en-US&gl=US&ceid=US:en", idioma: en, peso: 1.0, tema: TECNOLOGÍA, horas: 12}
   - {nombre: "Finance Magnates", url: "https://www.financemagnates.com/feed/", idioma: en, peso: 1.2, tema: BROKERS}
   # --- Argentina y español ---
   - {nombre: "Ámbito",           url: "https://www.ambito.com/rss/pages/economia.xml", idioma: es, peso: 1.3, tema: ARGENTINA}
@@ -1088,6 +1108,7 @@ instagram:
     "2026-11-05": paciencia-impulso   # el del miércoles 4/11, que falló
     "2026-11-06": binance-avances
     "2026-11-07": reversion-z-ig    # carrusel del bot con "Comentá BOT"
+    "2026-11-10": mexc-fincen       # EE.UU. corta a MEXC (en @ezebagnato y @comunidad_inversores_ok)
   # Guías que se mandan por DM a quien comenta la palabra del carrusel (la palabra va en mayúsculas).
   guias:
     BOT:
