@@ -185,6 +185,16 @@ def nombra_prohibido(texto: str, lista: list[str]) -> str | None:
     return None
 
 
+def marca_limitada(texto: str, limitadas: dict) -> str | None:
+    """Si el texto nombra a una marca de 'marcas_limitadas' y NO habla de ninguno de sus temas
+    permitidos, devuelve esa marca (la noticia se saltea). Si no, None."""
+    plano = sin_acentos(texto)
+    for marca, temas in (limitadas or {}).items():
+        if _aparece(marca, plano) and not any(_aparece(t, plano) for t in (temas or [])):
+            return str(marca)
+    return None
+
+
 def detectar_socio(titulos: str, cfg: dict) -> str:
     """Si el título nombra a una de las marcas con las que trabaja Eze, devuelve cuál."""
     plano = sin_acentos(titulos)
@@ -249,6 +259,11 @@ def preparar(noticias: list[Noticia], cfg: dict, ahora: datetime) -> tuple[list[
         if nombre:
             cuenta["prohibidas"] += 1
             log.info("  salteada por nombrar a %s: %s", nombre, g.principal.titulo[:80])
+            continue
+        limitada = marca_limitada(texto, cfg.get("marcas_limitadas") or {})
+        if limitada:
+            cuenta["prohibidas"] += 1
+            log.info("  salteada (de %s solo sale lo importante del tema permitido): %s", limitada, g.principal.titulo[:80])
             continue
         g.socio = detectar_socio(g.titulos(), cfg)
         limpios.append(g)

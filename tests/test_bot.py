@@ -67,6 +67,7 @@ def corrida(monkeypatch, tmp_path, red):
         c.tambien_en = []                            # solo el canal (la prueba del grupo lo prende)
         c.cfg["x_charla"]["activa"] = charla          # las preguntas para X, solo en sus pruebas
         c.cfg["hashtags"] = []                        # sin hashtags, salvo en su prueba
+        c.cfg["marcas_limitadas"] = {}                # las pruebas de socios usan noticias de Binance
         c.cfg["ensenanza"]["activa"] = False          # las enseñanzas, solo en sus pruebas
         c.cfg["calendario"]["activa"] = False         # el calendario económico, solo en sus pruebas
         c.cfg["campana_video"]["activa"] = False      # la campaña del video, solo en sus pruebas
@@ -1464,6 +1465,7 @@ def test_solo_texto_con_un_canal_caido_no_duplica(corrida, red, tmp_path):
 
 def test_asi_vienen_los_ajustes(cfg):
     from bot.util import socios_activos
+    assert [p["id"] for p in cfg["promos"] if p.get("activa")] == ["registrate-conmigo", "cashback-20", "exness-terminal-simple"]
     assert list(socios_activos(cfg)) == ["exness"]                             # Pionex y Binance apagados (Binance: 9/11/2026)
     assert cfg["socios"]["exness"]["enlace"] == "https://one.exnessonelink.com/a/ptf6lzlrc8"
     assert cfg["socios"]["binance"]["enlace"] == "https://www.binance.com/join?ref=202718448"
@@ -1473,7 +1475,7 @@ def test_asi_vienen_los_ajustes(cfg):
     assert cfg["imagen"]["idea_para_chatgpt"] is False and cfg["grok"]["activa"] is True
     c = main.Corrida("prueba", 1, False)
     c.ahora = AHORA
-    assert [p["id"] for p in c.promos_activas()] == []                         # hoy no hay promos propias activas
+    assert [p["id"] for p in c.promos_activas()] == ["registrate-conmigo", "cashback-20", "exness-terminal-simple"]
     hoy = AHORA.date()
     for promo in c.promos_activas():
         assert main.imagen_propia(promo["imagen"]) is not None, promo["id"]      # cada una con su imagen
@@ -2292,3 +2294,12 @@ def test_carrusel_caricatura_dibuja_el_robot_en_cada_pose():
     laminas += [{"tipo": "paso", "titulo": f"Idea {i}", "texto": "texto", "pose": p} for i, p in enumerate(robot.POSES)]
     pagina = carrusel_html.caricatura(laminas, "BOT", False)
     assert pagina.count('class="l c"') == len(laminas) + 1 and pagina.count("<svg") >= len(laminas)
+
+
+def test_binance_solo_sale_si_es_del_hackeo():
+    from bot.filtro import marca_limitada
+    cfg = cargar_ajustes()
+    lim = cfg["marcas_limitadas"]
+    assert marca_limitada("Binance lista una nueva moneda", lim) == "Binance"
+    assert marca_limitada("Binance confirma que devolverá los fondos robados en el hackeo", lim) is None
+    assert marca_limitada("Bitcoin cae 5%", lim) is None

@@ -350,7 +350,7 @@ campana_video:
 
         💻 [Descargá la licencia del bot Reversión Z](https://drive.google.com/file/d/1H98WoqlU1LFoPUJyzsXI3E5X1prWVnc7/view?usp=sharing) y seguí los pasos del video para tenerlo operando en automático en tu cuenta de Exness.
 
-        ¿Todavía no tenés cuenta en Exness? [Abrila con mi link](https://one.exnessonelink.com/a/ptf6lzlrc8)
+        🎁 La licencia es GRATIS abriendo tu cuenta de Exness con mi link, y además te devuelvo el 20% de cashback en comisiones → [Registrate acá](https://one.exnessonelink.com/a/ptf6lzlrc8)
 
         Operar con apalancamiento implica riesgo de perder tu capital.
       texto_x: |
@@ -380,7 +380,7 @@ campana_video:
 
         💻 [Descargá la licencia del bot Reversión Z](https://drive.google.com/file/d/1H98WoqlU1LFoPUJyzsXI3E5X1prWVnc7/view?usp=sharing) y seguí los pasos del video para tenerlo operando en automático en tu cuenta de Exness.
 
-        ¿No tenés cuenta en Exness? [Registrate con mi link](https://one.exnessonelink.com/a/ptf6lzlrc8)
+        🎁 La licencia es GRATIS abriendo tu cuenta de Exness con mi link, y además te devuelvo el 20% de cashback en comisiones → [Registrate acá](https://one.exnessonelink.com/a/ptf6lzlrc8)
 
         Operar con apalancamiento implica riesgo de perder tu capital.
 
@@ -413,7 +413,7 @@ campana_video:
 
         💻 [Descargá la licencia del bot Reversión Z](https://drive.google.com/file/d/1H98WoqlU1LFoPUJyzsXI3E5X1prWVnc7/view?usp=sharing) y seguí los pasos del video para tenerlo operando en automático en tu cuenta de Exness.
 
-        ¿Todavía no tenés cuenta en Exness? [Abrila con mi link](https://one.exnessonelink.com/a/ptf6lzlrc8)
+        🎁 La licencia es GRATIS abriendo tu cuenta de Exness con mi link, y además te devuelvo el 20% de cashback en comisiones → [Registrate acá](https://one.exnessonelink.com/a/ptf6lzlrc8)
 
         Operar con apalancamiento implica riesgo de perder tu capital.
       texto_x: |
@@ -426,6 +426,98 @@ campana_video:
         👉 Video, licencia y registro en el link de mi perfil
 
 promos:
+  # ===== FOCO (10/11/2026): Exness + bot Reversión Z gratis + 20% de cashback. Rotan entre ellas (3 por día). =====
+  - id: registrate-conmigo
+    activa: true
+    socio: exness
+    nombre: "Registrate conmigo en Exness: bot gratis + 20% de cashback"
+    imagen: assets/promos/registrate-conmigo.jpg
+    titulo_historia: "Bot gratis + 20% de cashback"
+    texto_fijo: |
+      🎁 SI ABRÍS TU CUENTA DE EXNESS CONMIGO, TE LLEVÁS 3 COSAS
+
+      No es solo un link de registro. Es entrar a lo que uso yo todos los días.
+
+      1️⃣ Mi bot Reversión Z GRATIS: opera solo en MetaTrader 5, AUD/CAD y EUR/AUD.
+      2️⃣ 20% de cashback: te devuelvo el 20% de lo que pagás en comisiones.
+      3️⃣ Acceso a mis herramientas y bots para operar.
+
+      📊 Primer mes del bot en señales (16/09 al 16/10, cuenta demo): 35 señales, 27 sin pérdida, +4,9% sobre la cuenta y una caída máxima de 2,8%. Ahora lo estoy probando 30 días con USD 100 reales y muestro todo, salga como salga.
+
+      👇 Cómo hacerlo, paso a paso:
+      1️⃣ [Abrí tu cuenta de Exness con mi link](https://one.exnessonelink.com/a/ptf6lzlrc8)
+      2️⃣ [Descargá la licencia del bot](https://drive.google.com/file/d/1H98WoqlU1LFoPUJyzsXI3E5X1prWVnc7/view?usp=sharing)
+      3️⃣ [Seguí el video de instalación](https://youtu.be/icTdEFD-d6c)
+
+      ⚠️ Operar con apalancamiento implica riesgo de perder tu capital. Resultados pasados no garantizan resultados futuros.
+    texto_x: |
+      🎁 Si abrís tu cuenta de Exness conmigo, te llevás 3 cosas:
+
+      1️⃣ Mi bot Reversión Z gratis, que opera solo
+      2️⃣ 20% de cashback en comisiones
+      3️⃣ Acceso a mis herramientas y bots
+
+      👉 Toda la info y el registro, en el link de mi perfil
+      ⚠️ Operar con apalancamiento implica riesgo.
+
+  - id: cashback-20
+    activa: true
+    socio: exness
+    nombre: "20% de cashback en comisiones con Exness"
+    imagen: assets/promos/cashback-20.jpg
+    titulo_historia: "Te devuelvo el 20% de tus comisiones"
+    texto_fijo: |
+      💸 CADA VEZ QUE OPERÁS, PAGÁS COMISIONES. YO TE DEVUELVO EL 20%
+
+      Spread, comisiones… son costos que casi nadie mira y que se comen parte del resultado.
+
+      📌 Cómo funciona:
+      1️⃣ Abrís tu cuenta de Exness con mi link
+      2️⃣ Operás como siempre
+      3️⃣ Te devuelvo el 20% de lo que pagaste en comisiones
+
+      ✅ Además tenés mi bot Reversión Z gratis y acceso a mis herramientas.
+
+      👉 [Registrate acá con mi link](https://one.exnessonelink.com/a/ptf6lzlrc8)
+
+      ⚠️ Operar con apalancamiento implica riesgo de perder tu capital.
+    texto_x: |
+      💸 Cada vez que operás, pagás comisiones.
+
+      Si abrís tu cuenta de Exness con mi link, te devuelvo el 20% de lo que pagás. Y te llevás mi bot Reversión Z gratis.
+
+      👉 Toda la info y el registro, en el link de mi perfil
+      ⚠️ Operar con apalancamiento implica riesgo.
+
+  - id: exness-terminal-simple
+    activa: true
+    socio: exness
+    nombre: "Exness Terminal: operar sin instalar MetaTrader"
+    imagen: assets/promos/exness-un-clic.jpg
+    titulo_historia: "Operá desde el celu, sin MetaTrader"
+    texto_fijo: |
+      📱 ¿RECIÉN EMPEZÁS? NO HACE FALTA INSTALAR METATRADER
+
+      Yo opero desde Exness Terminal, la plataforma propia de Exness. Entrás desde el navegador o el celular y tenés todo en una pantalla:
+
+      ⚡️ Operar con un clic
+      🛑 Stop loss y take profit desde el gráfico
+      📈 Hasta 8 gráficos a la vez y +100 indicadores
+      📅 Calendario económico integrado
+
+      🎁 Y si abrís la cuenta con mi link: mi bot Reversión Z gratis + 20% de cashback en comisiones + acceso a mis herramientas.
+
+      👉 [Registrate acá con mi link](https://one.exnessonelink.com/a/ptf6lzlrc8)
+
+      ⚠️ Operar con apalancamiento implica riesgo de perder tu capital.
+    texto_x: |
+      📱 ¿Recién empezás? No hace falta instalar MetaTrader.
+
+      Yo opero desde Exness Terminal: navegador o celu, un clic para entrar y stop loss desde el gráfico.
+
+      🎁 Con mi link: bot Reversión Z gratis + 20% de cashback.
+
+      👉 Toda la info y el registro, en el link de mi perfil
   # ===== Con TU texto (sale tal cual, la IA no lo toca) =====
   - id: senales-exness
     activa: false                 # pausada: Eze pidió frenar las señales y promocionar el bot Reversión Z (29/10/2026)
@@ -720,6 +812,11 @@ imagen_ia:
 #  Ejemplo:  no_nombrar: ["Empresa A", "Empresa B"]
 # ------------------------------------------------------------
 no_nombrar: []
+
+# MARCAS LIMITADAS: una noticia que nombra a esta marca solo sale si además habla de alguno de estos temas.
+# (10/11/2026: Eze ya no trabaja con Binance; solo quiere novedades importantes del hackeo.)
+marcas_limitadas:
+  Binance: ["hackeo", "hackearon", "hackers", "hacker", "hack", "hackean", "robo", "robaron", "robados", "exploit", "ataque", "fondos robados", "fondos de los usuarios", "reembolso", "devolucion", "recupero", "recuperaron", "Lazarus"]
 
 # ------------------------------------------------------------
 #  TÍTULOS QUE SE DESCARTAN SIEMPRE (notas de servicio, guías,
