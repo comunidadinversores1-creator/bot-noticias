@@ -2312,7 +2312,7 @@ def test_campana_weex_sale_una_vez_por_dia(corrida, red, tmp_path):
     from bot.util import cargar_ajustes as _c
     _sin_la_fed(red)
     weex = _c()["campanas_extra"][0]
-    c = corrida(ahora=datetime(2026, 11, 13, 23, 45, tzinfo=timezone.utc))
+    c = corrida(ahora=datetime(2026, 11, 13, 19, 15, tzinfo=timezone.utc))
     c.cfg["campanas_extra"] = [weex]
     assert c.correr() == 0
     todo = " ".join(m.get("caption", "") for m in red.telegram_fotos) + " ".join(m.get("text", "") for m in red.telegram_mensajes)

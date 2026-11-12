@@ -464,7 +464,7 @@ campanas_extra:
   - activa: true
     id: weex-eze-exclusive
     cada_dias: 1
-    desde: "20:30"                # de noche, separada del carrusel (18:00) y del resto de las promos
+    desde: "16:00"                # a la tarde: 2 horas antes del carrusel (18:00), separada de las otras promos
     vence: "2026-11-25"             # el evento de WEEX cierra el 26/11 a las 3:59 (hora Argentina)
     ctas_historia:
       - "Link en mi perfil ↑"
