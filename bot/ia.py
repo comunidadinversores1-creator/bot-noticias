@@ -223,7 +223,7 @@ NO es noticia de impacto (no la elijas):
 - Opinión, análisis, columnas, entrevistas, predicciones de precio y pronósticos de analistas.
 - Guías, explicadores y notas de servicio (cobros, jubilaciones, trámites, cotizaciones de rutina).
 - Promociones y lanzamientos menores de otras marcas (los de las MARCAS CON FOCO sí valen), notas patrocinadas, reseñas, comparativas y rumores sin confirmar.
-- Lo que repite algo que YA PUBLICAMOS (lista abajo), salvo que traiga una novedad importante.
+- Lo que repite algo que YA PUBLICAMOS (lista abajo), salvo que traiga una novedad importante. OJO: que algo que anticipamos SE CONCRETE es una novedad, no una repetición (publicamos "prepara la salida del CEO" y ahora "renunció el CEO" → SÍ va, con impacto alto). Lo mismo si una caída o suba sigue y llega a un nivel nuevo.
 
 Si dos candidatos cuentan LA MISMA noticia (aunque uno esté en inglés y otro en español, o sean de medios distintos), elegí uno solo: el que traiga más detalle.
 
