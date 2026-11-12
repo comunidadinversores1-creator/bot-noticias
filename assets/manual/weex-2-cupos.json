@@ -35,7 +35,7 @@
   {
    "tipo": "paso",
    "titulo": "¿Por qué *3 días*?",
-   "texto": "WEEX pide mantener el depósito para que nadie entre, cobre y se vaya. Se cuenta desde que depositás.",
+   "texto": "Es la regla de la promo: tu depósito tiene que quedarse 3 días. Si lo retirás antes, deja de contar.",
    "pose": "escudo",
    "objeto": "candado"
   },
@@ -43,7 +43,7 @@
    "tipo": "paso",
    "titulo": "Gana el *primero*",
    "texto": "Los cupos son para los primeros que cumplen. Registrarte hoy no te obliga a nada y ya te deja adentro.",
-   "escena": "a row of blank paper tickets lying in a line, with the first ticket glowing gold, no text"
+   "escena": "a small open treasure chest full of gold coins with a big golden key next to it, no text, no letters"
   },
   {
    "tipo": "paso",
@@ -60,5 +60,8 @@
   }
  ],
  "texto_post": "⏳ Los cupos no esperan: 50 lugares para el bono de bienvenida de WEEX\n\n📌 Lo mínimo para entrar:\n1️⃣ Te registrás con mi link\n2️⃣ Depositás 100 USDT y los mantenés 3 días\n3️⃣ Operás 100 USDT en futuros\n🎁 Te llevás entre 20 y 100 USDT de prueba\n\nY para el cashback del 20% hay solo 30 cupos. La promo termina el 26/11.\n\n💬 Comentá BONO y te mando el link por DM. También está en el link de mi perfil.\n\n⚠️ Promo de WEEX con condiciones propias, solo para usuarios nuevos que entran por el link. Operar futuros con apalancamiento implica riesgo de perder tu capital.",
- "tema": "Bono WEEX: los cupos no esperan"
+ "tema": "Bono WEEX: los cupos no esperan",
+ "rehacer": [
+  6
+ ]
 }
