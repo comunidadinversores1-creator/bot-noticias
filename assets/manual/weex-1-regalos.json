@@ -1,0 +1,63 @@
+{
+ "cuenta": "ezebagnato",
+ "usuario": "@ezebagnato",
+ "estilo": "caricatura",
+ "palabra": "BONO",
+ "laminas": [
+  {
+   "tipo": "portada",
+   "etiqueta": "Nuevo sponsor",
+   "titulo": "Te traje un *bono* exclusivo",
+   "bajada": "WEEX x Eze: hasta 200 USDT de prueba para mi comunidad. Del 12 al 26 de noviembre.",
+   "logo": "weex",
+   "sponsor": "weex",
+   "escena": "an open gift box with gold coins and a big green coin bursting out of it, confetti around, no text"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "¿Qué es *WEEX*?",
+   "texto": "Un exchange cripto para operar futuros. Es mi nuevo sponsor y armamos una promo solo para los que entran con mi link.",
+   "pose": "celular",
+   "logo": "weex"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "Regalo 1: *VIP 2*",
+   "texto": "Solo por registrarte te dan 30 días de VIP 2. Es para los primeros 50 usuarios nuevos.",
+   "pose": "festejo"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "Regalo 2: *hasta 100 USDT*",
+   "texto": "Depositás 100 USDT, los mantenés 3 días y operás 100 USDT en futuros. Te llevás entre 20 y 100 USDT de prueba.",
+   "escena": "a small stack of gold coins next to a much bigger stack of gold coins, a green arrow pointing up between them, no text"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "Regalo 3: *20%* de cashback",
+   "texto": "Con 500 USDT depositados y 30.000 de volumen en futuros, 100 USDT. Con 1.000 y 50.000, 200 USDT.",
+   "pose": "dinero",
+   "objeto": "usdt"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "Ojo con *esto*",
+   "texto": "Tenés que entrar por mi link y tocar «Registrarme ahora». Si no, tus depósitos no cuentan para la promo.",
+   "pose": "lupa"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "¿Cuándo *cobrás*?",
+   "texto": "Los premios llegan como cupones hasta 7 días hábiles después del 26/11. Hay que reclamarlos a mano.",
+   "pose": "pensando"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "Son *pocos* cupos",
+   "texto": "50 lugares para el bono del primer depósito y solo 30 para el cashback. Cuando se acaban, se acaban.",
+   "escena": "an hourglass with the sand almost run out, next to a few gold coins, no text"
+  }
+ ],
+ "texto_post": "🎁 Nuevo sponsor: WEEX x Eze, una promo exclusiva para mi comunidad (del 12 al 26/11)\n\n1️⃣ 30 días de VIP 2 solo por registrarte\n2️⃣ Depositás 100 USDT, los mantenés 3 días y operás 100 USDT en futuros → entre 20 y 100 USDT de prueba\n3️⃣ 20% de cashback en tu depósito → hasta 200 USDT de prueba\n\n⏳ Son 50 cupos para el bono de bienvenida y 30 para el cashback.\n\n💬 Comentá BONO y te mando el link por DM. También está en el link de mi perfil.\n\n⚠️ Promo de WEEX con condiciones propias, solo para usuarios nuevos que entran por el link. Operar futuros con apalancamiento implica riesgo de perder tu capital.",
+ "tema": "Bono WEEX: qué te llevás"
+}

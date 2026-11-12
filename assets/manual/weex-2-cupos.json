@@ -1,0 +1,64 @@
+{
+ "cuenta": "ezebagnato",
+ "usuario": "@ezebagnato",
+ "estilo": "caricatura",
+ "palabra": "BONO",
+ "laminas": [
+  {
+   "tipo": "portada",
+   "etiqueta": "Solo 50 cupos",
+   "titulo": "Los cupos *no* esperan",
+   "bajada": "50 lugares para el bono de bienvenida de WEEX. Te cuento cómo agarrar el tuyo antes del 26/11.",
+   "logo": "weex",
+   "sponsor": "weex",
+   "escena": "a single golden ticket with a gold coin on it in front of a big round wall clock, no text, no numbers"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "El error de *siempre*",
+   "texto": "Ver una promo, pensar «después me fijo» y llegar cuando ya no queda lugar. Me pasó más de una vez.",
+   "pose": "pensando"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "Cuántos *lugares* hay",
+   "texto": "50 para el bono del primer depósito y el VIP 2. Solo 30 para el cashback del 20%.",
+   "pose": "lupa",
+   "objeto": "usdt"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "Lo *mínimo*: 100 USDT",
+   "texto": "Depositás 100 USDT, los dejás 3 días y operás 100 USDT en futuros. Con eso entrás al bono de 20 a 100 USDT.",
+   "pose": "dinero"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "¿Por qué *3 días*?",
+   "texto": "WEEX pide mantener el depósito para que nadie entre, cobre y se vaya. Se cuenta desde que depositás.",
+   "pose": "escudo",
+   "objeto": "candado"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "Gana el *primero*",
+   "texto": "Los cupos son para los primeros que cumplen. Registrarte hoy no te obliga a nada y ya te deja adentro.",
+   "escena": "a row of blank paper tickets lying in a line, with the first ticket glowing gold, no text"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "Te lleva *5 minutos*",
+   "texto": "Entrás al link, te registrás y depositás USDT. Lo tenés en el link de mi perfil.",
+   "pose": "celular",
+   "logo": "weex"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "¿Vas a *entrar*?",
+   "texto": "Contame en los comentarios si ya tenés cuenta en WEEX o si sería la primera vez.",
+   "pose": "saludo"
+  }
+ ],
+ "texto_post": "⏳ Los cupos no esperan: 50 lugares para el bono de bienvenida de WEEX\n\n📌 Lo mínimo para entrar:\n1️⃣ Te registrás con mi link\n2️⃣ Depositás 100 USDT y los mantenés 3 días\n3️⃣ Operás 100 USDT en futuros\n🎁 Te llevás entre 20 y 100 USDT de prueba\n\nY para el cashback del 20% hay solo 30 cupos. La promo termina el 26/11.\n\n💬 Comentá BONO y te mando el link por DM. También está en el link de mi perfil.\n\n⚠️ Promo de WEEX con condiciones propias, solo para usuarios nuevos que entran por el link. Operar futuros con apalancamiento implica riesgo de perder tu capital.",
+ "tema": "Bono WEEX: los cupos no esperan"
+}

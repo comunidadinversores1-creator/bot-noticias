@@ -26,3 +26,4 @@ y la línea correspondiente de indice.json.
 
 exness.png / exness-texto.png: logo de Exness (marca registrada de Exness). Se usa como socio/afiliado de Eze, sin modificarlo.
 mexc.png: logo de MEXC (logotyp.us/file/mexc.svg), solo para uso informativo/periodístico
+weex.png / weex-texto.png: logo de WEEX recortado del banner oficial de la campaña (uso como sponsor)

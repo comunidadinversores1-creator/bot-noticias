@@ -270,5 +270,9 @@
  "mexc global": {
   "archivo": "mexc.png",
   "descripcion": "MEXC (exchange)"
+ },
+ "weex": {
+  "archivo": "weex.png",
+  "descripcion": "WEEX (exchange)"
  }
 }

@@ -1,0 +1,64 @@
+{
+ "cuenta": "ezebagnato",
+ "usuario": "@ezebagnato",
+ "estilo": "caricatura",
+ "palabra": "BONO",
+ "laminas": [
+  {
+   "tipo": "portada",
+   "etiqueta": "Fondos de prueba",
+   "titulo": "Operar futuros con *menos* miedo",
+   "bajada": "Los fondos de prueba de WEEX: qué son, cuánto te dan y qué tenés que saber.",
+   "logo": "weex",
+   "sponsor": "weex",
+   "escena": "a safety net stretched under a tightrope with a few gold coins balanced on the rope, no text"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "El *miedo* de todos",
+   "texto": "Abrir tu primera operación de futuros con tu propio dinero da miedo. Y está bien que dé.",
+   "pose": "pensando"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "¿Qué es un *fondo de prueba*?",
+   "texto": "Es saldo que te da el exchange para operar futuros. No es tu dinero: si la operación sale mal, no perdés tus USDT.",
+   "pose": "lupa",
+   "logo": "weex"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "¿Cuánto te *dan*?",
+   "texto": "Entre 20 y 100 USDT con tu primer depósito de 100 USDT. Hasta 200 USDT si llegás al cashback del 20%.",
+   "pose": "festejo",
+   "objeto": "usdt"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "Lo que *tenés que saber*",
+   "texto": "Llega como cupón, lo reclamás a mano y vence a los 7 días. Si no lo usás, se pierde.",
+   "pose": "celular"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "Mi *consejo*",
+   "texto": "Usalo para practicar: siempre con stop loss, posiciones chicas y nada de apalancamiento alto.",
+   "pose": "escudo",
+   "objeto": "candado"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "Lo *real*",
+   "texto": "El depósito sí es tu dinero y operar futuros tiene riesgo. Arrancá con lo que puedas perder.",
+   "escena": "a balance scale with a gold coin on one plate and a red warning triangle on the other plate, no text"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "¿Lo *probarías*?",
+   "texto": "¿Ya operaste futuros alguna vez o sería tu primera vez? Te leo en los comentarios.",
+   "pose": "saludo"
+  }
+ ],
+ "texto_post": "🧠 Operar futuros con menos miedo: los fondos de prueba de WEEX\n\n📌 Qué son: saldo que te da el exchange para operar futuros sin usar tus USDT.\n\n🎁 Cuánto te dan en la promo WEEX x Eze:\n✅ Entre 20 y 100 USDT con tu primer depósito de 100 USDT\n✅ Hasta 200 USDT con el cashback del 20%\n\n⚠️ Llegan como cupón, se reclaman a mano y vencen a los 7 días. El depósito sí es tu dinero: entrá con lo que puedas perder.\n\n💬 Comentá BONO y te mando el link por DM. También está en el link de mi perfil.\n\n⚠️ Promo de WEEX con condiciones propias, solo para usuarios nuevos que entran por el link. Operar futuros con apalancamiento implica riesgo de perder tu capital.",
+ "tema": "Bono WEEX: futuros con menos miedo"
+}

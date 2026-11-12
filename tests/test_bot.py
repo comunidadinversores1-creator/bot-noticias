@@ -71,6 +71,7 @@ def corrida(monkeypatch, tmp_path, red):
         c.cfg["ensenanza"]["activa"] = False          # las enseñanzas, solo en sus pruebas
         c.cfg["calendario"]["activa"] = False         # el calendario económico, solo en sus pruebas
         c.cfg["campana_video"]["activa"] = False      # la campaña del video, solo en sus pruebas
+        c.cfg["campanas_extra"] = []                  # las otras campañas (WEEX), solo en su prueba
         c.cfg["grok"]["modo"] = "auto"                 # las pruebas de Grok parten de "Grok primero" (en ajustes.yaml hoy está en "gratis")
         c.cfg["grok"]["activa"] = bool(os.environ.get("XAI_API_KEY"))   # la búsqueda de temas (Grok o gratis), solo en sus pruebas
         c.cfg["ritmo"]["horarios_noticias"] = []      # reparto parejo (los horarios fijos tienen su prueba)
@@ -751,6 +752,7 @@ def _con_promos(c, cuantas: int = 2):
     for p in c.cfg["promos"]:
         p["activa"] = p["id"] in elegidas
     c.cfg["ritmo"]["horarios_promos"] = ["10:30", "15:30", "20:30"]   # los horarios con los que se escribieron estas pruebas
+    c.cfg["ritmo"]["promos_por_dia"] = 3
     return c
 
 
@@ -1466,7 +1468,7 @@ def test_solo_texto_con_un_canal_caido_no_duplica(corrida, red, tmp_path):
 def test_asi_vienen_los_ajustes(cfg):
     from bot.util import socios_activos
     assert [p["id"] for p in cfg["promos"] if p.get("activa")] == ["registrate-conmigo", "cashback-20", "exness-terminal-simple"]
-    assert list(socios_activos(cfg)) == ["exness"]                             # Pionex y Binance apagados (Binance: 9/11/2026)
+    assert list(socios_activos(cfg)) == ["exness", "weex"]                             # Pionex y Binance apagados (Binance: 9/11/2026)
     assert cfg["socios"]["exness"]["enlace"] == "https://one.exnessonelink.com/a/ptf6lzlrc8"
     assert cfg["socios"]["binance"]["enlace"] == "https://www.binance.com/join?ref=202718448"
     assert cfg["x"]["poner_links"] is False and cfg["encendido"] is True and cfg["x"]["premium"] is True
@@ -1502,7 +1504,7 @@ def test_socio_apagado_no_se_promociona(corrida, red, tmp_path):
     assert not any("q=Pionex" in (p.url or "") for p in red.pedidos)            # ni siquiera busca sus noticias
     assert any("q=Binance" in (p.url or "") for p in red.pedidos)
     consigna = red.llamadas_ia[0]["messages"][0]["content"]
-    assert "MARCAS CON FOCO (Exness, Binance)" in consigna
+    assert "MARCAS CON FOCO (Exness, WEEX, Binance)" in consigna
     assert [p["tipo"] for p in _memoria(tmp_path)["publicadas"]] != ["promo"]
 
 
@@ -2303,3 +2305,19 @@ def test_binance_solo_sale_si_es_del_hackeo():
     assert marca_limitada("Binance lista una nueva moneda", lim) == "Binance"
     assert marca_limitada("Binance confirma que devolverá los fondos robados en el hackeo", lim) is None
     assert marca_limitada("Bitcoin cae 5%", lim) is None
+
+
+def test_campana_weex_sale_una_vez_por_dia(corrida, red, tmp_path):
+    """La campaña de WEEX (campanas_extra) sale en Telegram y X, una sola vez por día."""
+    from bot.util import cargar_ajustes as _c
+    _sin_la_fed(red)
+    weex = _c()["campanas_extra"][0]
+    c = corrida(ahora=datetime(2026, 11, 13, 16, 0, tzinfo=timezone.utc))
+    c.cfg["campanas_extra"] = [weex]
+    assert c.correr() == 0
+    todo = " ".join(m.get("caption", "") for m in red.telegram_fotos) + " ".join(m.get("text", "") for m in red.telegram_mensajes)
+    assert "WEEX" in todo and "weex.com/events/promo/eze-exclusive" in todo
+    assert "http" not in red.x_posts[0]["text"] and "Link en mi perfil" in red.x_posts[0]["text"]
+    c2 = corrida(ahora=datetime(2026, 11, 13, 20, 0, tzinfo=timezone.utc))
+    c2.cfg["campanas_extra"] = [weex]
+    assert c2.tal_vez_campana_video(weex) is False               # ya salió hoy

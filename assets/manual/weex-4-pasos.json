@@ -1,0 +1,64 @@
+{
+ "cuenta": "ezebagnato",
+ "usuario": "@ezebagnato",
+ "estilo": "caricatura",
+ "palabra": "BONO",
+ "laminas": [
+  {
+   "tipo": "portada",
+   "etiqueta": "Guía",
+   "titulo": "El bono en *5 pasos*",
+   "bajada": "La guía completa de la promo WEEX x Eze, desde el registro hasta cobrar.",
+   "logo": "weex",
+   "sponsor": "weex",
+   "escena": "a smartphone with a big green check mark on its screen and gold coins floating around it, no text"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "Paso 1: el *link*",
+   "texto": "Entrá a la promo exclusiva desde el link de mi perfil. Tiene que ser ese: es el único que cuenta.",
+   "pose": "celular",
+   "logo": "weex"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "Paso 2: *registrate*",
+   "texto": "Tocá «Registrarme ahora» y creá tu cuenta. Tus depósitos y tu volumen cuentan desde ese momento.",
+   "pose": "lupa"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "Paso 3: *depositá*",
+   "texto": "Depositá 100 USDT o más y no los retires por 3 días. El depósito neto es lo que entra menos lo que sacás.",
+   "pose": "dinero",
+   "objeto": "usdt"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "Paso 4: *operá*",
+   "texto": "Operá futuros USDT-M. Para el bono alcanzan 100 USDT de volumen, y el volumen suma la apertura y el cierre.",
+   "pose": "pensando",
+   "objeto": "grafico"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "Lo que *no* cuenta",
+   "texto": "Pares Coin-M, USDCUSDT, operaciones sin comisión, operar por API o con cupones.",
+   "pose": "escudo"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "Paso 5: *cobrá*",
+   "texto": "Hasta 7 días hábiles después del 26/11 te llega el cupón. Reclamalo a mano antes de que venza.",
+   "escena": "a blank gift voucher card with a gold coin and a big green check mark next to it, no text"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "¿Te *trabaste*?",
+   "texto": "Contame en qué paso te trabaste y te ayudo.",
+   "pose": "saludo"
+  }
+ ],
+ "texto_post": "📋 El bono de WEEX en 5 pasos (promo WEEX x Eze, hasta el 26/11)\n\n1️⃣ Entrá a la promo desde el link de mi perfil\n2️⃣ Tocá «Registrarme ahora» y creá tu cuenta\n3️⃣ Depositá 100 USDT o más y no los retires por 3 días\n4️⃣ Operá futuros USDT-M (para el bono alcanzan 100 USDT de volumen)\n5️⃣ Reclamá tu cupón: llega hasta 7 días hábiles después del evento\n\n❌ No cuentan: pares Coin-M, USDCUSDT, operaciones sin comisión, API ni cupones.\n\n💬 Comentá BONO y te mando el link por DM.\n\n⚠️ Promo de WEEX con condiciones propias, solo para usuarios nuevos que entran por el link. Operar futuros con apalancamiento implica riesgo de perder tu capital.",
+ "tema": "Bono WEEX: paso a paso"
+}

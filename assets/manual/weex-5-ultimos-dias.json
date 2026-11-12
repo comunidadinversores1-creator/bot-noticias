@@ -1,0 +1,64 @@
+{
+ "cuenta": "ezebagnato",
+ "usuario": "@ezebagnato",
+ "estilo": "caricatura",
+ "palabra": "BONO",
+ "laminas": [
+  {
+   "tipo": "portada",
+   "etiqueta": "Últimos días",
+   "titulo": "Quedan *2 días*",
+   "bajada": "La promo WEEX x Eze termina el 26/11. Esto es lo que te llevás si entrás hoy.",
+   "logo": "weex",
+   "sponsor": "weex",
+   "escena": "a ringing red alarm clock next to a pile of gold coins, no text, no numbers"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "El *resumen*",
+   "texto": "30 días de VIP 2, hasta 100 USDT de prueba con tu primer depósito y hasta 200 USDT con el cashback.",
+   "pose": "festejo",
+   "objeto": "usdt"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "¿Qué *perdés* si no entrás?",
+   "texto": "Nada de tu dinero. Pero dejás pasar un bono que no sabemos si vuelve a estar igual.",
+   "pose": "pensando"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "Si lo *dejás* para después",
+   "texto": "El evento cierra el 26 de noviembre a la madrugada. Lo que deposites después ya no cuenta.",
+   "pose": "alerta"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "El paso *más fácil*",
+   "texto": "Registrarte con el link no te cuesta nada y te da 30 días de VIP 2 si estás entre los primeros 50.",
+   "pose": "celular",
+   "logo": "weex"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "Si *ya entraste*",
+   "texto": "Revisá que tu depósito siga 3 días y que llegues al volumen. Y acordate de reclamar el cupón.",
+   "escena": "a clipboard checklist with three big green check marks and blank lines, no text"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "Mi *postura*",
+   "texto": "Promociono lo que uso. Operar futuros tiene riesgo: entrá con dinero que puedas perder.",
+   "pose": "escudo",
+   "objeto": "candado"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "¿*Entrás*?",
+   "texto": "Contame en los comentarios si llegaste a tiempo.",
+   "pose": "saludo"
+  }
+ ],
+ "texto_post": "⏰ Quedan 2 días: la promo WEEX x Eze termina el 26/11\n\n🎁 Lo que te llevás:\n✅ 30 días de VIP 2 (primeros 50)\n✅ Hasta 100 USDT de prueba con tu primer depósito de 100 USDT\n✅ Hasta 200 USDT de prueba con el cashback del 20%\n\nLo que deposites después del cierre ya no cuenta.\n\n💬 Comentá BONO y te mando el link por DM. También está en el link de mi perfil.\n\n⚠️ Promo de WEEX con condiciones propias, solo para usuarios nuevos que entran por el link. Operar futuros con apalancamiento implica riesgo de perder tu capital.",
+ "tema": "Bono WEEX: últimos días"
+}

@@ -515,10 +515,11 @@ class Corrida:
             self.estado.marcar_promo(str(promo.get("id")), self.ahora)
         return resultado
 
-    def tal_vez_campana_video(self) -> bool:
+    def tal_vez_campana_video(self, c: dict | None = None) -> bool:
         """Campaña del video: una vez cada N días sale en Telegram (canal y tema), en X y en las historias de las
-        dos cuentas de Instagram, rotando miniatura y texto. Devuelve True si publicó algo en esta corrida."""
-        c = self.cfg.get("campana_video") or {}
+        dos cuentas de Instagram, rotando miniatura y texto. Devuelve True si publicó algo en esta corrida.
+        Sirve igual para otras campañas ('campanas_extra' en ajustes, ej. WEEX)."""
+        c = c if c is not None else (self.cfg.get("campana_video") or {})
         variantes = [v for v in (c.get("variantes") or []) if str(v.get("texto") or "").strip()]
         if not (self.real and verdadero(c.get("activa")) and variantes) or en_silencio(self.cfg, self.ahora):
             return False
@@ -682,6 +683,11 @@ class Corrida:
             self.ocupado = self.tal_vez_material()      # lo que vos pedís por privado sale primero
             if not self.ocupado:
                 self.ocupado = self.tal_vez_campana_video()
+            for extra in (self.cfg.get("campanas_extra") or []):      # otras campañas diarias (ej. WEEX)
+                if self.ocupado:
+                    break
+                if isinstance(extra, dict):
+                    self.ocupado = self.tal_vez_campana_video(extra)
             if not self.ocupado:
                 self.ocupado = self.tal_vez_calendario()
             if not self.ocupado:

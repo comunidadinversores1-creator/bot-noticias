@@ -204,7 +204,7 @@ ensenanza:
 ritmo:
   zona_horaria: "America/Argentina/Buenos_Aires"
   max_por_dia: 7                  # noticias + promos por día (4 noticias + 3 promos). Las enseñanzas y las preguntas de X van aparte
-  promos_por_dia: 3               # cuántas de esas 10 son ventas de tus herramientas y campañas
+  promos_por_dia: 2               # (12/11: bajó de 3 a 2 porque ahora salen 2 campañas diarias: bot + WEEX) cuántas de esas 10 son ventas de tus herramientas y campañas
   horarios_promos: ["10:00", "15:00", "20:00"]   # desde esa hora sale la promo que toca
   # Las noticias comunes salen después de cada uno de estos horarios (lo urgente sale siempre).
   # Así queda el día en Telegram: 7:30 agenda · 8:30 enseñanza · 9:30 noticia · 10:30 promo · 11:30 noticia
@@ -270,6 +270,13 @@ socios:
     llamado: "Registrate en Exness con mi link"
     enlace: "https://one.exnessonelink.com/a/ptf6lzlrc8"
     aviso: "Operar con apalancamiento implica riesgo de perder tu capital."
+  weex:
+    activo: true                  # 12/11/2026: nuevo sponsor (campaña exclusiva del 12 al 26/11)
+    nombre: "WEEX"
+    alias: ["WEEX"]
+    llamado: "Registrate en WEEX con mi link"
+    enlace: "https://www.weex.com/events/promo/eze-exclusive?qrType=activity&vipCode=lc7p"
+    aviso: "Operar futuros con apalancamiento implica riesgo de perder tu capital."
   binance:
     activo: false                 # 9/11/2026: Eze ya no trabaja con Binance (sin promos, sin llamados, sin búsquedas dedicadas)
     nombre: "Binance"
@@ -425,6 +432,117 @@ campana_video:
         Es una prueba real de 30 días, sin promesas de rentabilidad y sin humo.
 
         👉 Video, licencia y registro en el link de mi perfil
+
+# =====================================================================================================
+#  OTRAS CAMPAÑAS DIARIAS (igual que la del video): 1 vez por día en Telegram (canal, grupo y tema), X e
+#  historias de las dos cuentas de IG, rotando textos e imágenes. Terminan solas el día de "vence".
+# =====================================================================================================
+campanas_extra:
+  - activa: true
+    id: weex-eze-exclusive
+    cada_dias: 1
+    desde: "12:00"
+    vence: "2026-11-25"             # el evento de WEEX cierra el 26/11 a las 3:59 (hora Argentina)
+    ctas_historia:
+      - "Link en mi perfil ↑"
+      - "Comentá BONO en mi último post y te lo mando por DM"
+    historias_extra:
+      - {imagen: assets/promos/weex-banner.jpg, titulo: "WEEX x Eze: 20% de cashback en tu depósito"}
+      - {imagen: assets/promos/weex-vip.jpg, titulo: "30 días VIP 2 solo por registrarte"}
+      - {imagen: assets/promos/weex-fin.jpg, titulo: "Termina el 26 de noviembre"}
+    variantes:
+      - imagen: assets/promos/weex-banner.jpg
+        titulo_historia: "Solo 50 cupos: hasta 100 USDT de prueba"
+        texto: |
+          🎁 NUEVO SPONSOR: WEEX x EZE, UNA PROMO EXCLUSIVA PARA MI COMUNIDAD
+
+          Del 12 al 26 de noviembre, si te registrás en WEEX con mi link tenés 3 beneficios:
+
+          1️⃣ 30 días de VIP 2 solo por registrarte (primeros 50 usuarios)
+          2️⃣ Primer depósito de 100 USDT o más: lo mantenés 3 días, operás 100 USDT en futuros y te llevás entre 20 y 100 USDT de fondo de prueba (primeros 50)
+          3️⃣ 20% de cashback en tu depósito: hasta 200 USDT en fondos de prueba (30 cupos)
+
+          📊 Así se gana el cashback:
+          ✅ Depósito neto de 500 USDT + 30.000 USDT de volumen en futuros → 100 USDT (20 ganadores)
+          ✅ Depósito neto de 1.000 USDT + 50.000 USDT de volumen en futuros → 200 USDT (10 ganadores)
+
+          ⏳ Son cupos limitados y se cuentan por orden de llegada.
+
+          👉 [Registrate acá en la promo exclusiva](https://www.weex.com/events/promo/eze-exclusive?qrType=activity&vipCode=lc7p)
+
+          Importante: tenés que entrar por ESE link y tocar "Registrarme ahora" para que cuenten tus depósitos y tu volumen.
+
+          ⚠️ Promoción de WEEX con condiciones propias (solo usuarios nuevos registrados con este link). Operar futuros con apalancamiento implica riesgo de perder tu capital.
+        texto_x: |
+          🎁 Nuevo sponsor: WEEX x Eze, una promo exclusiva para mi comunidad.
+
+          Del 12 al 26/11, registrándote con mi link:
+          1️⃣ 30 días de VIP 2
+          2️⃣ Depositás 100 USDT → hasta 100 USDT de prueba
+          3️⃣ 20% de cashback en tu depósito
+
+          ⏳ Solo 50 cupos
+          👉 Link en mi perfil
+      - imagen: assets/promos/weex-cupos.jpg
+        titulo_historia: "Depositá 100 USDT y llevate hasta 100 USDT"
+        texto: |
+          ⏳ SOLO 50 CUPOS: DEPOSITÁS 100 USDT Y TE LLEVÁS HASTA 100 USDT DE PRUEBA
+
+          Esta es la parte más fácil de la promo de WEEX, y la que primero se agota:
+
+          1️⃣ Te registrás con mi link (tiene que ser este)
+          2️⃣ Depositás 100 USDT o más y los mantenés 3 días
+          3️⃣ Operás 100 USDT de volumen en futuros
+          🎁 WEEX te da un fondo de prueba de entre 20 y 100 USDT
+
+          Y si vas por más: con 500 USDT depositados y 30.000 USDT de volumen en futuros, te llevás 100 USDT. Con 1.000 USDT y 50.000 de volumen, 200 USDT.
+
+          👉 [Entrá a la promo exclusiva acá](https://www.weex.com/events/promo/eze-exclusive?qrType=activity&vipCode=lc7p)
+
+          Los cupos son para los primeros 50. Cuando se terminan, se terminan.
+
+          ⚠️ Promoción de WEEX con condiciones propias (solo usuarios nuevos registrados con este link). Operar futuros con apalancamiento implica riesgo de perder tu capital.
+        texto_x: |
+          ⏳ Solo 50 cupos en la promo de WEEX:
+
+          1️⃣ Te registrás con mi link
+          2️⃣ Depositás 100 USDT y los mantenés 3 días
+          3️⃣ Operás 100 USDT en futuros
+          🎁 Te llevás entre 20 y 100 USDT de prueba
+
+          Termina el 26/11.
+          👉 Link en mi perfil
+      - imagen: assets/promos/weex-cashback.jpg
+        titulo_historia: "20% de cashback en tu depósito"
+        texto: |
+          💸 20% DE CASHBACK EN TU DEPÓSITO (pero solo hasta el 26 de noviembre)
+
+          Muchos me preguntan dónde operar futuros cripto. Arrancamos con WEEX como nuevo sponsor y trajimos una promo exclusiva:
+
+          📌 Cómo participar, paso a paso:
+          1️⃣ Entrá a la promo con mi link y tocá "Registrarme ahora"
+          2️⃣ Hacé tu primer depósito
+          3️⃣ Operá futuros USDT-M (los pares en USDC o sin comisión no cuentan)
+
+          🎁 Lo que te llevás:
+          ✅ 30 días de VIP 2
+          ✅ Entre 20 y 100 USDT de prueba con tu primer depósito de 100 USDT
+          ✅ Hasta 200 USDT de prueba con el cashback del 20%
+
+          Los premios llegan como cupones dentro de los 7 días hábiles después del evento y hay que reclamarlos a mano.
+
+          👉 [Registrate acá](https://www.weex.com/events/promo/eze-exclusive?qrType=activity&vipCode=lc7p)
+
+          ⚠️ Promoción de WEEX con condiciones propias (solo usuarios nuevos registrados con este link). Operar futuros con apalancamiento implica riesgo de perder tu capital.
+        texto_x: |
+          💸 20% de cashback en tu depósito en WEEX, solo hasta el 26/11.
+
+          ✅ 30 días de VIP 2
+          ✅ Hasta 100 USDT de prueba con tu primer depósito
+          ✅ Hasta 200 USDT de prueba con el cashback
+
+          Promo exclusiva para mi comunidad, con cupos limitados.
+          👉 Link en mi perfil
 
 promos:
   # ===== FOCO (10/11/2026): Exness + bot Reversión Z gratis + 20% de cashback. Rotan entre ellas (3 por día). =====
@@ -1109,8 +1227,18 @@ instagram:
     "2026-11-06": binance-avances
     "2026-11-07": reversion-z-ig    # carrusel del bot con "Comentá BOT"
     "2026-11-10": mexc-fincen       # EE.UU. corta a MEXC (en @ezebagnato y @comunidad_inversores_ok)
+    "2026-11-12": weex-1-regalos    # WEEX: un carrusel cada 3 días, todos con "Comentá BONO"
+    "2026-11-15": weex-2-cupos
+    "2026-11-18": weex-3-sin-miedo
+    "2026-11-21": weex-4-pasos
+    "2026-11-24": weex-5-ultimos-dias
   # Guías que se mandan por DM a quien comenta la palabra del carrusel (la palabra va en mayúsculas).
   guias:
+    BONO:
+      link: "https://www.weex.com/events/promo/eze-exclusive?qrType=activity&vipCode=lc7p"
+      mensaje: "¡Hola! 🎁 Acá tenés la promo exclusiva de WEEX para mi comunidad (del 12 al 26/11):\n\n👉 {link}\n\nEntrá por ESE link y tocá \"Registrarme ahora\" para que cuenten tus depósitos.\n\n✅ 30 días de VIP 2 (primeros 50)\n✅ Depositás 100 USDT, los mantenés 3 días y operás 100 USDT en futuros → entre 20 y 100 USDT de prueba\n✅ 20% de cashback en tu depósito: hasta 200 USDT de prueba\n\nCupos limitados. Operar futuros con apalancamiento implica riesgo de perder tu capital."
+      respuesta: "¡Listo! Te mandé el link del bono por DM 📩"
+      respuesta_sin_dm: "¡Gracias! En un rato te mando el link por DM 📩"
     BOT:
       link: "https://linktr.ee/comunidadinversores"
       mensaje: "¡Hola! 🤖 Acá tenés todo para usar mi bot Reversión Z:\n\n💻 Licencia gratis: https://drive.google.com/file/d/1H98WoqlU1LFoPUJyzsXI3E5X1prWVnc7/view?usp=sharing\n▶️ Video paso a paso: https://youtu.be/icTdEFD-d6c\n✅ Abrí tu cuenta de Exness con mi link: https://one.exnessonelink.com/a/ptf6lzlrc8\n\nY todo junto acá: {link}\n\nOperar con apalancamiento implica riesgo de perder tu capital."
