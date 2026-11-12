@@ -215,6 +215,7 @@ SÍ es noticia de impacto:
 - Gobiernos contra exchanges o brokers: sanciones, órdenes del Tesoro de EE.UU. (FinCEN, OFAC), causas judiciales, prohibiciones en un país.
 - Hackers y ciberataques grandes (robos de cripto, ransomware, ataques a bancos o empresas, grupos de Corea del Norte).
 - Inteligencia artificial: lanzamientos o avances grandes (OpenAI, Google, Anthropic, Meta, xAI), chips y Nvidia, inversiones o leyes de IA que muevan empresas o mercados, IA usada en trading o en estafas.
+- SEGUIMIENTO DIARIO (lista abajo, si viene): de esos temas queremos una actualización por día. Si un candidato trae una novedad real de alguno y no la publicamos hoy, ponele impacto MINIMO como mínimo.
 - Movimientos fuertes de precio (acciones, bonos, dólar, petróleo, oro, Bitcoin) con causa clara.
 - Argentina: dólar, reservas, riesgo país, deuda, FMI, medidas económicas, inflación del INDEC.
 
@@ -264,7 +265,10 @@ def elegir(cerebro: Cerebro, candidatos: list[Grupo], ya_publicadas: list[str], 
         lineas.append(f"id={g.id} | {_hace(g.fecha, ahora)} | {g.cobertura} medio(s): {medios} | {g.principal.titulo[:170]}{resumen}")
     local = ahora.astimezone(zona(cfg)).strftime("%d/%m/%Y %H:%M")
     publicadas = "\n".join(f"- {t}" for t in ya_publicadas) or "- (nada todavía)"
-    usuario = f"Fecha y hora (Argentina): {local}\n\nYA PUBLICAMOS (no repetir):\n{publicadas}\n\nTITULARES CANDIDATOS:\n" + "\n".join(lineas)
+    seguir = "\n".join(f"- {t}" for t in (cfg.get("seguimiento") or []))
+    usuario = (f"Fecha y hora (Argentina): {local}\n\nYA PUBLICAMOS (no repetir):\n{publicadas}\n\n"
+               + (f"SEGUIMIENTO DIARIO:\n{seguir}\n\n" if seguir else "")
+               + "TITULARES CANDIDATOS:\n" + "\n".join(lineas))
     socios = ", ".join(str(s.get("nombre", k)) for k, s in socios_activos(cfg).items()) or "ninguna"
     r = cfg["ritmo"]
     minimo = int(r.get("impacto_minimo", 7))

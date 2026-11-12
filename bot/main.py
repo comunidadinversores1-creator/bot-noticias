@@ -228,10 +228,36 @@ class Corrida:
             return post
         return None
 
+    def activo_operable(self, texto: str) -> bool:
+        """¿La noticia habla de un activo que se opera en el broker (Bitcoin, Nvidia, S&P 500, oro...)? (ajustes: cta_activos)"""
+        from .filtro import _aparece
+        from .util import sin_acentos
+        c = self.cfg.get("cta_activos") or {}
+        if not verdadero(c.get("activa")):
+            return False
+        plano = sin_acentos(texto or "")
+        return any(_aparece(str(p), plano) for p in (c.get("palabras") or []))
+
+    def llamado_de_activos(self, g: Grupo, post: dict) -> dict | None:
+        """Noticia de un activo que se opera en Exness (Bitcoin, Nvidia, oro, S&P 500): 'operalo en Exness con el 20% de cashback'."""
+        c = self.cfg.get("cta_activos") or {}
+        if not self.activo_operable(f"{g.titulos()} {post.get('titular', '')}"):
+            return None
+        socio = (socios_activos(self.cfg) or {}).get(str(c.get("socio") or "exness"))
+        if not socio or promesas(texto_revisable(post), g.texto_para_cifras()):
+            return None
+        tope = int(self.cfg["ritmo"].get("max_llamados_por_dia", 2))
+        if self.real and self.estado.publicadas_hoy(self.cfg, self.ahora, tipo="noticia", con_llamado=True) >= tope:
+            return None
+        return armar_llamado(socio, self.cfg, str(c.get("texto") or ""))
+
     def llamado_para(self, g: Grupo, post: dict) -> dict | None:
         """El 'registrate con mi link'. Solo va si la noticia es de un socio, es BUENA para esa marca
-        y no habla de ganancias ni rendimientos. Ante cualquier duda, la noticia sale sin llamado."""
-        if not g.socio or not post["llamado"] or post["para_la_marca"] != "buena":
+        y no habla de ganancias ni rendimientos. Ante cualquier duda, la noticia sale sin llamado.
+        Si no es de un socio pero habla de un activo que se opera en Exness, va ese llamado."""
+        if not g.socio:
+            return self.llamado_de_activos(g, post)
+        if not post["llamado"] or post["para_la_marca"] != "buena":
             return None
         if post["tono"] == "bajista" or es_mala_noticia(f"{g.titulos()} {post['titular']} {post['resumen']}"):
             return None
@@ -2233,8 +2259,30 @@ class Corrida:
             if verdadero(ne.get("activa", True)) and int(g.impacto or 0) >= int(ne.get("impacto_minimo", 8)) and hechas < int(ne.get("max_por_dia", 3)):
                 self.subir_historia("ezebagnato", historias.html_noticia(post.get("titular", ""), bajada, datos, es_logo, credito, g.categoria,
                                                                          g.urgente, post.get("fuente", ""), "@ezebagnato", red=red), "noticia")
+            # Después de una noticia de Bitcoin, Nvidia, oro o el S&P 500: la historia "operalo en Exness" (con tope diario).
+            self.historia_cta_activos(g, post)
         except Exception as error:
             log.warning("historia de la noticia: %s", error)
+
+    def historia_cta_activos(self, g, post: dict) -> None:
+        c = self.cfg.get("cta_activos") or {}
+        ruta = RAIZ / str(c.get("historia_imagen") or "")
+        if not (c.get("historia_imagen") and ruta.exists() and self.activo_operable(f"{g.titulos()} {post.get('titular', '')}")):
+            return
+        mem = self.estado.datos["ig"].setdefault("historias", {})
+        hoy = self.ahora.astimezone(zona(self.cfg)).date().isoformat()
+        cuenta_cta = mem.setdefault("cta_activos", {})
+        if cuenta_cta.get("dia") != hoy:
+            cuenta_cta.clear()
+            cuenta_cta["dia"] = hoy
+        tope = int(c.get("historias_max_por_dia", 2))
+        foto = ruta.read_bytes()
+        for cuenta, usuario in (("ezebagnato", "@ezebagnato"), ("comunidad", "@comunidad_inversores_ok")):
+            if int(cuenta_cta.get(cuenta, 0)) >= tope:
+                continue
+            if self.subir_historia(cuenta, historias.html_promo(foto, str(c.get("historia_titulo") or ""), usuario,
+                                                                str(c.get("historia_cta") or "Link en mi biografía ↑")), "cta_activos"):
+                cuenta_cta[cuenta] = int(cuenta_cta.get(cuenta, 0)) + 1
 
     def tal_vez_comentarios_ig(self) -> None:
         """A quien comenta la palabra de un carrusel (ej. BITCOIN) le manda la guía por DM y le responde el comentario."""

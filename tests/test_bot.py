@@ -2312,12 +2312,18 @@ def test_campana_weex_sale_una_vez_por_dia(corrida, red, tmp_path):
     from bot.util import cargar_ajustes as _c
     _sin_la_fed(red)
     weex = _c()["campanas_extra"][0]
-    c = corrida(ahora=datetime(2026, 11, 13, 16, 0, tzinfo=timezone.utc))
+    c = corrida(ahora=datetime(2026, 11, 13, 23, 45, tzinfo=timezone.utc))
     c.cfg["campanas_extra"] = [weex]
     assert c.correr() == 0
     todo = " ".join(m.get("caption", "") for m in red.telegram_fotos) + " ".join(m.get("text", "") for m in red.telegram_mensajes)
     assert "WEEX" in todo and "weex.com/events/promo/eze-exclusive" in todo
     assert "http" not in red.x_posts[0]["text"] and "Link en mi perfil" in red.x_posts[0]["text"]
-    c2 = corrida(ahora=datetime(2026, 11, 13, 20, 0, tzinfo=timezone.utc))
+    c2 = corrida(ahora=datetime(2026, 11, 14, 1, 30, tzinfo=timezone.utc))
     c2.cfg["campanas_extra"] = [weex]
     assert c2.tal_vez_campana_video(weex) is False               # ya salió hoy
+
+
+def test_noticia_de_bitcoin_lleva_el_llamado_de_exness(corrida):
+    c = corrida()
+    assert c.activo_operable("Bitcoin pierde los 72.000 dólares") and c.activo_operable("Renunció el CEO de Nvidia")
+    assert not c.activo_operable("El INDEC publica la inflación de octubre")

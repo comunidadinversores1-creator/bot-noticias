@@ -211,7 +211,7 @@ ritmo:
   # · 12:30 enseñanza · 14:00 noticia · 15:30 promo · 17:00 noticia · 18:30 enseñanza · 20:30 promo
   horarios_noticias: ["09:00", "11:00", "14:00", "17:00"]
   horas_entre_promos: 3           # nunca dos promos pegadas
-  max_llamados_por_dia: 2         # tope de noticias con "registrate con mi link" (aparte de las promos)
+  max_llamados_por_dia: 3         # tope de noticias con "registrate con mi link" (aparte de las promos)
   minutos_entre_publicaciones: 40 # separación mínima entre una y otra (el bot mira una vez por hora)
   impacto_minimo: 7               # del 1 al 10. Más alto = publica menos, solo lo fuerte
   impacto_de_relleno: 6           # si el día viene flojo (van 2 o más de atraso) también sale lo de este impacto. Con 7 nunca rellena
@@ -291,6 +291,29 @@ socios:
     llamado: "Registrate en Pionex con mi link"
     enlace: "https://accounts.pionex.com/es/signUp?r=0uCbaWYsxRp"
     aviso: "Los bots de trading no garantizan ganancias: podés perder capital."
+
+# ------------------------------------------------------------
+#  CTA DE ACTIVOS (12/11/2026, pedido de Eze): cuando una noticia habla de Bitcoin, Nvidia, el S&P 500, el oro...
+#  · Telegram y X: la noticia lleva "Operá ... en Exness y te devuelvo el 20% de cashback" con el link de Exness
+#    (respeta el tope de llamados por día de 'ritmo').
+#  · Instagram: después de la historia de la noticia sale una historia "Operá estos activos en Exness" (con tope).
+# ------------------------------------------------------------
+cta_activos:
+  activa: true
+  socio: exness
+  texto: "Operá Bitcoin, oro, el S&P 500 y acciones como Nvidia en Exness y te devuelvo el 20% de cashback en tus comisiones"
+  palabras: ["Bitcoin", "BTC", "Nvidia", "S&P 500", "S&P", "SP500", "Nasdaq", "Dow Jones", "Wall Street", "oro", "gold", "petróleo", "petroleo", "oil", "Ethereum", "Tesla", "Apple"]
+  historia_imagen: assets/promos/exness-activos.jpg
+  historia_titulo: "Operá estos activos en Exness"
+  historia_cta: "Link en mi biografía ↑"
+  historias_max_por_dia: 2
+
+# Temas que se siguen todos los días (si hay una novedad real, sale aunque no sea la más fuerte del día).
+seguimiento:
+  - "Nvidia y la salida de su CEO Jensen Huang (quién lo reemplaza, cómo sigue la acción)"
+  - "Bitcoin: precio, caídas o subidas fuertes, ETF, ballenas"
+  - "S&P 500 y Nasdaq: caídas o subidas fuertes"
+  - "Oro: caídas o subidas fuertes, récords"
 
 # Si a un socio le falta el link, se usa este.
 enlace_general: "https://linktr.ee/comunidadinversores"
@@ -441,7 +464,7 @@ campanas_extra:
   - activa: true
     id: weex-eze-exclusive
     cada_dias: 1
-    desde: "12:00"
+    desde: "20:30"                # de noche, separada del carrusel (18:00) y del resto de las promos
     vence: "2026-11-25"             # el evento de WEEX cierra el 26/11 a las 3:59 (hora Argentina)
     ctas_historia:
       - "Link en mi perfil ↑"
