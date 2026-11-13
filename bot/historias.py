@@ -160,18 +160,35 @@ def html_carrusel(portada: bytes, tema: str, usuario: str) -> str:
     return _pagina(f'''<section class="h"><div class="c">
       <span class="tag">Nuevo carrusel</span>
       <h1 style="font-size:96px">{e(tema)}</h1>
-      <div class="marco" style="width:600px"><img src="{_datos(portada)}"></div>
+      <div class="marco" style="width:860px; box-shadow:0 0 0 6px #fff, 0 40px 100px rgba(0,0,0,.7)"><img src="{_datos(portada)}"></div>
       <div class="cta">Está en mi perfil ↑</div>
     {_firma(usuario)}</div></section>''')
 
 
-def html_promo(imagen: bytes, titulo: str, usuario: str, cta: str = "El link está en mi perfil ↑") -> str:
-    return _pagina(f'''<section class="h"><div class="c">
-      <h1 style="font-size:92px">{e(titulo)}</h1>
-      <div class="marco" style="width:720px"><img src="{_datos(imagen)}"></div>
-      <div class="cta">{e(cta)}</div>
-    {_firma(usuario)}</div></section>''')
+def _proporcion(imagen: bytes) -> float:
+    """alto / ancho de la imagen (1,78 = vertical de historia; 0,56 = horizontal de YouTube)."""
+    try:
+        from PIL import Image
+        import io as _io
+        w, h = Image.open(_io.BytesIO(imagen)).size
+        return h / w if w else 1.0
+    except Exception:
+        return 1.0
 
+
+def html_promo(imagen: bytes, titulo: str, usuario: str, cta: str = "El link está en mi perfil ↑") -> str:
+    """Historia de una promo. Si la imagen ya es vertical de historia (9:16), va a pantalla completa, tal cual.
+    Si no, la imagen va GRANDE (todo el ancho), con el título bien legible arriba y el botón abajo."""
+    if _proporcion(imagen) >= 1.6:
+        return _pagina(f'''<section class="h" style="background:#000"><img src="{_datos(imagen)}"
+          style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:5"></section>''')
+    tam = 112 if len(titulo) <= 30 else (96 if len(titulo) <= 48 else 80)
+    return _pagina(f'''<section class="h"><div class="c" style="top:170px; bottom:200px; left:48px; right:48px; justify-content:center">
+      <h1 style="font-size:{tam}px; text-align:center; margin:0 0 10px">{e(titulo)}</h1>
+      <div class="marco" style="align-self:center; max-width:100%; border-radius:30px; box-shadow:0 0 0 6px #fff, 0 40px 100px rgba(0,0,0,.7)"><img src="{_datos(imagen)}" style="display:block; max-width:100%; max-height:1060px; width:auto; height:auto"></div>
+      <div class="cta" style="font-size:54px; padding:30px 60px; margin-top:56px">{e(cta)}</div>
+      <div style="margin-top:44px; display:flex; justify-content:center">{_firma(usuario).replace('class="firma"', 'class="firma" style="margin-top:0; padding-top:0"')}</div>
+    </div></section>''')
 
 def html_noticia(titular: str, bajada: str, foto: bytes | None, es_logo: bool, credito: str, categoria: str,
                  urgente: bool, fuente: str, usuario: str, red: str = "telegram") -> str:

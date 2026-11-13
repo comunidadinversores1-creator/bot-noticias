@@ -303,7 +303,7 @@ cta_activos:
   socio: exness
   texto: "Operá Bitcoin, oro, el S&P 500 y acciones como Nvidia en Exness y te devuelvo el 20% de cashback en tus comisiones"
   palabras: ["Bitcoin", "BTC", "Nvidia", "S&P 500", "S&P", "SP500", "Nasdaq", "Dow Jones", "Wall Street", "oro", "gold", "petróleo", "petroleo", "oil", "Ethereum", "Tesla", "Apple"]
-  historia_imagen: assets/promos/exness-activos.jpg
+  historia_imagen: assets/promos/exness-activos-h.jpg
   historia_titulo: "Operá estos activos en Exness"
   historia_cta: "Link en mi biografía ↑"
   historias_max_por_dia: 2
@@ -469,6 +469,11 @@ campanas_extra:
     ctas_historia:
       - "Link en mi perfil ↑"
       - "Comentá BONO en mi último post y te lo mando por DM"
+    historias:                      # 9:16, a pantalla completa (13/11: las otras se veían chiquitas)
+      - {imagen: assets/promos/weex-h4.jpg, titulo: "Bono exclusivo"}
+      - {imagen: assets/promos/weex-h1.jpg, titulo: "Solo 50 cupos"}
+      - {imagen: assets/promos/weex-h2.jpg, titulo: "20% de cashback"}
+      - {imagen: assets/promos/weex-h3.jpg, titulo: "30 días de VIP 2"}
     historias_extra:
       - {imagen: assets/promos/weex-banner.jpg, titulo: "WEEX x Eze: 20% de cashback en tu depósito"}
       - {imagen: assets/promos/weex-vip.jpg, titulo: "30 días VIP 2 solo por registrarte"}

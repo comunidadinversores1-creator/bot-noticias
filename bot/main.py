@@ -576,6 +576,8 @@ class Corrida:
         # La imagen de la historia rota entre las miniaturas y otras imágenes del bot (capturas reales, el robot...).
         pool = [(str(x.get("imagen") or ""), str(x.get("titulo_historia") or "")) for x in variantes]
         pool += [(str(x.get("imagen") or ""), str(x.get("titulo") or "")) for x in (c.get("historias_extra") or []) if isinstance(x, dict)]
+        if c.get("historias"):                   # imágenes hechas para historia (9:16): se usan solo esas, a pantalla completa
+            pool = [(str(x.get("imagen") or ""), str(x.get("titulo") or "")) for x in c["historias"] if isinstance(x, dict)] or pool
         img_hist, titulo = pool[vuelta % len(pool)]
         ruta = RAIZ / img_hist
         if self.historias_activas() and ruta.exists():
