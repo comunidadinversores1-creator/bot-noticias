@@ -573,6 +573,36 @@ campanas_extra:
           👉 Link en mi perfil
 
 promos:
+  - id: weex-atlas-gratis
+    activa: true
+    socio: weex
+    nombre: "BTC Cycle Atlas Pro gratis con WEEX"
+    imagen: assets/promos/weex-atlas.jpg
+    titulo_historia: "Mi indicador de ciclos de BTC, gratis"
+    texto_fijo: |
+      📊 ¿DÓNDE EMPIEZA Y DÓNDE TERMINA CADA CICLO DE BITCOIN? TE REGALO MI INDICADOR
+
+      Armé BTC Cycle Atlas Pro: te marca en el gráfico las fases de cada ciclo, contadas en semanas desde el halving. Suba, distribución, caída y la zona de COMIENZO DCA.
+
+      🎯 La semana del 9 de noviembre, el precio entró justo en esa zona de COMIENZO DCA.
+
+      🎁 Cómo conseguirlo gratis:
+      1️⃣ [Registrate en WEEX con mi link](https://www.weex.com/es-ES/register?vipCode=comuni20)
+      2️⃣ [Descargá el indicador acá](https://drive.google.com/file/d/1QnPW3beHG7iZR0F-4WNn6jRNJuVW1d8e/view?usp=sharing)
+      3️⃣ [Mirá cómo lo uso en este video](https://youtu.be/5PvXxbE5pg8)
+
+      💸 Y con mi link de WEEX, además, te devuelvo el 20% de tus comisiones al operar futuros.
+
+      ⚠️ Operar futuros con apalancamiento implica riesgo de perder tu capital. El indicador es una guía basada en ciclos pasados, no una promesa.
+    texto_x: |
+      📊 ¿dónde empieza y dónde termina cada ciclo de Bitcoin?
+
+      armé un indicador, BTC Cycle Atlas Pro, que marca las fases de cada ciclo desde el halving. la semana del 9/11 el precio entró en su zona de COMIENZO DCA.
+
+      🎁 te lo regalo si te registrás en WEEX con mi link (+ 20% de cashback en comisiones).
+
+      👉 link en mi perfil
+
   # ===== WEEX: 20% de cashback en comisiones de futuros con el link comuni20 (13/11/2026) =====
   - id: weex-comisiones-20
     activa: true
@@ -1321,12 +1351,18 @@ instagram:
     "2026-11-07": reversion-z-ig    # carrusel del bot con "Comentá BOT"
     "2026-11-10": mexc-fincen       # EE.UU. corta a MEXC (en @ezebagnato y @comunidad_inversores_ok)
     "2026-11-12": weex-1-regalos    # WEEX: un carrusel cada 3 días, todos con "Comentá BONO"
+    "2026-11-14": atlas-ciclos      # BTC Cycle Atlas Pro gratis registrándose en WEEX ("Comentá CICLO")
     "2026-11-15": weex-2-cupos
     "2026-11-18": weex-3-sin-miedo
     "2026-11-21": weex-4-pasos
     "2026-11-24": weex-5-ultimos-dias
   # Guías que se mandan por DM a quien comenta la palabra del carrusel (la palabra va en mayúsculas).
   guias:
+    CICLO:
+      link: "https://drive.google.com/file/d/1QnPW3beHG7iZR0F-4WNn6jRNJuVW1d8e/view?usp=sharing"
+      mensaje: "¡Hola! 📊 Acá tenés mi indicador BTC Cycle Atlas Pro, para ver dónde empiezan y terminan los ciclos alcistas y bajistas de Bitcoin:\n\n1️⃣ Registrate en WEEX con mi link: https://www.weex.com/es-ES/register?vipCode=comuni20\n2️⃣ Descargá el indicador: {link}\n▶️ Cómo lo uso, en este video: https://youtu.be/5PvXxbE5pg8\n\nAdemás, con mi link de WEEX te devuelvo el 20% de tus comisiones al operar futuros.\n\nEl indicador es una guía basada en ciclos pasados, no una promesa. Operar futuros implica riesgo de perder tu capital."
+      respuesta: "¡Listo! Te mandé el indicador por DM 📩"
+      respuesta_sin_dm: "¡Gracias! En un rato te lo mando por DM 📩"
     BONO:
       link: "https://www.weex.com/events/promo/eze-exclusive?qrType=activity&vipCode=lc7p"
       mensaje: "¡Hola! 🎁 Acá tenés la promo exclusiva de WEEX para mi comunidad (del 12 al 26/11):\n\n👉 {link}\n\nEntrá por ESE link y tocá \"Registrarme ahora\" para que cuenten tus depósitos.\n\n✅ 30 días de VIP 2 (primeros 50)\n✅ Depositás 100 USDT, los mantenés 3 días y operás 100 USDT en futuros → entre 20 y 100 USDT de prueba\n✅ 20% de cashback en tu depósito: hasta 200 USDT de prueba\n\nCupos limitados. Operar futuros con apalancamiento implica riesgo de perder tu capital."

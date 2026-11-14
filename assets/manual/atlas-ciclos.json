@@ -1,0 +1,58 @@
+{
+ "cuenta": "ezebagnato",
+ "usuario": "@ezebagnato",
+ "estilo": "caricatura",
+ "palabra": "CICLO",
+ "laminas": [
+  {
+   "tipo": "portada",
+   "etiqueta": "Gratis",
+   "titulo": "¿Dónde *empieza* y termina cada ciclo de Bitcoin?",
+   "bajada": "Mi indicador BTC Cycle Atlas Pro te lo marca en el gráfico. Y te lo regalo.",
+   "logo": "bitcoin",
+   "escena": "a big golden bitcoin coin on top of a gentle green hill with a winding path going up and down around it, no text"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "Bitcoin se mueve en *ciclos*",
+   "texto": "Cada 4 años hay un halving: los mineros cobran la mitad. Alrededor de eso se arman las subas y las bajas.",
+   "pose": "pensando",
+   "objeto": "bitcoin"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "Qué te *marca*",
+   "texto": "Las fases de cada ciclo, contadas en semanas desde el halving: suba, distribución, caída y zona de compra.",
+   "imagen": "assets/manual/btc-prediccion-9nov.jpg"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "La zona *DCA*",
+   "texto": "Unas 133 semanas después del halving, el indicador marca dónde empezar a comprar de a poco (DCA).",
+   "pose": "lupa",
+   "objeto": "grafico"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "Dónde *estamos* hoy",
+   "texto": "La semana del 9 de noviembre, el precio entró en la zona de COMIENZO DCA de mi indicador.",
+   "pose": "alerta"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "Cómo *conseguirlo* gratis",
+   "texto": "Registrate en WEEX con mi link y te mando el indicador. Además, te devuelvo el 20% de tus comisiones.",
+   "escena": "an open gift box with a golden bitcoin coin inside and a big green check mark above it, no text",
+   "logo": "weex"
+  },
+  {
+   "tipo": "paso",
+   "titulo": "No es *magia*",
+   "texto": "Es una guía basada en ciclos pasados. Los ciclos pueden cambiar: usalo siempre con gestión de riesgo.",
+   "pose": "escudo",
+   "objeto": "candado"
+  }
+ ],
+ "texto_post": "📊 ¿Dónde empieza y dónde termina cada ciclo de Bitcoin?\n\nArmé un indicador, BTC Cycle Atlas Pro, que te marca en el gráfico las fases de cada ciclo contadas desde el halving: suba, distribución, caída y la zona de COMIENZO DCA. La semana del 9 de noviembre, el precio entró justo en esa zona.\n\n🎁 Te lo regalo:\n1️⃣ Registrate en WEEX con mi link\n2️⃣ Te llega el indicador gratis\n3️⃣ Y te devuelvo el 20% de tus comisiones al operar futuros\n\n💬 Comentá CICLO y te mando todo por DM. También está en el link de mi perfil.\n\n⚠️ Operar futuros con apalancamiento implica riesgo de perder tu capital. El indicador es una guía basada en ciclos pasados, no una promesa.",
+ "tema": "BTC Cycle Atlas Pro gratis con WEEX"
+}
