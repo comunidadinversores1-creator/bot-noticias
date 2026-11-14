@@ -573,6 +573,71 @@ campanas_extra:
           👉 Link en mi perfil
 
 promos:
+  # ===== WEEX: 20% de cashback en comisiones de futuros con el link comuni20 (13/11/2026) =====
+  - id: weex-comisiones-20
+    activa: true
+    socio: weex
+    nombre: "WEEX: 20% de cashback en comisiones de futuros"
+    imagen: assets/promos/weex-comisiones.jpg
+    titulo_historia: "Te devuelvo el 20% de tus comisiones en WEEX"
+    texto_fijo: |
+      💸 OPERÁS FUTUROS EN WEEX: TE DEVUELVO EL 20% DE TUS COMISIONES
+
+      Cada vez que abrís y cerrás una operación de futuros pagás comisión. Si te registrás en WEEX con mi link, el 20% de esas comisiones vuelve a tu cuenta.
+
+      📌 Cómo funciona:
+      1️⃣ Te registrás en WEEX con mi link
+      2️⃣ Operás futuros como siempre
+      3️⃣ Te vuelve el 20% de lo que pagaste en comisiones
+
+      ✅ Vale para cada operación, salga bien o mal
+      ✅ No cambia cómo operás: solo pagás menos
+
+      👉 [Registrate en WEEX con mi link](https://www.weex.com/es-ES/register?vipCode=comuni20)
+
+      ⚠️ Beneficio de WEEX con condiciones propias. Operar futuros con apalancamiento implica riesgo de perder tu capital.
+    texto_x: |
+      💸 si operás futuros en WEEX, te devuelvo el 20% de tus comisiones.
+
+      1️⃣ te registrás con mi link
+      2️⃣ operás como siempre
+      3️⃣ te vuelve el 20% de lo que pagaste
+
+      vale para cada operación, salga bien o mal.
+
+      👉 link en mi perfil
+
+  - id: weex-por-que-20
+    activa: true
+    socio: weex
+    nombre: "Por qué conviene el 20% de cashback en comisiones"
+    imagen: assets/promos/weex-por-que-20.jpg
+    titulo_historia: "¿Por qué conviene el 20% de cashback?"
+    texto_fijo: |
+      🧠 ¿POR QUÉ CONVIENE TANTO QUE TE DEVUELVAN EL 20% DE LAS COMISIONES?
+
+      La mayoría mira cuánto gana por trade. Casi nadie mira cuánto paga en comisiones. Y en futuros se pagan todo el tiempo: al abrir y al cerrar cada operación.
+
+      📊 Hacé la cuenta (ejemplo):
+      1️⃣ Si pagás USD 100 de comisiones por mes, te vuelven USD 20
+      2️⃣ En un año son USD 240 de vuelta
+      3️⃣ Si operás más seguido, la diferencia es más grande
+
+      💡 Lo mejor: el cashback no depende de que ganes. Te vuelve aunque el trade salga mal, así que baja tu costo por operación desde el primer día.
+
+      👉 [Registrate en WEEX con mi link y empezá a recibir el 20%](https://www.weex.com/es-ES/register?vipCode=comuni20)
+
+      ⚠️ Beneficio de WEEX con condiciones propias. Operar futuros con apalancamiento implica riesgo de perder tu capital.
+    texto_x: |
+      🧠 ¿por qué conviene que te devuelvan el 20% de las comisiones?
+
+      ejemplo: si pagás USD 100 de comisiones por mes, te vuelven USD 20. en un año, USD 240.
+
+      y no depende de que ganes: te vuelve aunque el trade salga mal.
+
+      en WEEX lo tenés con mi link.
+      👉 link en mi perfil
+
   # ===== FOCO (10/11/2026): Exness + bot Reversión Z gratis + 20% de cashback. Rotan entre ellas (3 por día). =====
   - id: registrate-conmigo
     activa: true

@@ -1467,7 +1467,7 @@ def test_solo_texto_con_un_canal_caido_no_duplica(corrida, red, tmp_path):
 
 def test_asi_vienen_los_ajustes(cfg):
     from bot.util import socios_activos
-    assert [p["id"] for p in cfg["promos"] if p.get("activa")] == ["registrate-conmigo", "cashback-20", "exness-terminal-simple"]
+    assert [p["id"] for p in cfg["promos"] if p.get("activa")] == ["weex-comisiones-20", "weex-por-que-20", "registrate-conmigo", "cashback-20", "exness-terminal-simple"]
     assert list(socios_activos(cfg)) == ["exness", "weex"]                             # Pionex y Binance apagados (Binance: 9/11/2026)
     assert cfg["socios"]["exness"]["enlace"] == "https://one.exnessonelink.com/a/ptf6lzlrc8"
     assert cfg["socios"]["binance"]["enlace"] == "https://www.binance.com/join?ref=202718448"
@@ -1477,7 +1477,7 @@ def test_asi_vienen_los_ajustes(cfg):
     assert cfg["imagen"]["idea_para_chatgpt"] is False and cfg["grok"]["activa"] is True
     c = main.Corrida("prueba", 1, False)
     c.ahora = AHORA
-    assert [p["id"] for p in c.promos_activas()] == ["registrate-conmigo", "cashback-20", "exness-terminal-simple"]
+    assert [p["id"] for p in c.promos_activas()] == ["weex-comisiones-20", "weex-por-que-20", "registrate-conmigo", "cashback-20", "exness-terminal-simple"]
     hoy = AHORA.date()
     for promo in c.promos_activas():
         assert main.imagen_propia(promo["imagen"]) is not None, promo["id"]      # cada una con su imagen
