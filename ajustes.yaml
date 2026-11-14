@@ -1394,8 +1394,8 @@ instagram:
   # una promo cada 2 días (máximo 3 por día). @comunidad_inversores_ok: cada noticia que sale (máximo 6 por día).
   historias:
     activa: true
-    max_ezebagnato: 8             # agenda + avisos de datos + promo + el video de la campaña + hasta 3 noticias
-    max_comunidad: 9              # agenda + avisos de datos + las noticias que salen (hasta 6)
+    max_ezebagnato: 10             # agenda + avisos de datos + promo + el video de la campaña + hasta 3 noticias
+    max_comunidad: 11              # agenda + avisos de datos + las noticias que salen (hasta 6)
     agenda_comunidad: true        # la agenda económica y los avisos de datos también en @comunidad_inversores_ok
     noticias_ezebagnato:          # solo las noticias más importantes en las historias de @ezebagnato
       activa: true
