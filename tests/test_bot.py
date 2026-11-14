@@ -72,6 +72,7 @@ def corrida(monkeypatch, tmp_path, red):
         c.cfg["calendario"]["activa"] = False         # el calendario económico, solo en sus pruebas
         c.cfg["campana_video"]["activa"] = False      # la campaña del video, solo en sus pruebas
         c.cfg["campanas_extra"] = []                  # las otras campañas (WEEX), solo en su prueba
+        c.cfg["alarma_precios"] = {"activa": False}   # la alarma de precio, solo en su prueba
         c.cfg["grok"]["modo"] = "auto"                 # las pruebas de Grok parten de "Grok primero" (en ajustes.yaml hoy está en "gratis")
         c.cfg["grok"]["activa"] = bool(os.environ.get("XAI_API_KEY"))   # la búsqueda de temas (Grok o gratis), solo en sus pruebas
         c.cfg["ritmo"]["horarios_noticias"] = []      # reparto parejo (los horarios fijos tienen su prueba)
@@ -2327,3 +2328,19 @@ def test_noticia_de_bitcoin_lleva_el_llamado_de_exness(corrida):
     c = corrida()
     assert c.activo_operable("Bitcoin pierde los 72.000 dólares") and c.activo_operable("Renunció el CEO de Nvidia")
     assert not c.activo_operable("El INDEC publica la inflación de octubre")
+
+
+def test_alarma_de_precio_avisa_cada_escalon_una_vez():
+    from bot import alarma
+    cfg = {"umbral_24h": 4, "escalon": {"bitcoin": 1000}}
+    d = {"precio": 64995.4, "c24": -4.8, "c7": -14.1, "max24": 68200, "min24": 64900}
+    mem = {}
+    dec = alarma.decidir("bitcoin", d, mem, cfg)
+    assert dec == {"sube": False, "nivel": 65000}
+    mem["bitcoin"] = dec
+    assert alarma.decidir("bitcoin", d, mem, cfg) is None                                   # mismo escalón: no repite
+    assert alarma.decidir("bitcoin", {**d, "precio": 65400}, mem, cfg) is None              # rebotó: nada
+    assert alarma.decidir("bitcoin", {**d, "precio": 63900}, mem, cfg)["nivel"] == 64000    # perdió otro escalón
+    assert alarma.decidir("bitcoin", {**d, "c24": -2.0}, {}, cfg) is None                    # movimiento chico: nada
+    titular, tg, x = alarma.textos("bitcoin", d, dec, "https://exness.test/x")
+    assert titular == "Bitcoin perdió los USD 65.000" and "USD 64.995" in tg and "-4,8%" in tg and "http" not in x

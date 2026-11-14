@@ -708,7 +708,9 @@ class Corrida:
             self.tal_vez_comentarios_ig()    # Instagram: a quien comenta la palabra le responde y le manda la guía por DM
             self.tal_vez_historias()         # Instagram: agenda, avisos de datos y promos en historias de @ezebagnato
             self.tal_vez_carrusel_semanal()  # Instagram: los domingos, el resumen de la semana en @comunidad_inversores_ok
-            self.ocupado = self.tal_vez_material()      # lo que vos pedís por privado sale primero
+            self.ocupado = self.tal_vez_alarma_precio()  # Bitcoin/Ethereum se mueven fuerte: aviso al toque, sin depender de la IA
+            if not self.ocupado:
+                self.ocupado = self.tal_vez_material()  # lo que vos pedís por privado sale primero
             if not self.ocupado:
                 self.ocupado = self.tal_vez_campana_video()
             for extra in (self.cfg.get("campanas_extra") or []):      # otras campañas diarias (ej. WEEX)
@@ -2266,10 +2268,65 @@ class Corrida:
         except Exception as error:
             log.warning("historia de la noticia: %s", error)
 
-    def historia_cta_activos(self, g, post: dict) -> None:
+    def tal_vez_alarma_precio(self) -> bool:
+        """Si Bitcoin o Ethereum se mueven fuerte (4% o más en 24 h) y cruzan un número redondo, sale un aviso con
+        los números en Telegram, X e historias (+ la historia de Exness). No depende de la IA ni de los medios."""
+        from . import alarma
+        c = self.cfg.get("alarma_precios") or {}
+        if not (self.real and verdadero(c.get("activa"))):
+            return False
+        mem = self.estado.datos.setdefault("alarma", {})
+        hoy = self.ahora.astimezone(zona(self.cfg)).date().isoformat()
+        if mem.get("dia") != hoy:
+            mem["dia"], mem["hoy"] = hoy, 0
+        if int(mem.get("hoy", 0)) >= int(c.get("max_por_dia", 4)):
+            return False
+        if mem.get("ultima") and (self.ahora - datetime.fromisoformat(mem["ultima"])).total_seconds() < float(c.get("horas_entre_avisos", 2)) * 3600:
+            return False
+        monedas = [str(m) for m in (c.get("monedas") or ["bitcoin"]) if str(m) in alarma.NOMBRES]
+        datos = alarma.leer(monedas)
+        niveles = mem.setdefault("niveles", {})
+        for moneda in monedas:
+            d = datos.get(moneda)
+            if not d:
+                continue
+            dec = alarma.decidir(moneda, d, niveles, c)
+            if not dec:
+                continue
+            if not mem.get("iniciada"):
+                niveles[moneda] = dec                  # primera vez: anota dónde está, sin publicar (no repetir lo que ya salió a mano)
+                continue
+            if en_silencio(self.cfg, self.ahora) and abs(d["c24"]) < float(c.get("de_noche_si_pasa", 8)):
+                continue
+            socio = (socios_activos(self.cfg) or {}).get("exness") or {}
+            titular, tg, x = alarma.textos(moneda, d, dec, str(socio.get("enlace") or ""))
+            post, hist = alarma.imagenes(moneda, d, dec)
+            registro = {
+                "fecha": self.ahora.isoformat(), "tipo": "noticia", "titular": titular, "categoria": "CRIPTO", "impacto": 9,
+                "fuente": "CoinGecko", "foto": "", "socio": "", "llamado": True, "titulos_originales": [titular], "telegram": None, "x": None,
+            }
+            if self.entregar(95, post, tg, x, registro, publicidad=False, original=titular) != "ok":
+                return False
+            niveles[moneda] = dec
+            mem["ultima"], mem["hoy"] = self.ahora.isoformat(), int(mem.get("hoy", 0)) + 1
+            self.estado.guardar()
+            if hist and self.historias_activas():
+                try:
+                    for cuenta, usuario in (("ezebagnato", "@ezebagnato"), ("comunidad", "@comunidad_inversores_ok")):
+                        self.subir_historia(cuenta, historias.html_promo(hist, "", usuario), "alarma")
+                    self.historia_cta_activos(None, {"titular": titular}, forzar=True)
+                except Exception as error:
+                    log.warning("historias (alarma): %s", error)
+            return True
+        mem["iniciada"] = True
+        self.estado.guardar()
+        return False
+
+    def historia_cta_activos(self, g, post: dict, forzar: bool = False) -> None:
         c = self.cfg.get("cta_activos") or {}
         ruta = RAIZ / str(c.get("historia_imagen") or "")
-        if not (c.get("historia_imagen") and ruta.exists() and self.activo_operable(f"{g.titulos()} {post.get('titular', '')}")):
+        texto = f"{g.titulos() if g is not None else ''} {post.get('titular', '')}"
+        if not (c.get("historia_imagen") and ruta.exists() and (forzar or self.activo_operable(texto))):
             return
         mem = self.estado.datos["ig"].setdefault("historias", {})
         hoy = self.ahora.astimezone(zona(self.cfg)).date().isoformat()

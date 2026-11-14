@@ -308,6 +308,18 @@ cta_activos:
   historia_cta: "Link en mi biografía ↑"
   historias_max_por_dia: 2
 
+# ALARMA DE PRECIO (14/11/2026): si Bitcoin o Ethereum se mueven 4% o más en 24 horas y cruzan un número
+# redondo (BTC cada 1.000, ETH cada 100), sale un aviso al toque en Telegram, X e historias, con los números
+# reales de CoinGecko. No depende de la IA ni de que un medio lo publique.
+alarma_precios:
+  activa: true
+  monedas: [bitcoin, ethereum]
+  umbral_24h: 4
+  escalon: {bitcoin: 1000, ethereum: 100}
+  horas_entre_avisos: 2
+  max_por_dia: 4
+  de_noche_si_pasa: 8             # de madrugada solo si se mueve 8% o más
+
 # Temas que se siguen todos los días (si hay una novedad real, sale aunque no sea la más fuerte del día).
 seguimiento:
   - "Nvidia y la salida de su CEO Jensen Huang (quién lo reemplaza, cómo sigue la acción)"
