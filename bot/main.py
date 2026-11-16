@@ -1820,6 +1820,8 @@ class Corrida:
             return False
         imagen = imagen_propia(str(datos.get("imagen") or ""))
         jpg = tal_cual(imagen) if imagen is not None else None
+        if verdadero(datos.get("solo_telegram")):
+            self.canales = [c for c in self.canales if c == "telegram"]      # X lo sube Eze a mano
         para_telegram = texto_propio_telegram(datos["texto"])
         para_x = texto_propio_x(str(datos.get("texto_x") or ""), datos["texto"], self.cfg["x"])
         registro = {
