@@ -2346,15 +2346,12 @@ def test_alarma_de_precio_avisa_cada_escalon_una_vez():
     assert titular == "Bitcoin perdió los USD 65.000" and "USD 64.995" in tg and "-4,8%" in tg and "http" not in x
 
 
-def test_alarma_se_rearma_despues_de_un_rebote_y_avisa_nuevos_minimos():
+def test_alarma_no_repite_un_numero_ya_avisado_aunque_rebote_y_avisa_nuevos_minimos():
     from bot import alarma
     cfg = {"umbral_24h": 4, "umbral_nuevo_minimo": 2, "escalon": {"bitcoin": 1000}}
     mem = {"bitcoin": {"sube": False, "nivel": 63000.0}}                       # como quedó el 15/11
     d = {"precio": 62450, "c24": -3.3, "c7": -6, "max24": 64600, "min24": 62000}
-    assert alarma.decidir("bitcoin", d, dict(mem), cfg) is None               # mismo escalón y sin rebote
-    mem2 = dict(mem)
-    assert alarma.decidir("bitcoin", {**d, "precio": 64500, "c24": 1.0}, mem2, cfg) is None   # rebota: se rearma
-    dec = alarma.decidir("bitcoin", d, mem2, cfg)                              # vuelve a caer a los 62 mil
-    assert dec is not None and dec["nivel"] == 63000
-    dec2 = alarma.decidir("bitcoin", {**d, "precio": 61800, "c24": -2.5}, {"bitcoin": dec}, cfg)
-    assert dec2["nivel"] == 62000 and dec2["nuevo_minimo"] is True            # nuevo mínimo con -2,5%
+    assert alarma.decidir("bitcoin", {**d, "precio": 64500, "c24": 1.0}, mem, cfg) is None   # rebota
+    assert alarma.decidir("bitcoin", d, mem, cfg) is None                     # vuelve a 62 mil: ya avisado, no repite
+    dec = alarma.decidir("bitcoin", {**d, "precio": 61800, "c24": -2.5}, mem, cfg)
+    assert dec["nivel"] == 62000 and dec["nuevo_minimo"] is True              # nuevo mínimo con -2,5%

@@ -48,19 +48,12 @@ def nivel(precio: float, paso: float) -> float:
 def decidir(moneda: str, d: dict, mem: dict, cfg: dict) -> dict | None:
     """¿Hay que avisar? Sí si el movimiento de 24 h pasa el umbral y el precio cruzó un escalón redondo
     desde el último aviso de esa moneda. Devuelve {'sube', 'nivel', 'minimo', 'nuevo_minimo'} o None.
-    · Si después de un aviso de caída el precio rebota un escalón entero, la alarma se "rearma":
-      si vuelve a caer a ese número, se avisa de nuevo (ej. 63 mil → rebota a 64,5 mil → vuelve a 62 mil).
+    · Cada número redondo se avisa una sola vez, aunque el precio rebote y vuelva (pedido de Eze, 18/11).
     · Un nuevo mínimo de la caída (más abajo que todo lo avisado antes) sale con un umbral más bajo."""
     umbral = float(cfg.get("umbral_24h", 4))
     paso = float((cfg.get("escalon") or {}).get(moneda, 1000 if moneda == "bitcoin" else 100))
     ultimo = dict(mem.get(moneda) or {})
     minimo = ultimo.get("minimo") or (ultimo.get("nivel") if ultimo and not ultimo.get("sube") else None)
-    if ultimo.get("nivel") is not None:
-        rebote = (not ultimo.get("sube") and d["precio"] >= float(ultimo["nivel"]) + paso) or \
-                 (ultimo.get("sube") and d["precio"] <= float(ultimo["nivel"]) - paso)
-        if rebote:
-            ultimo = {"minimo": minimo} if minimo else {}
-            mem[moneda] = ultimo                                     # rearmada (se guarda con el estado)
     sube = d["c24"] > 0
     escalon = nivel(d["precio"], paso) + (0 if sube else paso)       # cae: "perdió los 65.000"; sube: "superó los 64.000"
     nuevo_minimo = (not sube) and minimo is not None and escalon < float(minimo)
