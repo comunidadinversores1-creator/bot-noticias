@@ -315,6 +315,7 @@ alarma_precios:
   activa: true
   monedas: [bitcoin, ethereum]
   umbral_24h: 4
+  umbral_nuevo_minimo: 2          # si vuelve a la zona más baja de la caída (o la rompe), alcanza con 2% en 24 h
   escalon: {bitcoin: 1000, ethereum: 100}
   horas_entre_avisos: 2
   max_por_dia: 4
