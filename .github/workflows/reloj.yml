@@ -1,0 +1,35 @@
+name: Reloj del bot
+
+# GitHub a veces atrasa o se saltea los horarios programados (desde el 22/11 corría 2 o 3 veces por día).
+# Este "reloj" arranca la corrida del bot cada 30 minutos sin depender de eso: queda prendido casi 6 horas
+# y antes de terminar se vuelve a lanzar solo. Los horarios de GitHub de abajo quedan solo de respaldo,
+# por si el reloj se cortara (si ya hay un reloj andando, el nuevo espera y no se duplica nada).
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 */6 * * *"
+
+permissions:
+  actions: write
+
+concurrency:
+  group: reloj-del-bot
+  cancel-in-progress: false
+
+jobs:
+  reloj:
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Arrancar el bot cada 30 minutos
+        run: |
+          for vuelta in $(seq 1 11); do
+            gh workflow run bot.yml -f modo=real || echo "::warning::no pude arrancar el bot en la vuelta $vuelta"
+            sleep 1800
+          done
+      - name: Volver a lanzar el reloj
+        if: always()
+        run: gh workflow run reloj.yml || echo "::warning::no pude relanzar el reloj (lo retoma el horario de respaldo)"
