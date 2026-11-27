@@ -473,6 +473,26 @@ campana_video:
 #  OTRAS CAMPAÑAS DIARIAS (igual que la del video): 1 vez por día en Telegram (canal, grupo y tema), X e
 #  historias de las dos cuentas de IG, rotando textos e imágenes. Terminan solas el día de "vence".
 # =====================================================================================================
+# =====================================================================================================
+#  VIDEOS NUEVOS DE YOUTUBE (27/11: Eze pidió que cada video largo nuevo se promocione solo).
+#  El bot mira el canal cada media hora. Cuando subís un video largo (los Shorts no), escribe 3 textos
+#  con la IA usando solo el título y la descripción, baja la miniatura y lo publica 1 vez por día durante
+#  "dias_campana" días en Telegram (canal y tema Noticias), X y las historias de las dos cuentas de IG.
+#  Los links son el del video y los que pongas en la descripción (sin redes sociales). Te avisa por
+#  Telegram cuando arranca. Si subís otro video, la campaña nueva reemplaza a la anterior.
+#  Para frenarlo: activa: false
+# =====================================================================================================
+videos_youtube:
+  activa: true
+  canal_id: UCrz3HSZDE2g9dR0Stp1KQag     # Ezequiel Bagnato | Comunidad Inversores
+  dias_campana: 3                        # cuántos días se promociona cada video
+  cada_dias: 1
+  desde: "10:00"                         # no sale antes de esta hora (hora Argentina)
+  dias_atras: 3                          # solo cuentan los videos subidos en los últimos 3 días
+  ctas_historia:
+    - "Video nuevo en YouTube · link en el perfil ↑"
+    - "Mirá el video completo · link en el perfil ↑"
+
 campanas_extra:
   - activa: true
     id: weex-eze-exclusive

@@ -71,6 +71,7 @@ def corrida(monkeypatch, tmp_path, red):
         c.cfg["ensenanza"]["activa"] = False          # las enseñanzas, solo en sus pruebas
         c.cfg["calendario"]["activa"] = False         # el calendario económico, solo en sus pruebas
         c.cfg["campana_video"]["activa"] = False      # la campaña del video, solo en sus pruebas
+        c.cfg.setdefault("videos_youtube", {})["activa"] = False   # videos nuevos de YouTube, solo en sus pruebas
         c.cfg["campanas_extra"] = []                  # las otras campañas (WEEX), solo en su prueba
         c.cfg["alarma_precios"] = {"activa": False}   # la alarma de precio, solo en su prueba
         c.cfg["grok"]["modo"] = "auto"                 # las pruebas de Grok parten de "Grok primero" (en ajustes.yaml hoy está en "gratis")
@@ -2355,3 +2356,93 @@ def test_alarma_no_repite_un_numero_ya_avisado_aunque_rebote_y_avisa_nuevos_mini
     assert alarma.decidir("bitcoin", d, mem, cfg) is None                     # vuelve a 62 mil: ya avisado, no repite
     dec = alarma.decidir("bitcoin", {**d, "precio": 61800, "c24": -2.5}, mem, cfg)
     assert dec["nivel"] == 62000 and dec["nuevo_minimo"] is True              # nuevo mínimo con -2,5%
+
+
+# ------------------------------------------------------------ videos nuevos de YouTube
+from bot import youtube as mod_youtube
+
+RSS_YT = b"""<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns:yt="http://www.youtube.com/xml/schemas/2015" xmlns:media="http://search.yahoo.com/mrss/" xmlns="http://www.w3.org/2005/Atom">
+<entry><id>yt:video:LARGO123456</id><yt:videoId>LARGO123456</yt:videoId><title>BITCOIN ROMPERA LOS $55.000?</title>
+<published>2026-10-09T12:00:00+00:00</published>
+<media:group><media:title>BITCOIN</media:title><media:description>Masterclass de Bitcoin.
+Consegui mi indicador gratis: https://linktr.ee/comunidadinversores
+Instagram: https://www.instagram.com/ezebagnato/</media:description></media:group></entry>
+<entry><id>yt:video:VIEJO123456</id><yt:videoId>VIEJO123456</yt:videoId><title>Video viejo</title>
+<published>2026-09-01T12:00:00+00:00</published><media:group><media:description>viejo</media:description></media:group></entry>
+</feed>"""
+
+
+def test_youtube_lee_el_rss_y_saca_solo_links_de_promo(monkeypatch):
+    class R:
+        content = RSS_YT
+        def raise_for_status(self):
+            pass
+    monkeypatch.setattr(mod_youtube.requests, "get", lambda *a, **k: R())
+    videos = mod_youtube.leer_videos("UCx")
+    assert [v["id"] for v in videos] == ["LARGO123456", "VIEJO123456"]
+    assert "linktr.ee" in videos[0]["descripcion"]
+    assert mod_youtube.links_de(videos[0]["descripcion"]) == ["https://linktr.ee/comunidadinversores"]
+
+
+class _CerebroFalso:
+    disponible = True
+    def pedir_json(self, sistema, usuario, **_):
+        if "revisor de publicidad" in sistema:
+            return {"promete": False}
+        return {"variantes": [{"titulo_historia": "Bitcoin toco 55.000", "texto": "Bitcoin toco 55.000 y reboto https://malo.com",
+                               "texto_x": "Bitcoin toco 55.000. Video en mi perfil"}] * 3,
+                "links": [{"url": "https://linktr.ee/comunidadinversores", "texto": "Consegui el indicador gratis"},
+                          {"url": "https://otro-link-inventado.com", "texto": "trampa"}]}
+
+
+def test_youtube_textos_llevan_solo_el_video_y_los_links_de_la_descripcion():
+    video = {"id": "LARGO123456", "titulo": "BITCOIN", "descripcion": "x", "url": "https://youtu.be/LARGO123456"}
+    variantes = mod_youtube.redactar(_CerebroFalso(), video, ["https://linktr.ee/comunidadinversores"])
+    assert len(variantes) == 3
+    t = variantes[0]["texto"]
+    assert "malo.com" not in t and "otro-link-inventado" not in t
+    assert "https://youtu.be/LARGO123456" in t
+    assert "[Consegui el indicador gratis](https://linktr.ee/comunidadinversores)" in t
+
+
+def test_youtube_video_largo_nuevo_arma_la_campana_y_los_shorts_no(corrida, red, tmp_path, monkeypatch):
+    c = corrida()
+    c.cfg["videos_youtube"] = {"activa": True, "canal_id": "UCx", "dias_campana": 3, "dias_atras": 3, "desde": "10:00"}
+    c.cerebro = _CerebroFalso()
+    reciente = (AHORA - timedelta(hours=5)).isoformat()
+    videos = [
+        {"id": "SHORT123456", "titulo": "Un short", "descripcion": "", "publicado": reciente, "url": "https://youtu.be/SHORT123456"},
+        {"id": "LARGO123456", "titulo": "BITCOIN", "descripcion": "https://linktr.ee/comunidadinversores", "publicado": reciente, "url": "https://youtu.be/LARGO123456"},
+        {"id": "VIEJO123456", "titulo": "Viejo", "descripcion": "", "publicado": (AHORA - timedelta(days=30)).isoformat(), "url": "https://youtu.be/VIEJO123456"},
+    ]
+    monkeypatch.setattr(mod_youtube, "leer_videos", lambda canal: videos)
+    monkeypatch.setattr(mod_youtube, "es_short", lambda vid, titulo="": vid.startswith("SHORT"))
+    mem = c.estado.datos.setdefault("youtube", {})
+    c.buscar_video_nuevo(c.cfg["videos_youtube"], mem)
+    assert mem["campana"]["id"] == "LARGO123456"
+    assert mem["campana"]["vence"] == "2026-10-11"                # 3 días: hoy, mañana y pasado
+    assert {"SHORT123456", "LARGO123456", "VIEJO123456"} <= set(mem["vistos"])
+    # La próxima corrida no vuelve a armarla ni la cambia.
+    c.ahora = AHORA + timedelta(hours=1)
+    c.buscar_video_nuevo(c.cfg["videos_youtube"], mem)
+    assert mem["campana"]["inicio"] == AHORA.isoformat()
+
+
+def test_youtube_la_campana_sale_en_telegram_con_la_miniatura(corrida, red, tmp_path, monkeypatch):
+    _sin_la_fed(red)
+    monkeypatch.setattr(main, "RAIZ", tmp_path)
+    c = corrida(imagen="ninguna")
+    c.cfg["promos"] = []
+    c.cfg["instagram"] = {"historias": {"activa": False}}
+    c.cfg["videos_youtube"] = {"activa": True, "canal_id": "UCx", "desde": "10:00"}
+    monkeypatch.setattr(mod_youtube, "leer_videos", lambda canal: [])
+    monkeypatch.setattr(mod_youtube, "miniatura", lambda vid: red._jpg)
+    video = {"id": "LARGO123456", "titulo": "BITCOIN", "descripcion": "x", "url": "https://youtu.be/LARGO123456"}
+    variantes = mod_youtube.redactar(_CerebroFalso(), video, ["https://linktr.ee/comunidadinversores"])
+    c.estado.datos.setdefault("youtube", {})["campana"] = {"id": "LARGO123456", "variantes": variantes, "vence": "2026-10-11"}
+    assert c.correr() == 0
+    salidas = [p for p in _memoria(tmp_path)["publicadas"] if p.get("promo_id") == "yt-LARGO123456"]
+    assert len(salidas) == 1 and salidas[0]["foto"] == "salida/youtube-LARGO123456.jpg"
+    pie = red.telegram_fotos[0].get("caption") or ""
+    assert "youtu.be/LARGO123456" in pie and "linktr.ee/comunidadinversores" in pie

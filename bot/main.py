@@ -28,6 +28,7 @@ from . import carrusel_html
 from . import historias
 from . import instagram
 from . import ia
+from . import youtube
 from .estado import Estado
 from .filtro import Grupo, es_mala_noticia, nombra_prohibido, preparar, puntaje, ya_contada
 from .fuentes import leer_fuentes
@@ -592,6 +593,102 @@ class Corrida:
                 log.warning("historias (campaña): %s", error)
         return True
 
+    # ------------------------------------------------- YouTube: videos nuevos
+    def tal_vez_video_youtube(self) -> bool:
+        """Cuando Eze sube un video largo a YouTube, el bot lo detecta solo, escribe 3 textos, baja la
+        miniatura y lo promociona unos días en Telegram, X y las historias (como las otras campañas).
+        Los Shorts no se promocionan. Devuelve True si publicó algo en esta corrida."""
+        c = self.cfg.get("videos_youtube") or {}
+        if not (self.real and verdadero(c.get("activa")) and str(c.get("canal_id") or "").strip()):
+            return False
+        mem = self.estado.datos.setdefault("youtube", {})
+        try:
+            self.buscar_video_nuevo(c, mem)
+        except (requests.RequestException, ValueError) as error:
+            log.warning("YouTube: no pude leer el canal: %s", error)
+        camp = mem.get("campana")
+        if not camp or not camp.get("variantes"):
+            return False
+        ruta = f"salida/youtube-{camp['id']}.jpg"
+        if not (RAIZ / ruta).exists():
+            foto = youtube.miniatura(camp["id"])
+            if foto:
+                (RAIZ / "salida").mkdir(exist_ok=True)
+                (RAIZ / ruta).write_bytes(foto)
+        campana = {
+            "activa": True, "id": f"yt-{camp['id']}", "cada_dias": int(c.get("cada_dias", 1)),
+            "desde": str(c.get("desde") or "10:00"), "vence": camp.get("vence") or "",
+            "ctas_historia": c.get("ctas_historia") or ["Video nuevo en YouTube · link en el perfil ↑"],
+            "variantes": [{**v, "imagen": ruta} for v in camp["variantes"]],
+        }
+        return self.tal_vez_campana_video(campana)
+
+    def buscar_video_nuevo(self, c: dict, mem: dict) -> None:
+        """Mira el canal y, si hay un video largo nuevo, arma su campaña (reemplaza a la anterior)."""
+        local = self.ahora.astimezone(zona(self.cfg))
+        ultima = mem.get("revisado")
+        if ultima and (self.ahora - datetime.fromisoformat(ultima)).total_seconds() < 25 * 60 and not self.forzar:
+            return
+        videos = youtube.leer_videos(str(c["canal_id"]).strip())
+        mem["revisado"] = self.ahora.isoformat()
+        vistos: list[str] = mem.setdefault("vistos", [])
+        dias_atras = float(c.get("dias_atras", 3))
+        if not mem.get("iniciado"):
+            # Primera vez: lo viejo queda como visto. Solo cuenta como nuevo lo de los últimos días.
+            for v in videos:
+                if (self.ahora - datetime.fromisoformat(v["publicado"])).total_seconds() > dias_atras * 86400:
+                    vistos.append(v["id"])
+            mem["iniciado"] = self.ahora.isoformat()
+        for v in videos:                                  # del más nuevo al más viejo
+            if v["id"] in vistos:
+                continue
+            if (self.ahora - datetime.fromisoformat(v["publicado"])).total_seconds() > dias_atras * 86400:
+                vistos.append(v["id"])
+                continue
+            short = youtube.es_short(v["id"], v["titulo"])
+            if short is None:
+                continue                                  # no se supo: se prueba en la próxima corrida
+            if short:
+                vistos.append(v["id"])
+                continue
+            if not self.cerebro.disponible:
+                return
+            links = youtube.links_de(v["descripcion"])
+            try:
+                variantes = youtube.redactar(self.cerebro, v, links)
+            except ia.SinCerebro as error:
+                log.warning("YouTube: la IA no escribió los textos del video: %s", error)
+                return
+            buenas = []
+            for var in variantes:
+                try:
+                    promete, frase = ia.juzgar_promo(self.cerebro, var["texto"] + "\n\n" + var["texto_x"], v["titulo"] + "\n" + v["descripcion"])
+                except ia.SinCerebro:
+                    promete, frase = True, "no se pudo revisar"
+                if promete:
+                    log.warning("YouTube: descarté un texto del video (%s)", frase)
+                else:
+                    buenas.append(var)
+            if not buenas:
+                self.avisar(f"yt_textos_{v['id']}", f"Subiste «{v['titulo']}» pero no pude escribir textos de promo que pasen la revisión. Lo intento de nuevo en la próxima corrida.")
+                return
+            dias = int(c.get("dias_campana", 3))
+            mem["campana"] = {"id": v["id"], "titulo": v["titulo"], "url": v["url"], "variantes": buenas,
+                              "vence": (local.date() + timedelta(days=dias - 1)).isoformat(), "inicio": self.ahora.isoformat()}
+            # Los videos más viejos que este ya no se promocionan (sale siempre el último).
+            vistos.extend(x["id"] for x in videos if x["id"] not in vistos)
+            mem["vistos"] = vistos[-200:]
+            self.estado.guardar()
+            if self.token and self.chat_prueba:
+                try:
+                    telegram_mensaje(self.token, self.chat_prueba,
+                                     f"🎬 Vi tu video nuevo en YouTube: «{v['titulo']}»\n\nLo voy a promocionar solo durante {dias} días "
+                                     f"en Telegram, X y las historias de Instagram, con su miniatura y los links de la descripción.\n\n{v['url']}")
+                except ErrorPublicacion as error:
+                    log.warning("YouTube: no pude avisarte del video: %s", error)
+            return
+        mem["vistos"] = vistos[-200:]
+
     def muestra_campana(self) -> bool:
         """Prueba: manda a tu chat privado cómo saldría cada variante de la campaña (Telegram, X e historias)."""
         c = self.cfg.get("campana_video") or {}
@@ -713,6 +810,8 @@ class Corrida:
                 self.ocupado = self.tal_vez_material()  # lo que vos pedís por privado sale primero
             if not self.ocupado:
                 self.ocupado = self.tal_vez_campana_video()
+            if not self.ocupado:
+                self.ocupado = self.tal_vez_video_youtube()   # video nuevo en YouTube: lo promociona solo
             for extra in (self.cfg.get("campanas_extra") or []):      # otras campañas diarias (ej. WEEX)
                 if self.ocupado:
                     break
