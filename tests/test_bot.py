@@ -2399,16 +2399,16 @@ class _CerebroFalso:
 def test_youtube_textos_llevan_solo_el_video_y_los_links_de_la_descripcion():
     video = {"id": "LARGO123456", "titulo": "BITCOIN", "descripcion": "x", "url": "https://youtu.be/LARGO123456"}
     variantes = mod_youtube.redactar(_CerebroFalso(), video, ["https://linktr.ee/comunidadinversores"])
-    assert len(variantes) == 3
+    assert len(variantes) == 3                     # la IA de prueba devuelve 3
     t = variantes[0]["texto"]
     assert "malo.com" not in t and "otro-link-inventado" not in t
     assert "https://youtu.be/LARGO123456" in t
     assert "[Consegui el indicador gratis](https://linktr.ee/comunidadinversores)" in t
 
 
-def test_youtube_video_largo_nuevo_arma_la_campana_y_los_shorts_no(corrida, red, tmp_path, monkeypatch):
+def test_youtube_dos_videos_seguidos_tienen_cada_uno_su_campana_de_10_dias(corrida, red, tmp_path, monkeypatch):
     c = corrida()
-    c.cfg["videos_youtube"] = {"activa": True, "canal_id": "UCx", "dias_campana": 3, "dias_atras": 3, "desde": "10:00"}
+    c.cfg["videos_youtube"] = {"activa": True, "canal_id": "UCx", "dias_campana": 10, "dias_atras": 3, "desde": "10:00"}
     c.cerebro = _CerebroFalso()
     reciente = (AHORA - timedelta(hours=5)).isoformat()
     videos = [
@@ -2420,13 +2420,32 @@ def test_youtube_video_largo_nuevo_arma_la_campana_y_los_shorts_no(corrida, red,
     monkeypatch.setattr(mod_youtube, "es_short", lambda vid, titulo="": vid.startswith("SHORT"))
     mem = c.estado.datos.setdefault("youtube", {})
     c.buscar_video_nuevo(c.cfg["videos_youtube"], mem)
-    assert mem["campana"]["id"] == "LARGO123456"
-    assert mem["campana"]["vence"] == "2026-10-11"                # 3 días: hoy, mañana y pasado
-    assert {"SHORT123456", "LARGO123456", "VIEJO123456"} <= set(mem["vistos"])
-    # La próxima corrida no vuelve a armarla ni la cambia.
-    c.ahora = AHORA + timedelta(hours=1)
+    assert [x["id"] for x in mem["campanas"]] == ["LARGO123456"]
+    assert c.vence_video(c.cfg["videos_youtube"], mem["campanas"][0]).isoformat() == "2026-10-18"   # 10 días
+    assert {"SHORT123456", "VIEJO123456"} <= set(mem["vistos"])
+    # Al otro día sube otro video: el primero sigue y se suma el segundo.
+    c.ahora = AHORA + timedelta(days=1)
+    videos.insert(0, {"id": "OTRO1234567", "titulo": "Otro", "descripcion": "", "publicado": c.ahora.isoformat(), "url": "https://youtu.be/OTRO1234567"})
     c.buscar_video_nuevo(c.cfg["videos_youtube"], mem)
-    assert mem["campana"]["inicio"] == AHORA.isoformat()
+    assert [x["id"] for x in mem["campanas"]] == ["LARGO123456", "OTRO1234567"]
+    assert mem["campanas"][0]["inicio"] == AHORA.isoformat()
+    # Eze puede extender un video después de los 10 días.
+    c.cfg["videos_youtube"]["extender"] = {"LARGO123456": "2026-11-30"}
+    assert c.vence_video(c.cfg["videos_youtube"], mem["campanas"][0]).isoformat() == "2026-11-30"
+
+
+def test_youtube_al_terminar_la_promo_avisa_a_eze(corrida, red, tmp_path, monkeypatch):
+    _sin_la_fed(red)
+    monkeypatch.setattr(main, "RAIZ", tmp_path)
+    c = corrida(imagen="ninguna", ahora=AHORA + timedelta(days=12))
+    c.chat_prueba = "999"
+    c.cfg["videos_youtube"] = {"activa": True, "canal_id": "UCx", "dias_campana": 10}
+    monkeypatch.setattr(mod_youtube, "leer_videos", lambda canal: [])
+    c.estado.datos.setdefault("youtube", {})["campanas"] = [{"id": "LARGO123456", "titulo": "BITCOIN", "url": "https://youtu.be/LARGO123456",
+                                                              "variantes": [{"titulo_historia": "x", "texto": "y", "texto_x": "z"}], "inicio": AHORA.isoformat()}]
+    assert c.tal_vez_video_youtube() is False
+    assert any("Terminó la promo" in str(m.get("text")) for m in red.telegram_mensajes)
+    assert c.estado.datos["youtube"]["campanas"][0]["avisado"]
 
 
 def test_youtube_la_campana_sale_en_telegram_con_la_miniatura(corrida, red, tmp_path, monkeypatch):
@@ -2440,7 +2459,7 @@ def test_youtube_la_campana_sale_en_telegram_con_la_miniatura(corrida, red, tmp_
     monkeypatch.setattr(mod_youtube, "miniatura", lambda vid: red._jpg)
     video = {"id": "LARGO123456", "titulo": "BITCOIN", "descripcion": "x", "url": "https://youtu.be/LARGO123456"}
     variantes = mod_youtube.redactar(_CerebroFalso(), video, ["https://linktr.ee/comunidadinversores"])
-    c.estado.datos.setdefault("youtube", {})["campana"] = {"id": "LARGO123456", "variantes": variantes, "vence": "2026-10-11"}
+    c.estado.datos.setdefault("youtube", {})["campana"] = {"id": "LARGO123456", "variantes": variantes, "inicio": AHORA.isoformat()}   # formato viejo: se pasa solo
     assert c.correr() == 0
     salidas = [p for p in _memoria(tmp_path)["publicadas"] if p.get("promo_id") == "yt-LARGO123456"]
     assert len(salidas) == 1 and salidas[0]["foto"] == "salida/youtube-LARGO123456.jpg"

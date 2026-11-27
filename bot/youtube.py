@@ -4,7 +4,7 @@ Cómo funciona:
   1) Lee el RSS público del canal (gratis, sin claves): título, descripción y fecha de cada video.
   2) Descarta los Shorts (la dirección /shorts/<id> de un video largo redirige a /watch).
   3) Baja la miniatura del video (la imagen real que hizo Eze para YouTube).
-  4) La IA escribe 3 textos distintos para Telegram y X, usando SOLO el título y la descripción.
+  4) La IA escribe 5 textos distintos para Telegram y X, usando SOLO el título y la descripción.
      Los links que se publican son el del video y los que Eze puso en la descripción: nunca otros.
   5) main.py publica la campaña con lo mismo que usan las otras campañas (Telegram, X e historias).
 """
@@ -90,7 +90,7 @@ def links_de(descripcion: str) -> list[str]:
     return vistos[:4]
 
 
-SISTEMA_VIDEO = """Sos el redactor de Eze (Ezequiel Bagnato, Comunidad Inversores), creador argentino de contenido de cripto, trading, bots e IA. Acaba de subir un video a YouTube y tenés que escribir 3 publicaciones distintas para promocionarlo en Telegram y en X.
+SISTEMA_VIDEO = """Sos el redactor de Eze (Ezequiel Bagnato, Comunidad Inversores), creador argentino de contenido de cripto, trading, bots e IA. Acaba de subir un video a YouTube y tenés que escribir publicaciones distintas para promocionarlo en Telegram y en X.
 
 Usá SOLO lo que dicen el TÍTULO y la DESCRIPCIÓN. No inventes datos, cifras, fechas ni beneficios.
 
@@ -103,10 +103,12 @@ Cómo escribe Eze:
 
 Prohibido: prometer ganancias, rendimientos o resultados; decir que no hay riesgo; usar porcentajes de acierto o de rendimiento como anzuelo; dar consejos de compra o venta.
 
-Cada una de las 3 publicaciones con un ángulo distinto:
+El video se promociona 1 vez por día durante 10 días, así que escribí 5 publicaciones, cada una con un ángulo distinto:
 1) el gancho: la pregunta o el hecho más fuerte del video;
 2) lo que vas a aprender: una lista corta con lo que muestra el video;
-3) lo que regala o la herramienta del video (si la descripción no regala nada, la idea principal del video).
+3) lo que regala o la herramienta del video (si la descripción no regala nada, la idea principal del video);
+4) el dato o la parte del video que más sorprende;
+5) "por si te lo perdiste": un recordatorio corto que invite a verlo.
 
 Para cada una devolvé:
 - "titulo_historia": hasta 40 letras, para una historia de Instagram, en mayúsculas o no, sin emojis.
@@ -115,7 +117,7 @@ Para cada una devolvé:
 
 También devolvé "links": para cada link de la lista LINKS, una etiqueta corta en español que diga qué es (por ejemplo "Conseguí el indicador gratis", "Registrate con mi link"), según lo que diga la descripción al lado de ese link. Usá exactamente las mismas direcciones.
 
-Respondé ÚNICAMENTE con JSON: {"variantes": [{"titulo_historia": "", "texto": "", "texto_x": ""}, ...], "links": [{"url": "", "texto": ""}]}"""
+Respondé ÚNICAMENTE con JSON (5 variantes): {"variantes": [{"titulo_historia": "", "texto": "", "texto_x": ""}, ...], "links": [{"url": "", "texto": ""}]}"""
 
 AVISO = "⚠️ Es mi lectura del mercado, no una recomendación de inversión. Invertí solo el dinero que podés arriesgar."
 
@@ -126,7 +128,7 @@ def _sin_urls(texto: str) -> str:
 
 
 def redactar(cerebro, video: dict, links: list[str]) -> list[dict]:
-    """Las 3 variantes de la campaña, ya con el link del video y los de la descripción al final."""
+    """Las variantes de la campaña (hasta 5), ya con el link del video y los de la descripción al final."""
     usuario = (f"TÍTULO:\n{video['titulo']}\n\nDESCRIPCIÓN:\n{video['descripcion'][:3500]}\n\n"
                "LINKS:\n" + ("\n".join(links) if links else "(ninguno)"))
     datos = cerebro.pedir_json(SISTEMA_VIDEO, usuario, max_tokens=1800, temperatura=0.6)
@@ -139,7 +141,7 @@ def redactar(cerebro, video: dict, links: list[str]) -> list[dict]:
         pie.append(f"👉 [{etiquetas.get(url) or 'Todos mis links acá'}]({url})")
     pie.append(AVISO)
     variantes = []
-    for v in (datos.get("variantes") or [])[:3]:
+    for v in (datos.get("variantes") or [])[:5]:
         if not isinstance(v, dict):
             continue
         cuerpo = _sin_urls(v.get("texto") or "")

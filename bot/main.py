@@ -595,43 +595,81 @@ class Corrida:
 
     # ------------------------------------------------- YouTube: videos nuevos
     def tal_vez_video_youtube(self) -> bool:
-        """Cuando Eze sube un video largo a YouTube, el bot lo detecta solo, escribe 3 textos, baja la
-        miniatura y lo promociona unos días en Telegram, X y las historias (como las otras campañas).
-        Los Shorts no se promocionan. Devuelve True si publicó algo en esta corrida."""
+        """Cuando Eze sube un video largo a YouTube, el bot lo detecta solo, escribe textos, baja la
+        miniatura y lo promociona 1 vez por día durante 'dias_campana' días (10) en Telegram, X y las
+        historias. Cada video tiene su propia campaña: si sube 2 seguidos, se promocionan los 2.
+        Al terminar le avisa a Eze para que decida si sigue. Los Shorts no se promocionan.
+        Devuelve True si publicó algo en esta corrida."""
         c = self.cfg.get("videos_youtube") or {}
         if not (self.real and verdadero(c.get("activa")) and str(c.get("canal_id") or "").strip()):
             return False
         mem = self.estado.datos.setdefault("youtube", {})
+        if mem.get("campana"):                            # versión anterior: una sola campaña
+            mem.setdefault("campanas", []).append(mem.pop("campana"))
         try:
             self.buscar_video_nuevo(c, mem)
         except (requests.RequestException, ValueError) as error:
             log.warning("YouTube: no pude leer el canal: %s", error)
-        camp = mem.get("campana")
-        if not camp or not camp.get("variantes"):
-            return False
-        ruta = f"salida/youtube-{camp['id']}.jpg"
-        if not (RAIZ / ruta).exists():
-            foto = youtube.miniatura(camp["id"])
-            if foto:
-                (RAIZ / "salida").mkdir(exist_ok=True)
-                (RAIZ / ruta).write_bytes(foto)
-        campana = {
-            "activa": True, "id": f"yt-{camp['id']}", "cada_dias": int(c.get("cada_dias", 1)),
-            "desde": str(c.get("desde") or "10:00"), "vence": camp.get("vence") or "",
-            "ctas_historia": c.get("ctas_historia") or ["Video nuevo en YouTube · link en el perfil ↑"],
-            "variantes": [{**v, "imagen": ruta} for v in camp["variantes"]],
-        }
-        return self.tal_vez_campana_video(campana)
+        hoy = self.ahora.astimezone(zona(self.cfg)).date()
+        activas = []
+        for camp in mem.get("campanas") or []:
+            vence = self.vence_video(c, camp)
+            if hoy <= vence:
+                activas.append(camp)
+            elif not camp.get("avisado"):
+                camp["avisado"] = self.ahora.isoformat()
+                self.estado.guardar()
+                if self.token and self.chat_prueba:
+                    try:
+                        telegram_mensaje(self.token, self.chat_prueba,
+                                         f"⏰ Terminó la promo de tu video «{camp.get('titulo')}» ({c.get('dias_campana', 10)} días en Telegram, X e historias).\n\n"
+                                         f"{camp.get('url')}\n\nMirá cómo le fue en YouTube y decime en el chat de Claude si le seguimos dando promoción y por cuántos días más.")
+                    except ErrorPublicacion as error:
+                        log.warning("YouTube: no pude avisarte del fin de la promo: %s", error)
+        # Se borran de la memoria las que terminaron hace más de 60 días.
+        mem["campanas"] = [x for x in mem.get("campanas") or [] if (hoy - self.vence_video(c, x)).days <= 60]
+        # Primero la que hace más que no sale, así todas tienen su lugar en el día.
+        activas.sort(key=lambda x: str((self.estado.datos.get("campanas") or {}).get(f"yt-{x['id']}", {}).get("ultima") or ""))
+        for camp in activas:
+            if not camp.get("variantes"):
+                continue
+            ruta = f"salida/youtube-{camp['id']}.jpg"
+            if not (RAIZ / ruta).exists():
+                foto = youtube.miniatura(camp["id"])
+                if foto:
+                    (RAIZ / "salida").mkdir(exist_ok=True)
+                    (RAIZ / ruta).write_bytes(foto)
+            campana = {
+                "activa": True, "id": f"yt-{camp['id']}", "cada_dias": int(c.get("cada_dias", 1)),
+                "desde": str(c.get("desde") or "10:00"), "vence": self.vence_video(c, camp).isoformat(),
+                "ctas_historia": c.get("ctas_historia") or ["Video nuevo en YouTube · link en el perfil ↑"],
+                "variantes": [{**v, "imagen": ruta} for v in camp["variantes"]],
+            }
+            if self.tal_vez_campana_video(campana):
+                return True                               # una por corrida: la otra sale en la próxima
+        return False
+
+    def vence_video(self, c: dict, camp: dict) -> date:
+        """Último día de la promo de un video: 'dias_campana' días desde que arrancó, o la fecha que
+        Eze haya pedido en 'extender' (id del video: fecha) para seguir promocionándolo."""
+        extra = (c.get("extender") or {}).get(camp.get("id"))
+        if extra:
+            try:
+                return date.fromisoformat(str(extra))
+            except ValueError:
+                pass
+        inicio = datetime.fromisoformat(camp["inicio"]).astimezone(zona(self.cfg)).date()
+        return inicio + timedelta(days=int(c.get("dias_campana", 10)) - 1)
 
     def buscar_video_nuevo(self, c: dict, mem: dict) -> None:
-        """Mira el canal y, si hay un video largo nuevo, arma su campaña (reemplaza a la anterior)."""
-        local = self.ahora.astimezone(zona(self.cfg))
+        """Mira el canal y arma una campaña por cada video largo nuevo (las anteriores siguen)."""
         ultima = mem.get("revisado")
         if ultima and (self.ahora - datetime.fromisoformat(ultima)).total_seconds() < 25 * 60 and not self.forzar:
             return
         videos = youtube.leer_videos(str(c["canal_id"]).strip())
         mem["revisado"] = self.ahora.isoformat()
         vistos: list[str] = mem.setdefault("vistos", [])
+        campanas: list[dict] = mem.setdefault("campanas", [])
         dias_atras = float(c.get("dias_atras", 3))
         if not mem.get("iniciado"):
             # Primera vez: lo viejo queda como visto. Solo cuenta como nuevo lo de los últimos días.
@@ -639,8 +677,8 @@ class Corrida:
                 if (self.ahora - datetime.fromisoformat(v["publicado"])).total_seconds() > dias_atras * 86400:
                     vistos.append(v["id"])
             mem["iniciado"] = self.ahora.isoformat()
-        for v in videos:                                  # del más nuevo al más viejo
-            if v["id"] in vistos:
+        for v in reversed(videos):                        # del más viejo al más nuevo
+            if v["id"] in vistos or any(x.get("id") == v["id"] for x in campanas):
                 continue
             if (self.ahora - datetime.fromisoformat(v["publicado"])).total_seconds() > dias_atras * 86400:
                 vistos.append(v["id"])
@@ -652,13 +690,13 @@ class Corrida:
                 vistos.append(v["id"])
                 continue
             if not self.cerebro.disponible:
-                return
+                break
             links = youtube.links_de(v["descripcion"])
             try:
                 variantes = youtube.redactar(self.cerebro, v, links)
             except ia.SinCerebro as error:
                 log.warning("YouTube: la IA no escribió los textos del video: %s", error)
-                return
+                break
             buenas = []
             for var in variantes:
                 try:
@@ -671,22 +709,20 @@ class Corrida:
                     buenas.append(var)
             if not buenas:
                 self.avisar(f"yt_textos_{v['id']}", f"Subiste «{v['titulo']}» pero no pude escribir textos de promo que pasen la revisión. Lo intento de nuevo en la próxima corrida.")
-                return
-            dias = int(c.get("dias_campana", 3))
-            mem["campana"] = {"id": v["id"], "titulo": v["titulo"], "url": v["url"], "variantes": buenas,
-                              "vence": (local.date() + timedelta(days=dias - 1)).isoformat(), "inicio": self.ahora.isoformat()}
-            # Los videos más viejos que este ya no se promocionan (sale siempre el último).
-            vistos.extend(x["id"] for x in videos if x["id"] not in vistos)
-            mem["vistos"] = vistos[-200:]
+                continue
+            camp = {"id": v["id"], "titulo": v["titulo"], "url": v["url"], "variantes": buenas, "inicio": self.ahora.isoformat()}
+            campanas.append(camp)
+            vistos.append(v["id"])
             self.estado.guardar()
             if self.token and self.chat_prueba:
+                dias = int(c.get("dias_campana", 10))
                 try:
                     telegram_mensaje(self.token, self.chat_prueba,
-                                     f"🎬 Vi tu video nuevo en YouTube: «{v['titulo']}»\n\nLo voy a promocionar solo durante {dias} días "
-                                     f"en Telegram, X y las historias de Instagram, con su miniatura y los links de la descripción.\n\n{v['url']}")
+                                     f"🎬 Vi tu video nuevo en YouTube: «{v['titulo']}»\n\nLo voy a promocionar solo, 1 vez por día durante {dias} días "
+                                     f"(hasta el {self.vence_video(c, camp):%d/%m}), en Telegram, X y las historias de Instagram, con su miniatura y los "
+                                     f"links de la descripción. Cuando termine te aviso para ver si seguimos.\n\n{v['url']}")
                 except ErrorPublicacion as error:
                     log.warning("YouTube: no pude avisarte del video: %s", error)
-            return
         mem["vistos"] = vistos[-200:]
 
     def muestra_campana(self) -> bool:
