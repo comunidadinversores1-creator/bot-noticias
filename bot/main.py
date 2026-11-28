@@ -633,6 +633,17 @@ class Corrida:
         for camp in activas:
             if not camp.get("variantes"):
                 continue
+            if not camp.get("estreno_revisado"):
+                # Si es un estreno o un vivo programado, no se promociona antes de que empiece.
+                f = youtube.ficha(camp["id"])
+                if f is not None:
+                    camp["estreno_revisado"] = True
+                    if f.get("estreno"):
+                        camp["no_antes"] = f["estreno"]
+                        camp["inicio"] = max(camp["inicio"], f["estreno"])
+                    self.estado.guardar()
+            if camp.get("no_antes") and self.ahora < datetime.fromisoformat(camp["no_antes"]) + timedelta(minutes=5):
+                continue                                  # todavía no se estrenó
             ruta = f"salida/youtube-{camp['id']}.jpg"
             if not (RAIZ / ruta).exists():
                 foto = youtube.miniatura(camp["id"])
@@ -643,7 +654,8 @@ class Corrida:
                 "activa": True, "id": f"yt-{camp['id']}", "cada_dias": int(c.get("cada_dias", 1)),
                 "desde": str(c.get("desde") or "10:00"), "vence": self.vence_video(c, camp).isoformat(),
                 "ctas_historia": c.get("ctas_historia") or ["Video nuevo en YouTube · link en el perfil ↑"],
-                "variantes": [{**v, "imagen": ruta} for v in camp["variantes"]],
+                # Textos escritos a mano en ajustes ("textos": id del video -> lista) reemplazan a los de la IA.
+                "variantes": [{**v, "imagen": ruta} for v in ((c.get("textos") or {}).get(camp["id"]) or camp["variantes"])],
             }
             if self.tal_vez_campana_video(campana):
                 return True                               # una por corrida: la otra sale en la próxima
@@ -677,6 +689,15 @@ class Corrida:
                 if (self.ahora - datetime.fromisoformat(v["publicado"])).total_seconds() > dias_atras * 86400:
                     vistos.append(v["id"])
             mem["iniciado"] = self.ahora.isoformat()
+        # Videos agregados a mano en ajustes ("agregar"), por ejemplo uno que el RSS ya no muestra
+        # porque se subieron muchos Shorts después.
+        for vid in c.get("agregar") or []:
+            vid = str(vid).strip()
+            if not vid or vid in vistos or any(x.get("id") == vid for x in campanas) or vid in [x["id"] for x in videos]:
+                continue
+            f = youtube.ficha(vid)
+            if f is not None:
+                videos.append({**f, "publicado": self.ahora.isoformat()})
         for v in reversed(videos):                        # del más viejo al más nuevo
             if v["id"] in vistos or any(x.get("id") == v["id"] for x in campanas):
                 continue
@@ -711,6 +732,12 @@ class Corrida:
                 self.avisar(f"yt_textos_{v['id']}", f"Subiste «{v['titulo']}» pero no pude escribir textos de promo que pasen la revisión. Lo intento de nuevo en la próxima corrida.")
                 continue
             camp = {"id": v["id"], "titulo": v["titulo"], "url": v["url"], "variantes": buenas, "inicio": self.ahora.isoformat()}
+            f = youtube.ficha(v["id"])
+            if f is not None:
+                camp["estreno_revisado"] = True
+                if f.get("estreno"):                      # estreno o vivo programado: arranca cuando empieza
+                    camp["no_antes"] = f["estreno"]
+                    camp["inicio"] = max(camp["inicio"], f["estreno"])
             campanas.append(camp)
             vistos.append(v["id"])
             self.estado.guardar()

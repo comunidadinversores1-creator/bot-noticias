@@ -495,6 +495,151 @@ videos_youtube:
     - "Video nuevo en YouTube · link en el perfil ↑"
     - "Mirá el video completo · link en el perfil ↑"
   extender: {}                           # ej. {W_2fZJmF7T8: "2026-12-20"} para seguir hasta esa fecha
+  textos:                                # textos escritos a mano (le ganan a los de la IA)
+    SzjUx9g4AGk:                         # "Probé un BOT de trading 30 días con dinero real: perdí 8 %" (estreno 28/11 11 h); escritos desde los subtítulos
+      - titulo_historia: "Mi bot perdió 8 % en 30 días"
+        texto: |
+          🤖 MI BOT PERDIÓ 8 % EN 30 DÍAS. TE MUESTRO POR QUÉ
+
+          Hace 30 días prendí el bot Reversión Z en una cuenta real. Arrancamos con 10.000 créditos y hoy tenemos 9.178: perdimos 829, un 8,2 %.
+
+          No te lo voy a esconder. En el video te muestro los números reales, qué falló y qué vamos a hacer ahora.
+
+          ▶️ Mirá el video completo acá:
+          https://youtu.be/SzjUx9g4AGk
+
+          👉 [Abrí tu cuenta en Exness](https://one.exnessonelink.com/boarding/sign-up/303589/a/ptf6lzlrc8?lng=es)
+
+          👉 [Descargá la licencia del bot](https://drive.google.com/file/d/1mdZtc6ZotTGK1Nbq_EzihukabIY4FvEn/view?usp=sharing)
+
+          👉 [Mirá cómo instalarlo paso a paso](https://youtu.be/icTdEFD-d6c)
+
+          👉 [Contacto y comunidad](https://linktr.ee/comunidadinversores)
+
+          ⚠️ No es una recomendación de inversión. Operar con apalancamiento implica riesgo de perder tu capital.
+        texto_x: |
+          Mi bot perdió 8 % en 30 días con dinero real.
+
+          Arrancamos con 10.000 créditos y hoy tenemos 9.178. No lo escondo: en el video te muestro los números, qué falló y qué vamos a hacer.
+
+          El video y los links están en mi perfil.
+      - titulo_historia: "¿Por qué perdió el bot?"
+        texto: |
+          📉 ¿POR QUÉ PERDIÓ EL BOT REVERSIÓN Z?
+
+          El bot opera EUR/AUD y AUD/CAD y busca que el precio vuelva a su media de 200. En octubre y noviembre el dólar australiano se cayó tan fuerte que el precio nunca volvió a la media, y saltaron los stop loss.
+
+          Esos stop loss hicieron su trabajo: perdimos 8 %, mientras a mucha gente le liquidaron la cuenta.
+
+          Te lo explico con los gráficos en el video 👇
+
+          ▶️ Mirá el video completo acá:
+          https://youtu.be/SzjUx9g4AGk
+
+          👉 [Abrí tu cuenta en Exness](https://one.exnessonelink.com/boarding/sign-up/303589/a/ptf6lzlrc8?lng=es)
+
+          👉 [Descargá la licencia del bot](https://drive.google.com/file/d/1mdZtc6ZotTGK1Nbq_EzihukabIY4FvEn/view?usp=sharing)
+
+          👉 [Mirá cómo instalarlo paso a paso](https://youtu.be/icTdEFD-d6c)
+
+          👉 [Contacto y comunidad](https://linktr.ee/comunidadinversores)
+
+          ⚠️ No es una recomendación de inversión. Operar con apalancamiento implica riesgo de perder tu capital.
+        texto_x: |
+          ¿Por qué perdió mi bot?
+
+          Opera EUR/AUD y AUD/CAD buscando que el precio vuelva a la media. El dólar australiano se cayó tan fuerte que nunca volvió y saltaron los stop loss.
+
+          Perdimos 8 %. A otros les liquidaron la cuenta.
+
+          El video y los links están en mi perfil.
+      - titulo_historia: "Los 2 frenos de emergencia"
+        texto: |
+          🛑 LOS 2 FRENOS DE EMERGENCIA DEL BOT
+
+          Si el bot llega a -25 %, se frena solo y lo reviso. Si llega a -35 %, se apaga del todo. Así la cuenta nunca llega a cero.
+
+          No es lo que quiero que pase, pero prefiero que sepas cuánto podés llegar a perder antes de copiarlo.
+
+          ▶️ Mirá el video completo acá:
+          https://youtu.be/SzjUx9g4AGk
+
+          👉 [Abrí tu cuenta en Exness](https://one.exnessonelink.com/boarding/sign-up/303589/a/ptf6lzlrc8?lng=es)
+
+          👉 [Descargá la licencia del bot](https://drive.google.com/file/d/1mdZtc6ZotTGK1Nbq_EzihukabIY4FvEn/view?usp=sharing)
+
+          👉 [Mirá cómo instalarlo paso a paso](https://youtu.be/icTdEFD-d6c)
+
+          👉 [Contacto y comunidad](https://linktr.ee/comunidadinversores)
+
+          ⚠️ No es una recomendación de inversión. Operar con apalancamiento implica riesgo de perder tu capital.
+        texto_x: |
+          Los 2 frenos de emergencia de mi bot:
+
+          1. Si llega a -25 %, se frena solo y lo reviso.
+          2. Si llega a -35 %, se apaga del todo.
+
+          Prefiero que sepas cuánto podés perder antes de copiarlo.
+
+          El video y los links están en mi perfil.
+      - titulo_historia: "¿Apago el bot o sigo?"
+        texto: |
+          🤔 ¿APAGO EL BOT O LE DOY MÁS TIEMPO?
+
+          Le voy a dar 60 días más, con mi dinero adentro como hasta ahora. Ahí vemos si mejora, si hay que cambiar algo o si lo frenamos.
+
+          Siempre te voy a mostrar los resultados, salgan bien o mal.
+
+          💬 ¿Vos qué harías: lo apagás o le das 60 días más?
+
+          ▶️ Mirá el video completo acá:
+          https://youtu.be/SzjUx9g4AGk
+
+          👉 [Abrí tu cuenta en Exness](https://one.exnessonelink.com/boarding/sign-up/303589/a/ptf6lzlrc8?lng=es)
+
+          👉 [Descargá la licencia del bot](https://drive.google.com/file/d/1mdZtc6ZotTGK1Nbq_EzihukabIY4FvEn/view?usp=sharing)
+
+          👉 [Mirá cómo instalarlo paso a paso](https://youtu.be/icTdEFD-d6c)
+
+          👉 [Contacto y comunidad](https://linktr.ee/comunidadinversores)
+
+          ⚠️ No es una recomendación de inversión. Operar con apalancamiento implica riesgo de perder tu capital.
+        texto_x: |
+          Mi bot perdió 8 % en 30 días. ¿Lo apago?
+
+          Le voy a dar 60 días más, con mi dinero adentro. Después vemos si mejora, si hay que cambiar algo o si lo frenamos.
+
+          ¿Vos qué harías?
+
+          El video y los links están en mi perfil.
+      - titulo_historia: "El bot es gratis: mirá esto antes"
+        texto: |
+          🎁 EL BOT ES GRATIS, PERO ANTES MIRÁ ESTE VIDEO
+
+          La licencia del bot Reversión Z es gratis abriendo tu cuenta de Exness con mi link, y además te devuelvo el 20 % de las comisiones de cada operación.
+
+          Antes de copiarlo mirá el video: ahí están las pérdidas, los riesgos y los frenos que tiene.
+
+          ▶️ Mirá el video completo acá:
+          https://youtu.be/SzjUx9g4AGk
+
+          👉 [Abrí tu cuenta en Exness](https://one.exnessonelink.com/boarding/sign-up/303589/a/ptf6lzlrc8?lng=es)
+
+          👉 [Descargá la licencia del bot](https://drive.google.com/file/d/1mdZtc6ZotTGK1Nbq_EzihukabIY4FvEn/view?usp=sharing)
+
+          👉 [Mirá cómo instalarlo paso a paso](https://youtu.be/icTdEFD-d6c)
+
+          👉 [Contacto y comunidad](https://linktr.ee/comunidadinversores)
+
+          ⚠️ No es una recomendación de inversión. Operar con apalancamiento implica riesgo de perder tu capital.
+        texto_x: |
+          Mi bot Reversión Z es gratis y además te devuelvo el 20 % de las comisiones.
+
+          Pero antes de copiarlo, mirá el video: ahí están las pérdidas, los riesgos y los frenos que tiene.
+
+          El video y los links están en mi perfil.
+  agregar:                               # videos para promocionar aunque el bot no los haya visto (ej. tapados por muchos Shorts)
+    - W_2fZJmF7T8                        # "BITCOIN ROMPERA LOS $55.000?" (24/11): se le había prometido a Eze y quedó afuera del RSS
 
 campanas_extra:
   - activa: true

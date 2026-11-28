@@ -92,7 +92,7 @@ def links_de(descripcion: str) -> list[str]:
 
 SISTEMA_VIDEO = """Sos el redactor de Eze (Ezequiel Bagnato, Comunidad Inversores), creador argentino de contenido de cripto, trading, bots e IA. Acaba de subir un video a YouTube y tenés que escribir publicaciones distintas para promocionarlo en Telegram y en X.
 
-Usá SOLO lo que dicen el TÍTULO y la DESCRIPCIÓN. No inventes datos, cifras, fechas ni beneficios.
+Usá SOLO lo que dicen el TÍTULO y la DESCRIPCIÓN. No inventes datos, cifras, fechas ni beneficios. El tema del video es el del TÍTULO: si la descripción tiene textos generales, links o temas que no son el del título (por ejemplo una lista de mercados o noticias), no los menciones.
 
 Cómo escribe Eze:
 - Español rioplatense, con voseo, cercano y humano, como habla él. Nada robótico. No dejes un renglón en blanco después de cada frase.
@@ -151,3 +151,40 @@ def redactar(cerebro, video: dict, links: list[str]) -> list[dict]:
             continue
         variantes.append({"titulo_historia": titulo, "texto": cuerpo + "\n\n" + "\n\n".join(pie), "texto_x": corto})
     return variantes
+
+
+def ficha(video_id: str) -> dict | None:
+    """Datos de un video leídos de su página: título, descripción completa y, si es un estreno o un vivo
+    programado que todavía no empezó, cuándo empieza ('estreno', en UTC). None si no se pudo leer."""
+    try:
+        r = requests.get(f"https://www.youtube.com/watch?v={video_id}&hl=es",
+                         headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36",
+                                  "Accept-Language": "es-AR,es;q=0.9"}, timeout=20)
+        r.raise_for_status()
+    except requests.RequestException as error:
+        log.warning("YouTube: no pude abrir la página de %s: %s", video_id, error)
+        return None
+    pagina = r.text
+    pos = pagina.find("ytInitialPlayerResponse")
+    if pos < 0:
+        return None
+    inicio = pagina.find("{", pos)
+    try:
+        import json
+        datos, _ = json.JSONDecoder().raw_decode(pagina[inicio:])
+    except ValueError:
+        return None
+    det = datos.get("videoDetails") or {}
+    micro = ((datos.get("microformat") or {}).get("playerMicroformatRenderer") or {})
+    vivo = micro.get("liveBroadcastDetails") or {}
+    estreno = None
+    if det.get("isUpcoming") and vivo.get("startTimestamp"):
+        try:
+            estreno = datetime.fromisoformat(str(vivo["startTimestamp"]).replace("Z", "+00:00")).isoformat()
+        except ValueError:
+            estreno = None
+    titulo = str(det.get("title") or "").strip()
+    if not titulo:
+        return None
+    return {"id": video_id, "titulo": titulo, "descripcion": str(det.get("shortDescription") or "").strip(),
+            "estreno": estreno, "url": f"https://youtu.be/{video_id}"}

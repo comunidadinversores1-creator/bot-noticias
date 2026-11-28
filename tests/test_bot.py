@@ -2465,3 +2465,44 @@ def test_youtube_la_campana_sale_en_telegram_con_la_miniatura(corrida, red, tmp_
     assert len(salidas) == 1 and salidas[0]["foto"] == "salida/youtube-LARGO123456.jpg"
     pie = red.telegram_fotos[0].get("caption") or ""
     assert "youtu.be/LARGO123456" in pie and "linktr.ee/comunidadinversores" in pie
+
+
+def test_youtube_estreno_no_se_promociona_antes_de_que_empiece(corrida, red, tmp_path, monkeypatch):
+    _sin_la_fed(red)
+    monkeypatch.setattr(main, "RAIZ", tmp_path)
+    c = corrida(imagen="ninguna")
+    c.cfg["promos"] = []
+    c.cfg["instagram"] = {"historias": {"activa": False}}
+    c.cfg["videos_youtube"] = {"activa": True, "canal_id": "UCx", "desde": "10:00"}
+    monkeypatch.setattr(mod_youtube, "leer_videos", lambda canal: [])
+    monkeypatch.setattr(mod_youtube, "miniatura", lambda vid: red._jpg)
+    estreno = (AHORA + timedelta(hours=14)).isoformat()
+    monkeypatch.setattr(mod_youtube, "ficha", lambda vid: {"id": vid, "titulo": "BOT", "descripcion": "", "estreno": estreno, "url": "u"})
+    video = {"id": "LARGO123456", "titulo": "BITCOIN", "descripcion": "x", "url": "https://youtu.be/LARGO123456"}
+    variantes = mod_youtube.redactar(_CerebroFalso(), video, [])
+    c.estado.datos.setdefault("youtube", {})["campanas"] = [{"id": "LARGO123456", "titulo": "BOT", "url": "u", "variantes": variantes, "inicio": AHORA.isoformat()}]
+    assert c.tal_vez_video_youtube() is False                     # todavía no se estrenó
+    camp = c.estado.datos["youtube"]["campanas"][0]
+    assert camp["no_antes"] == estreno and camp["inicio"] == estreno
+    c.estado.guardar()
+    c2 = corrida(imagen="ninguna", ahora=AHORA + timedelta(hours=22))   # ya se estrenó (13 h en Argentina)
+    c2.cfg["promos"] = []
+    c2.cfg["instagram"] = {"historias": {"activa": False}}
+    c2.cfg["videos_youtube"] = {"activa": True, "canal_id": "UCx", "desde": "10:00"}
+    assert c2.correr() == 0
+    assert [p for p in _memoria(tmp_path)["publicadas"] if p.get("promo_id") == "yt-LARGO123456"]
+
+
+def test_youtube_video_agregado_a_mano(corrida, red, tmp_path, monkeypatch):
+    c = corrida()
+    c.cfg["videos_youtube"] = {"activa": True, "canal_id": "UCx", "dias_campana": 10, "agregar": ["MANO1234567"]}
+    c.cerebro = _CerebroFalso()
+    monkeypatch.setattr(mod_youtube, "leer_videos", lambda canal: [])
+    monkeypatch.setattr(mod_youtube, "es_short", lambda vid, titulo="": False)
+    monkeypatch.setattr(mod_youtube, "ficha", lambda vid: {"id": vid, "titulo": "Video viejo", "descripcion": "https://linktr.ee/comunidadinversores", "estreno": None, "url": f"https://youtu.be/{vid}"})
+    mem = c.estado.datos.setdefault("youtube", {})
+    c.buscar_video_nuevo(c.cfg["videos_youtube"], mem)
+    assert [x["id"] for x in mem["campanas"]] == ["MANO1234567"]
+    c.ahora = AHORA + timedelta(hours=1)
+    c.buscar_video_nuevo(c.cfg["videos_youtube"], mem)
+    assert len(mem["campanas"]) == 1                               # no se duplica
