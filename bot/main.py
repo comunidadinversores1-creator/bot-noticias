@@ -642,6 +642,8 @@ class Corrida:
                         camp["no_antes"] = f["estreno"]
                         camp["inicio"] = max(camp["inicio"], f["estreno"])
                     self.estado.guardar()
+            if (c.get("estrenos") or {}).get(camp["id"]):     # hora de estreno escrita a mano en ajustes
+                camp["no_antes"] = datetime.fromisoformat(str(c["estrenos"][camp["id"]])).isoformat()
             if camp.get("no_antes") and self.ahora < datetime.fromisoformat(camp["no_antes"]) + timedelta(minutes=5):
                 continue                                  # todavía no se estrenó
             ruta = f"salida/youtube-{camp['id']}.jpg"

@@ -495,6 +495,8 @@ videos_youtube:
     - "Video nuevo en YouTube · link en el perfil ↑"
     - "Mirá el video completo · link en el perfil ↑"
   extender: {}                           # ej. {W_2fZJmF7T8: "2026-12-20"} para seguir hasta esa fecha
+  estrenos:                              # hora de estreno escrita a mano: no se promociona antes (por si no se puede leer la página)
+    SzjUx9g4AGk: "2026-11-28T11:00:00-03:00"
   textos:                                # textos escritos a mano (le ganan a los de la IA)
     SzjUx9g4AGk:                         # "Probé un BOT de trading 30 días con dinero real: perdí 8 %" (estreno 28/11 11 h); escritos desde los subtítulos
       - titulo_historia: "Mi bot perdió 8 % en 30 días"
