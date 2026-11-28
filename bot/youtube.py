@@ -92,7 +92,7 @@ def links_de(descripcion: str) -> list[str]:
 
 SISTEMA_VIDEO = """Sos el redactor de Eze (Ezequiel Bagnato, Comunidad Inversores), creador argentino de contenido de cripto, trading, bots e IA. Acaba de subir un video a YouTube y tenés que escribir publicaciones distintas para promocionarlo en Telegram y en X.
 
-Usá SOLO lo que dicen el TÍTULO y la DESCRIPCIÓN. No inventes datos, cifras, fechas ni beneficios. El tema del video es el del TÍTULO: si la descripción tiene textos generales, links o temas que no son el del título (por ejemplo una lista de mercados o noticias), no los menciones.
+Si te paso los SUBTÍTULOS (lo que Eze dice en el video), el contenido sale SOLO de ahí: la descripción puede estar mal. Si no hay subtítulos, usá SOLO lo que dicen el TÍTULO y la DESCRIPCIÓN. No inventes datos, cifras, fechas ni beneficios. El tema del video es el del TÍTULO: si la descripción tiene textos generales, links o temas que no son el del título (por ejemplo una lista de mercados o noticias), no los menciones.
 
 Cómo escribe Eze:
 - Español rioplatense, con voseo, cercano y humano, como habla él. Nada robótico. No dejes un renglón en blanco después de cada frase.
@@ -101,7 +101,7 @@ Cómo escribe Eze:
 - Emojis solo para ordenar (un título, una lista, el cierre), no más.
 - Con emoción y urgencia, pero solo con datos reales del video (lo que pasó, la pregunta que responde, lo que vas a aprender, la herramienta que regala).
 
-Prohibido: prometer ganancias, rendimientos o resultados; decir que no hay riesgo; usar porcentajes de acierto o de rendimiento como anzuelo; dar consejos de compra o venta.
+Prohibido: cifras de rendimiento de backtests o simulaciones (porcentajes de ganancia anual o mensual, aunque Eze los diga en el video); prometer ganancias, rendimientos o resultados; decir que no hay riesgo; usar porcentajes de acierto o de rendimiento como anzuelo; dar consejos de compra o venta.
 
 El video se promociona 1 vez por día durante 10 días, así que escribí 5 publicaciones, cada una con un ángulo distinto:
 1) el gancho: la pregunta o el hecho más fuerte del video;
@@ -127,10 +127,15 @@ def _sin_urls(texto: str) -> str:
     return re.sub(r"https?://\S+", "", texto).strip()
 
 
-def redactar(cerebro, video: dict, links: list[str]) -> list[dict]:
-    """Las variantes de la campaña (hasta 5), ya con el link del video y los de la descripción al final."""
-    usuario = (f"TÍTULO:\n{video['titulo']}\n\nDESCRIPCIÓN:\n{video['descripcion'][:3500]}\n\n"
-               "LINKS:\n" + ("\n".join(links) if links else "(ninguno)"))
+def redactar(cerebro, video: dict, links: list[str], subtitulos: str = "") -> list[dict]:
+    """Las variantes de la campaña (hasta 5), ya con el link del video y los de la descripción al final.
+    Si hay subtítulos, el contenido sale de ahí (lo que Eze dice de verdad), no de la descripción."""
+    if subtitulos:
+        usuario = (f"TÍTULO:\n{video['titulo']}\n\nLO QUE DICE EZE EN EL VIDEO (subtítulos, la fuente principal):\n{subtitulos[:14000]}\n\n"
+                   "LINKS (de la descripción):\n" + ("\n".join(links) if links else "(ninguno)"))
+    else:
+        usuario = (f"TÍTULO:\n{video['titulo']}\n\nDESCRIPCIÓN:\n{video['descripcion'][:3500]}\n\n"
+                   "LINKS:\n" + ("\n".join(links) if links else "(ninguno)"))
     datos = cerebro.pedir_json(SISTEMA_VIDEO, usuario, max_tokens=1800, temperatura=0.6)
     etiquetas = {}
     for l in datos.get("links") or []:
@@ -187,4 +192,23 @@ def ficha(video_id: str) -> dict | None:
     if not titulo:
         return None
     return {"id": video_id, "titulo": titulo, "descripcion": str(det.get("shortDescription") or "").strip(),
-            "estreno": estreno, "url": f"https://youtu.be/{video_id}"}
+            "estreno": estreno, "url": f"https://youtu.be/{video_id}", "subtitulos": _subtitulos(datos)}
+
+
+def _subtitulos(datos: dict) -> str:
+    """El texto de lo que se dice en el video (subtítulos de YouTube, en español si hay). Vacío si todavía no hay."""
+    pistas = (((datos.get("captions") or {}).get("playerCaptionsTracklistRenderer") or {}).get("captionTracks") or [])
+    if not pistas:
+        return ""
+    pista = next((p for p in pistas if str(p.get("languageCode", "")).startswith("es")), pistas[0])
+    url = str(pista.get("baseUrl") or "")
+    if not url.startswith("https://"):
+        return ""
+    try:
+        r = requests.get(url + "&fmt=json3", headers={"User-Agent": AGENTE}, timeout=20)
+        r.raise_for_status()
+        eventos = r.json().get("events") or []
+    except (requests.RequestException, ValueError):
+        return ""
+    partes = ["".join(str(s.get("utf8") or "") for s in (e.get("segs") or [])) for e in eventos]
+    return re.sub(r"\s+", " ", " ".join(partes)).strip()

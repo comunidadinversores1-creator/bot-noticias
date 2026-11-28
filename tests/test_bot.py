@@ -72,6 +72,7 @@ def corrida(monkeypatch, tmp_path, red):
         c.cfg["calendario"]["activa"] = False         # el calendario económico, solo en sus pruebas
         c.cfg["campana_video"]["activa"] = False      # la campaña del video, solo en sus pruebas
         c.cfg.setdefault("videos_youtube", {})["activa"] = False   # videos nuevos de YouTube, solo en sus pruebas
+        c.cfg["borrar_x"] = []                        # borrados de X, solo en sus pruebas
         c.cfg["campanas_extra"] = []                  # las otras campañas (WEEX), solo en su prueba
         c.cfg["alarma_precios"] = {"activa": False}   # la alarma de precio, solo en su prueba
         c.cfg["grok"]["modo"] = "auto"                 # las pruebas de Grok parten de "Grok primero" (en ajustes.yaml hoy está en "gratis")
@@ -2499,10 +2500,38 @@ def test_youtube_video_agregado_a_mano(corrida, red, tmp_path, monkeypatch):
     c.cerebro = _CerebroFalso()
     monkeypatch.setattr(mod_youtube, "leer_videos", lambda canal: [])
     monkeypatch.setattr(mod_youtube, "es_short", lambda vid, titulo="": False)
-    monkeypatch.setattr(mod_youtube, "ficha", lambda vid: {"id": vid, "titulo": "Video viejo", "descripcion": "https://linktr.ee/comunidadinversores", "estreno": None, "url": f"https://youtu.be/{vid}"})
+    monkeypatch.setattr(mod_youtube, "ficha", lambda vid: {"id": vid, "titulo": "Video viejo", "descripcion": "https://linktr.ee/comunidadinversores", "estreno": None, "url": f"https://youtu.be/{vid}", "subtitulos": "hola, en este video te cuento"})
     mem = c.estado.datos.setdefault("youtube", {})
     c.buscar_video_nuevo(c.cfg["videos_youtube"], mem)
     assert [x["id"] for x in mem["campanas"]] == ["MANO1234567"]
     c.ahora = AHORA + timedelta(hours=1)
     c.buscar_video_nuevo(c.cfg["videos_youtube"], mem)
     assert len(mem["campanas"]) == 1                               # no se duplica
+
+
+def test_youtube_espera_los_subtitulos(corrida, red, tmp_path, monkeypatch):
+    c = corrida()
+    c.cfg["videos_youtube"] = {"activa": True, "canal_id": "UCx", "dias_campana": 10, "dias_atras": 3}
+    c.cerebro = _CerebroFalso()
+    recien = (AHORA - timedelta(hours=1)).isoformat()
+    monkeypatch.setattr(mod_youtube, "leer_videos", lambda canal: [{"id": "NUEVO123456", "titulo": "BOT", "descripcion": "", "publicado": recien, "url": "u"}])
+    monkeypatch.setattr(mod_youtube, "es_short", lambda vid, titulo="": False)
+    sub = {"t": ""}
+    monkeypatch.setattr(mod_youtube, "ficha", lambda vid: {"id": vid, "titulo": "BOT", "descripcion": "", "estreno": None, "url": "u", "subtitulos": sub["t"]})
+    mem = c.estado.datos.setdefault("youtube", {"iniciado": AHORA.isoformat()})
+    c.buscar_video_nuevo(c.cfg["videos_youtube"], mem)
+    assert not mem.get("campanas")                                   # sin subtítulos todavía: espera
+    sub["t"] = "probé el bot 30 días"
+    c.ahora = AHORA + timedelta(hours=1)
+    c.buscar_video_nuevo(c.cfg["videos_youtube"], mem)
+    assert [x["id"] for x in mem["campanas"]] == ["NUEVO123456"]
+
+
+def test_borrar_x_una_sola_vez(corrida, red, tmp_path, monkeypatch):
+    c = corrida()
+    c.cfg["borrar_x"] = ["123"]
+    llamados = []
+    monkeypatch.setattr(main, "x_borrar", lambda claves, pid: llamados.append(pid) or True)
+    c.tal_vez_borrar_x()
+    c.tal_vez_borrar_x()
+    assert llamados == ["123"]

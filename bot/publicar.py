@@ -340,3 +340,20 @@ def _x_crear(firma, texto: str, imagen: dict, publicidad: bool, hecha_con_ia: bo
     except (ValueError, KeyError, TypeError):
         log.warning("X publicó pero no devolvió el id.")
         return ""
+
+
+def x_borrar(claves: dict, post_id: str) -> bool:
+    """Borra un post propio de X. True si X confirma que quedó borrado."""
+    firma = OAuth1(claves["X_API_KEY"], claves["X_API_SECRET"], claves["X_ACCESS_TOKEN"], claves["X_ACCESS_SECRET"])
+    try:
+        r = requests.delete(f"{X_POST}/{post_id}", auth=firma, timeout=30)
+    except requests.RequestException as error:
+        raise ErrorPublicacion(f"No pude conectarme con X ({type(error).__name__}).", "x_red", True)
+    if r.status_code == 404:
+        return True                      # ya no existe
+    if r.status_code != 200:
+        raise _error_x(r, "el borrado", claves)
+    try:
+        return bool(r.json()["data"]["deleted"])
+    except (ValueError, KeyError, TypeError):
+        return False

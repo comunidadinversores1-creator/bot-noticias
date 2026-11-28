@@ -33,7 +33,7 @@ from .estado import Estado
 from .filtro import Grupo, es_mala_noticia, nombra_prohibido, preparar, puntaje, ya_contada
 from .fuentes import leer_fuentes
 from .imagen import armar_placa, armar_promo, buscar_foto, generar_con_ia, logo_guardado, tal_cual
-from .publicar import ErrorPublicacion, claves_x, telegram_album, telegram_foto, telegram_bajar, telegram_chats, telegram_novedades, telegram_mensaje, telegram_publicar, telegram_puede_publicar, x_publicar, x_quien_soy
+from .publicar import ErrorPublicacion, claves_x, x_borrar, telegram_album, telegram_foto, telegram_bajar, telegram_chats, telegram_novedades, telegram_mensaje, telegram_publicar, telegram_puede_publicar, x_publicar, x_quien_soy
 from .texto import (
     anio_actual, armar_llamado, enlaces_extra, faltantes, faltantes_promo, fuente_limpia, idea_de_imagen, normalizar_post, normalizar_promo,
     numeros_inventados, promesas, promo_telegram, promo_x, texto_revisable, texto_revisable_promo,
@@ -714,9 +714,22 @@ class Corrida:
                 continue
             if not self.cerebro.disponible:
                 break
+            # Los textos salen de los subtítulos (lo que Eze dice), no de la descripción. Un estreno se espera
+            # a que salga, y después se esperan los subtítulos automáticos hasta 6 horas.
+            f = youtube.ficha(v["id"])
+            subtitulos = ""
+            if f is not None:
+                if f.get("estreno") and datetime.fromisoformat(f["estreno"]) > self.ahora:
+                    continue                              # todavía no se estrenó: se vuelve a mirar después
+                subtitulos = f.get("subtitulos") or ""
+                if f.get("descripcion"):
+                    v = {**v, "descripcion": f["descripcion"]}
+                desde_cuando = datetime.fromisoformat(f.get("estreno") or v["publicado"])
+                if not subtitulos and (self.ahora - desde_cuando).total_seconds() < 6 * 3600:
+                    continue                              # YouTube todavía no hizo los subtítulos
             links = youtube.links_de(v["descripcion"])
             try:
-                variantes = youtube.redactar(self.cerebro, v, links)
+                variantes = youtube.redactar(self.cerebro, v, links, subtitulos)
             except ia.SinCerebro as error:
                 log.warning("YouTube: la IA no escribió los textos del video: %s", error)
                 break
@@ -734,7 +747,6 @@ class Corrida:
                 self.avisar(f"yt_textos_{v['id']}", f"Subiste «{v['titulo']}» pero no pude escribir textos de promo que pasen la revisión. Lo intento de nuevo en la próxima corrida.")
                 continue
             camp = {"id": v["id"], "titulo": v["titulo"], "url": v["url"], "variantes": buenas, "inicio": self.ahora.isoformat()}
-            f = youtube.ficha(v["id"])
             if f is not None:
                 camp["estreno_revisado"] = True
                 if f.get("estreno"):                      # estreno o vivo programado: arranca cuando empieza
@@ -753,6 +765,29 @@ class Corrida:
                 except ErrorPublicacion as error:
                     log.warning("YouTube: no pude avisarte del video: %s", error)
         mem["vistos"] = vistos[-200:]
+
+    def tal_vez_borrar_x(self) -> None:
+        """Borra una sola vez los posts de X que figuran en 'borrar_x' (ajustes) y avisa a Eze."""
+        pedidos = [str(x).strip() for x in (self.cfg.get("borrar_x") or []) if str(x).strip()]
+        if not (self.real and pedidos and self.claves_x):
+            return
+        hechos = self.estado.datos.setdefault("x_borrados", [])
+        for pid in pedidos:
+            if pid in hechos:
+                continue
+            try:
+                ok = x_borrar(self.claves_x, pid)
+            except ErrorPublicacion as error:
+                self.avisar(f"x_borrar_{pid}", f"No pude borrar el post de X {pid}: {error}")
+                continue
+            if ok:
+                hechos.append(pid)
+                self.estado.guardar()
+                if self.token and self.chat_prueba:
+                    try:
+                        telegram_mensaje(self.token, self.chat_prueba, f"🗑️ Listo, borré el post de X que pediste (https://x.com/C_INVERSORES/status/{pid}).")
+                    except ErrorPublicacion:
+                        pass
 
     def muestra_campana(self) -> bool:
         """Prueba: manda a tu chat privado cómo saldría cada variante de la campaña (Telegram, X e historias)."""
@@ -864,6 +899,7 @@ class Corrida:
                 salio = self.tal_vez_carrusel_semanal(forzar=True)
                 self.estado.guardar()
                 return self.cerrar(1 if salio else 0)
+            self.tal_vez_borrar_x()          # posts de X que Eze pidió borrar (lista "borrar_x" en ajustes)
             self.tal_vez_grok()              # no publica nada: busca temas del día y te manda los virales
             self.tal_vez_carrusel()          # Instagram: arma y publica el carrusel del día (y te avisa)
             self.tal_vez_numeros_ig()        # Instagram: lee cómo le fue a cada carrusel y los domingos te manda el ranking

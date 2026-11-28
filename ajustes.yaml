@@ -484,6 +484,10 @@ campana_video:
 #  Para seguir promocionando un video después de los 10 días: en "extender", el id del video y hasta qué día.
 #  Para frenarlo todo: activa: false
 # =====================================================================================================
+# Posts de X para borrar (el bot los borra una sola vez y te avisa por Telegram).
+borrar_x:
+  - "2126485072597360815"     # promo del video de Reversión Z 30 días que salió antes del estreno (27/11 22:13)
+
 videos_youtube:
   activa: true
   canal_id: UCrz3HSZDE2g9dR0Stp1KQag     # Ezequiel Bagnato | Comunidad Inversores
