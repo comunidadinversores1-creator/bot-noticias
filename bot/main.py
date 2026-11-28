@@ -891,6 +891,36 @@ class Corrida:
                         resultados.append(f"{prov['nombre']}/{modelo}: FALLA ({str(error)[:80]})")
             log.warning("Prueba de IA: %s", " | ".join(resultados))
             return self.cerrar(1)
+        if not self.real and self.promo_pedida.lower().startswith("listar_ig:"):
+            # Lista las publicaciones de IG (carruseles, reels, fotos) desde una fecha que mencionan una palabra.
+            # Uso: listar_ig:2026-11-01:exness  → deja el resultado en ig/descargas/listado_ig.txt
+            _, desde, palabra = (self.promo_pedida.split(":", 2) + ["", ""])[:3]
+            g = self.estado.datos["ig"]
+            filas = []
+            for cuenta in instagram.disponibles(g):
+                t = instagram.llave(cuenta, g)
+                ruta, params = "me/media", {"fields": "caption,permalink,timestamp,media_type,media_product_type", "limit": 100}
+                for _ in range(10):
+                    try:
+                        r = instagram._pedir("GET", ruta, t, **params)
+                    except instagram.ErrorInstagram as error:
+                        log.warning("listar_ig %s: %s", cuenta, error)
+                        break
+                    viejo = False
+                    for m in r.get("data") or []:
+                        if str(m.get("timestamp") or "")[:10] < desde:
+                            viejo = True
+                            continue
+                        if palabra.lower() in str(m.get("caption") or "").lower():
+                            filas.append(f"{cuenta}|{str(m.get('timestamp'))[:10]}|{m.get('media_product_type') or m.get('media_type')}|{m.get('permalink')}|{str(m.get('caption') or '')[:80].replace(chr(10), ' ')}")
+                    despues = ((r.get("paging") or {}).get("cursors") or {}).get("after")
+                    if viejo or not despues:
+                        break
+                    params["after"] = despues
+            texto = "\n".join(filas) or "(nada)"
+            instagram.subir_imagenes_en(texto.encode("utf-8"), "descargas/listado_ig.txt")
+            log.warning("listar_ig: %d publicaciones", len(filas))
+            return self.cerrar(1)
         if not self.real and self.promo_pedida.lower().startswith("bajar:"):
             # Baja imágenes de internet (separadas por espacio) y las deja en ig/descargas/ para usarlas después.
             hechas = 0
